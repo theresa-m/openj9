@@ -1472,3 +1472,28 @@ J9NLS_CFR_LVTT_DUPLICATE.explanation=Please consult the Java Virtual Machine Spe
 J9NLS_CFR_LVTT_DUPLICATE.system_action=The JVM will throw a verification or classloading-related exception such as java.lang.ClassFormatError.
 J9NLS_CFR_LVTT_DUPLICATE.user_response=Contact the provider of the classfile for a corrected version.
 # END NON-TRANSLATABLE
+
+# ClassFile is not translatable
+# Record is not translatable
+J9NLS_CFR_ERR_TWO_RECORD_ATTRIBUTES=ClassFile has two record attributes
+# START NON-TRANSLATABLE
+J9NLS_CFR_ERR_TWO_RECORD_ATTRIBUTES.explanation=Please consult the Java Virtual Machine Specification for a detailed explaination.
+J9NLS_CFR_ERR_TWO_RECORD_ATTRIBUTES.system_action=The JVM will throw a verification or classloading-related exception such as java.lang.ClassFormatError.
+J9NLS_CFR_ERR_TWO_RECORD_ATTRIBUTES.user_response=Contact the provider of the classfile for a corrected version.
+# END NON-TRANSLATABLE
+
+# Record is not translatable
+J9NLS_CFR_RECORD_CLASS_MUST_BE_FINAL=Record classes should also be final
+# START NON-TRANSLATABLE
+J9NLS_CFR_RECORD_CLASS_MUST_BE_FINAL.explanation=Please consult the Java Virtual Machine Specification for a detailed explaination.
+J9NLS_CFR_RECORD_CLASS_MUST_BE_FINAL.system_action=The JVM will throw a verification or classloading-related exception such as java.lang.ClassFormatError.
+J9NLS_CFR_RECORD_CLASS_MUST_BE_FINAL.user_response=Contact the provider of the classfile for a corrected version.
+# END NON-TRANSLATABLE
+
+# Record is not translatable
+J9NLS_CFR_RECORD_CLASS_CANNOT_BE_ABSTRACT=Record classes cannot be abstract
+# START NON-TRANSLATABLE
+J9NLS_CFR_RECORD_CLASS_CANNOT_BE_ABSTRACT.explanation=Please consult the Java Virtual Machine Specification for a detailed explaination.
+J9NLS_CFR_RECORD_CLASS_CANNOT_BE_ABSTRACT.system_action=The JVM will throw a verification or classloading-related exception such as java.lang.ClassFormatError.
+J9NLS_CFR_RECORD_CLASS_CANNOT_BE_ABSTRACT.user_response=Contact the provider of the classfile for a corrected version.
+# END NON-TRANSLATABLE
