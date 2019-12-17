@@ -1890,6 +1890,25 @@ javaLookupMethod (J9VMThread *vmContext, J9Class *clazz, J9ROMNameAndSignature *
 UDATA
 javaLookupMethodImpl (J9VMThread *vmContext, J9Class *clazz, J9ROMNameAndSignature *selector, J9Class *senderClass, UDATA options, BOOLEAN *foundDefaultConflicts);
 
+/**
+ * Lookup method in superclass and if not found interfaces. If interface is searched
+ * There may be more than one matching method. If arraySize is not null return all result
+ * options and set the number returned in arraySize
+ * 
+ * @param currentThread Current VM thread
+ * @param targetClass The class or interface to start the resolution in
+ * @param nameAndSig The name and signature of the method
+ * @param senderClass The caller class
+ * @param lookupOptions VM lookup options
+ * @param foundDefaultConflicts
+ * @param methodListSize null to only return the first result, otherwise should be set to
+ * the number of methods returned. If resulting method is null no number will be set.
+ * @return an array of methods. If arraySize is null a maximum of one will be returned.
+ */
+J9Method**
+javaLookupMethodList(J9VMThread *currentThread, J9Class *targetClass, J9ROMNameAndSignature *nameAndSig, J9Class *senderClass, 
+		UDATA lookupOptions, BOOLEAN *foundDefaultConflicts, U_32* methodListSize);
+
 /* ---------------- lookuphelper.c ---------------- */
 
 /**

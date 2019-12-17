@@ -4513,6 +4513,7 @@ typedef struct J9InternalVMFunctions {
 #endif /* J9VM_OPT_REFLECT */
 	UDATA  ( *javaLookupMethod)(struct J9VMThread *currentThread, struct J9Class *clazz, struct J9ROMNameAndSignature *selector, struct J9Class *senderClass, UDATA options) ;
 	UDATA  ( *javaLookupMethodImpl)(struct J9VMThread *currentThread, struct J9Class *clazz, struct J9ROMNameAndSignature *selector, struct J9Class *senderClass, UDATA options, BOOLEAN *foundDefaultConflicts) ;
+	J9Method** ( *javaLookupMethodList)(struct J9VMThread *currentThread, struct J9Class *targetClass, struct J9ROMNameAndSignature *nameAndSig, struct J9Class *senderClass, UDATA lookupOptions, BOOLEAN *foundDefaultConflicts, U_32* methodListSize) ;
 	void  ( *setCurrentException)(struct J9VMThread *currentThread, UDATA exceptionNumber, UDATA *detailMessage) ;
 	void  ( *setCurrentExceptionUTF)(struct J9VMThread * vmThread, UDATA exceptionNumber, const char * detailUTF) ;
 	void  ( *setCurrentExceptionNLS)(struct J9VMThread * vmThread, UDATA exceptionNumber, U_32 moduleName, U_32 messageNumber) ;

@@ -86,6 +86,7 @@ J9InternalVMFunctions J9InternalFunctions = {
 #endif /* J9VM_OPT_REFLECT */
 	javaLookupMethod,
 	javaLookupMethodImpl,
+	javaLookupMethodList,
 	setCurrentException,
 	setCurrentExceptionUTF,
 	setCurrentExceptionNLS,

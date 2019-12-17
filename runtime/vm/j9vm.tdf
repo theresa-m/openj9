@@ -243,7 +243,6 @@ TraceExit=Trc_VM_getForwardedMethod_Exit_Debug Overhead=1 Level=3 Template="exit
 TraceExit=Trc_VM_getForwardedMethod_Exit_JVMPI Overhead=1 Level=3 Template="exit getForwardedMethod(%p) JVMPI enabled"
 
 TraceEntry=Trc_VM_javaLookupMethod_Entry Overhead=1 Level=3 Template="javaLookupMethod(vmStruct %p, targetClass %p, nameAndSig %p, senderClass %p, lookupOptions %d)"
-TraceEvent=Trc_VM_javaLookupMethod_Name Overhead=1 Level=3 Template="javaLookupMethod - methodName %.*s"
 TraceExit=Trc_VM_javaLookupMethod_Exit Overhead=1 Level=3 Template="exit javaLookupMethod resultMethod %p"
 
 TraceEntry=Trc_VM_callJNILoad_Entry Overhead=1 Level=1 Template="callJNILoad(vmStruct %p, slHandle %d, fnName %s, defaultResult %d)"
@@ -781,3 +780,7 @@ TraceException=Trc_VM_CreateRAMClassFromROMClass_nestedValueClassNotVisible Over
 TraceEvent=Trc_VM_CreateRAMClassFromROMClass_valueTypeIsFlattened Overhead=1 Level=7 Template="ValueType is eligible for flattening name=%.*s j9class=%p"
 
 TraceException=Trc_VM_classInitStateMachine_classRelationshipValidationFailed Group=classinit Overhead=1 Level=1 Template="Class relationship validation failed between child: %.*s and parent: %.*s"
+
+TraceEntry=Trc_VM_javaLookupMethodList_Entry Overhead=1 Level=3 Template="javaLookupMethodList(vmStruct %p, targetClass %p, nameAndSig %p, senderClass %p, lookupOptions %d)"
+TraceEvent=Trc_VM_javaLookupMethodList_Name Overhead=1 Level=3 Template="javaLookupMethodList - methodName %.*s"
+TraceExit=Trc_VM_javaLookupMethodList_Exit Overhead=1 Level=3 Template="exit javaLookupMethodList resultMethod %p"

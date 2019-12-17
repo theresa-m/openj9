@@ -959,9 +959,8 @@ _done:
 					vmFuncs->setHeapOutOfMemoryError(currentThread);
 				} else {
 					for (U_32 i = 0; i < methodListSize; i++) {
-						J9ROMMethod *romMethod = J9_ROM_METHOD_FROM_RAM_METHOD(methodList[i]);
 						PUSH_OBJECT_IN_SPECIAL_FRAME(currentThread, resultObject);
-						j9object_t element = vm->reflectFunctions.createDeclaredMethodObject(romMethod, clazz, NULL, currentThread);
+						j9object_t element = vm->reflectFunctions.createDeclaredMethodObject(methodList[i], clazz, NULL, currentThread);
 						resultObject = POP_OBJECT_IN_SPECIAL_FRAME(currentThread);
 						if (NULL == element) {
 							break;

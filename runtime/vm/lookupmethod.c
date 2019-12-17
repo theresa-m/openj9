@@ -387,7 +387,8 @@ javaResolveInterfaceMethods(J9VMThread *currentThread, J9Class *targetClass, J9R
 				if (J9_ARE_NO_BITS_SET(J9_ROM_METHOD_FROM_RAM_METHOD(foundMethod)->modifiers, J9AccPrivate | J9AccStatic)) {
 					J9Method* processedMethod = processMethod(currentThread, lookupOptions, foundMethod, interfaceClass, &data->exception, &data->exceptionClass, &data->errorType, nameAndSig, senderClass, targetClass);
 					if (NULL != methodListSize) *methodListSize = 1;
-					return &processedMethod;
+					resultMethods = &processedMethod;
+					return resultMethods;
 				}
 			}
 			/* No point in searching more, we won't find it */
@@ -504,7 +505,7 @@ doneItableSearch:
 	if (1 == numElements) {
 		/* Exactly one match, find it and return it */
 		IDATA i = 0;
-		resultMethod = NULL;
+		resultMethods = NULL;
 		for (i = 0; i <= maxUsedSlotIndex; i++) {
 			if (workingArray[i] != NULL) {
 				if (NULL != methodListSize) *methodListSize = 1;
@@ -635,27 +636,12 @@ UDATA
 javaLookupMethodImpl(J9VMThread *currentThread, J9Class *targetClass, J9ROMNameAndSignature *nameAndSig, J9Class *senderClass, UDATA lookupOptions, BOOLEAN *foundDefaultConflicts)
 {
 	J9Method** resultMethods;
-	Trc_VM_javaLookupMethodImpl_Entry(currentThread, currentThread, targetClass, nameAndSig, senderClass, lookupOptions);
+	Trc_VM_javaLookupMethod_Entry(currentThread, currentThread, targetClass, nameAndSig, senderClass, lookupOptions);
 	resultMethods = javaLookupMethodList(currentThread, targetClass, nameAndSig, senderClass, lookupOptions, foundDefaultConflicts, NULL);
-	Trc_VM_javaLookupMethodImpl_Exit(currentThread, currentThread, targetClass, nameAndSig, senderClass, lookupOptions);
-	return (resultMethods == NULL) ? NULL : (UDATA)resultMethods[0];
+	Trc_VM_javaLookupMethod_Exit(currentThread, (resultMethods == NULL) ? NULL : resultMethods[0]);
+	return (resultMethods == NULL) ? (UDATA)NULL : (UDATA)resultMethods[0];
 }
 
-/**
- * Lookup method in superclass and if not found interfaces. If interface is searched
- * There may be more than one matching method. If arraySize is not null return all result
- * options and set the number returned in arraySize
- * 
- * @param currentThread Current VM thread
- * @param targetClass The class or interface to start the resolution in
- * @param nameAndSig The name and signature of the method
- * @param senderClass The caller class
- * @param lookupOptions VM lookup options
- * @param foundDefaultConflicts
- * @param methodListSize null to only return the first result, otherwise should be set to
- * the number of methods returned. If resulting method is null no number will be set.
- * @return an array of methods. If arraySize is null a maximum of one will be returned.
- */
 J9Method**
 javaLookupMethodList(J9VMThread *currentThread, J9Class *targetClass, J9ROMNameAndSignature *nameAndSig, J9Class *senderClass, 
 		UDATA lookupOptions, BOOLEAN *foundDefaultConflicts, U_32* methodListSize)
@@ -743,10 +729,10 @@ retry:
 		/* Search for a matching method in the target class and its superclasses. */
 	
 		while (lookupClass != NULL) {
-			J9Method * foundMethod = searchClassForMethodCommon(lookupClass, name, nameLength, sig, sigLength, J9_ARE_ANY_BITS_SET(lookupOptions, J9_LOOK_PARTIAL_SIGNATURE));
+			J9Method* foundMethod = searchClassForMethodCommon(lookupClass, name, nameLength, sig, sigLength, J9_ARE_ANY_BITS_SET(lookupOptions, J9_LOOK_PARTIAL_SIGNATURE));
 
 			if (foundMethod != NULL) {
-				J9Method * processedMethod = processMethod(currentThread, lookupOptions, foundMethod, lookupClass, &exception, &exceptionClass, &errorType, nameAndSig, senderClass, targetClass);
+				J9Method* processedMethod = processMethod(currentThread, lookupOptions, foundMethod, lookupClass, &exception, &exceptionClass, &errorType, nameAndSig, senderClass, targetClass);
 				if (NULL != currentThread->currentException) {
 					goto end;
 				}
@@ -774,7 +760,7 @@ retry:
 					 */
 				} else if (!isInterfaceLookup) {
 					if (NULL != methodListSize) *methodListSize = 1;
-					resultMethods = &processMethod;
+					resultMethods = &processedMethod;
 					/* success */
 					goto done;
 				}
@@ -967,8 +953,12 @@ done:
 		}
 	}
 end:
-	for (i = 0; i < *arraySize, i++) {
-		Trc_VM_javaLookupMethodList_Exit(currentThread, resultMethods[i]);
+	if (NULL == methodListSize) {
+		Trc_VM_javaLookupMethodList_Exit(currentThread, (NULL == resultMethods) ? NULL : resultMethods[0]);
+	} else {
+		for (i = 0; i < *methodListSize; i++) {
+			Trc_VM_javaLookupMethodList_Exit(currentThread, resultMethods[i]);
+		}
 	}
 	return resultMethods;
 }
