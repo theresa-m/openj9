@@ -1454,7 +1454,7 @@ private Method throwExceptionOrReturnNull(boolean throwException, String name, C
 Method getMethodHelper(
 	boolean throwException, boolean forDeclaredMethod, List<Method> methodList, String name, Class<?>... parameterTypes)
 	throws NoSuchMethodException {
-	Method result;
+	Method result = null;
 	Method bestCandidate;
 	String strSig;
 	
@@ -1488,7 +1488,29 @@ Method getMethodHelper(
 			return null;
 		}
 	}
-	result = forDeclaredMethod ? getDeclaredMethodImpl(name, parameterTypes, strSig, null) : getMethodImpl(name, parameterTypes, strSig);
+	if (forDeclaredMethod) {
+		result = getDeclaredMethodImpl(name, parameterTypes, strSig, null);
+	} else {
+		/* check for match in current class and superclass */
+		Method[] resultArray = getMethodImpl(name, parameterTypes, strSig);
+		if ((resultArray == null) || (resultArray.length == 0)) {
+			return throwExceptionOrReturnNull(throwException, name, parameterTypes);
+		}
+
+		/* If there is more than one method candidate returned, there are multiple potential
+		 * results from superinterfaces. Find the one with the most specific return type. */
+		for (Method candidate : resultArray) {
+			if (result == null) {
+				result = candidate;
+				continue;
+			}
+			Class<?> candidateRetType = candidate.getReturnType();
+			Class<?> resultRetType = result.getReturnType();
+			if ((candidateRetType != resultRetType) && resultRetType.isAssignableFrom(candidateRetType)) {
+				result = candidate;
+			}
+		}
+	}
 	if (result == null) {
 		return throwExceptionOrReturnNull(throwException, name, parameterTypes);
 	}
@@ -1562,12 +1584,13 @@ Method getMethodHelper(
  *					the types of the arguments.
  * @param		partialSignature String
  *					the signature of the method, without return type.
- * @return		Object
- *					the first Method found matching the arguments
+ * @return		Method[]
+ *					an array of methods that match the given arguments. If a match in the superclass is 
+ *					found it will be the only element returned.
  *
  * @see			#getMethods
  */
-private native Method getMethodImpl(String name, Class<?>[] parameterTypes, String partialSignature);
+private native Method[] getMethodImpl(String name, Class<?>[] parameterTypes, String partialSignature);
 
 /**
  * Answers an array containing Method objects describing

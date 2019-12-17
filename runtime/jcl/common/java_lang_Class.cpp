@@ -892,6 +892,7 @@ Java_java_lang_Class_getMethodImpl(JNIEnv *env, jobject recv, jobject name, jobj
 	J9VMThread *currentThread = (J9VMThread*)env;
 	J9JavaVM *vm = currentThread->javaVM;
 	J9InternalVMFunctions *vmFuncs = vm->internalVMFunctions;
+	J9MemoryManagerFunctions *mmFuncs = vm->memoryManagerFunctions;
 	j9object_t resultObject = NULL;
 	vmFuncs->internalEnterVMFromJNI(currentThread);
 
@@ -899,12 +900,14 @@ Java_java_lang_Class_getMethodImpl(JNIEnv *env, jobject recv, jobject name, jobj
 	if ((NULL == name) || (NULL == partialSignature)) {
 		vmFuncs->setCurrentExceptionUTF(currentThread, J9VMCONSTANTPOOL_JAVALANGNULLPOINTEREXCEPTION, NULL);
 	} else {
+		J9Class *arrayClass = fetchArrayClass(currentThread, J9VMJAVALANGREFLECTMETHOD_OR_NULL(vm));
 		J9Class *clazz = J9VM_J9CLASS_FROM_HEAPCLASS(currentThread, J9_JNI_UNWRAP_REFERENCE(recv));
 		J9ROMClass *romClass = clazz->romClass;
 
 		/* primitives doesn't have local methods */
-		if (!J9ROMCLASS_IS_PRIMITIVE_TYPE(romClass)) {
-			J9Method *currentMethod = NULL;
+		if ((NULL != arrayClass) && (!J9ROMCLASS_IS_PRIMITIVE_TYPE(romClass))) {
+			J9Method** methodList = NULL;
+			U_32 methodListSize;
 			j9object_t nameObject = J9_JNI_UNWRAP_REFERENCE(name);
 			j9object_t signatureObject = J9_JNI_UNWRAP_REFERENCE(partialSignature);
 			UDATA lookupFLags = J9_LOOK_JNI | J9_LOOK_NO_THROW | J9_LOOK_PARTIAL_SIGNATURE | (J9ROMCLASS_IS_INTERFACE(romClass) ? (J9_LOOK_INTERFACE | J9_LOOK_NO_JLOBJECT) : 0);
@@ -933,14 +936,15 @@ Java_java_lang_Class_getMethodImpl(JNIEnv *env, jobject recv, jobject name, jobj
 			}
 			nameAndSig.signatureLength = (U_32)signatureLength;
 
-			currentMethod = (J9Method *) vmFuncs->javaLookupMethodImpl(currentThread, clazz, ((J9ROMNameAndSignature *) &nameAndSig), NULL, lookupFLags, NULL);
-			if (NULL == currentMethod) { /* by default we look for virtual methods.  Try static methods. */
+			methodList = vmFuncs->javaLookupMethodList(currentThread, clazz, ((J9ROMNameAndSignature *) &nameAndSig), NULL, lookupFLags, NULL, &methodListSize);
+			if (NULL == methodList) { /* by default we look for virtual methods.  Try static methods. */
 				lookupFLags |= J9_LOOK_STATIC;
-				currentMethod = (J9Method *) vmFuncs->javaLookupMethodImpl(currentThread, clazz, ((J9ROMNameAndSignature *) &nameAndSig), NULL, lookupFLags, NULL);
+				methodList = vmFuncs->javaLookupMethodList(currentThread, clazz, ((J9ROMNameAndSignature *) &nameAndSig), NULL, lookupFLags, NULL, &methodListSize);
 			}
 
-
-			Trc_JCL_getMethodImpl_result(currentThread, nameAndSig.nameLength, nameAndSig.name, nameAndSig.signatureLength, nameAndSig.signature, currentMethod);
+			for (U_32 i = 0; i < methodListSize; i++) {
+				Trc_JCL_getMethodImpl_result(currentThread, nameAndSig.nameLength, nameAndSig.name, nameAndSig.signatureLength, nameAndSig.signature, methodList[i]);
+			}
 _done:
 			if (nameAndSig.name != nameBuffer) {
 				j9mem_free_memory((void *)nameAndSig.name);
@@ -949,14 +953,21 @@ _done:
 				j9mem_free_memory((void *)nameAndSig.signature);
 			}
 
-			if (NULL != currentMethod) {
-				J9ROMMethod *romMethod = J9_ROM_METHOD_FROM_RAM_METHOD(currentMethod);
-				if (J9_ARE_ALL_BITS_SET(romMethod->modifiers, J9AccPublic) && !isSpecialMethod(romMethod)) {
-					j9object_t parameterTypesObject = NULL;
-					if (NULL != parameterTypes) {
-						parameterTypesObject = J9_JNI_UNWRAP_REFERENCE(parameterTypes);
+			if (NULL != methodList) {
+				resultObject = mmFuncs->J9AllocateIndexableObject(currentThread, arrayClass, methodListSize, J9_GC_ALLOCATE_OBJECT_NON_INSTRUMENTABLE);
+				if (NULL == resultObject) {
+					vmFuncs->setHeapOutOfMemoryError(currentThread);
+				} else {
+					for (U_32 i = 0; i < methodListSize; i++) {
+						J9ROMMethod *romMethod = J9_ROM_METHOD_FROM_RAM_METHOD(methodList[i]);
+						PUSH_OBJECT_IN_SPECIAL_FRAME(currentThread, resultObject);
+						j9object_t element = vm->reflectFunctions.createDeclaredMethodObject(romMethod, clazz, NULL, currentThread);
+						resultObject = POP_OBJECT_IN_SPECIAL_FRAME(currentThread);
+						if (NULL == element) {
+							break;
+						}
+						J9JAVAARRAYOFOBJECT_STORE(currentThread, resultObject, i, element);
 					}
-					resultObject = vm->reflectFunctions.createMethodObject(currentMethod, clazz, (j9array_t)parameterTypesObject, currentThread);
 				}
 			}
 		}
