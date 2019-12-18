@@ -1905,7 +1905,7 @@ javaLookupMethodImpl (J9VMThread *vmContext, J9Class *clazz, J9ROMNameAndSignatu
  * the number of methods returned. If resulting method is null no number will be set.
  * @return an array of methods. If arraySize is null a maximum of one will be returned.
  */
-J9Method**
+J9Method*
 javaLookupMethodList(J9VMThread *currentThread, J9Class *targetClass, J9ROMNameAndSignature *nameAndSig, J9Class *senderClass, 
 		UDATA lookupOptions, BOOLEAN *foundDefaultConflicts, U_32* methodListSize);
 

@@ -906,7 +906,7 @@ Java_java_lang_Class_getMethodImpl(JNIEnv *env, jobject recv, jobject name, jobj
 
 		/* primitives doesn't have local methods */
 		if ((NULL != arrayClass) && (!J9ROMCLASS_IS_PRIMITIVE_TYPE(romClass))) {
-			J9Method** methodList = NULL;
+			J9Method* methodList = NULL;
 			U_32 methodListSize = 0;
 			j9object_t nameObject = J9_JNI_UNWRAP_REFERENCE(name);
 			j9object_t signatureObject = J9_JNI_UNWRAP_REFERENCE(partialSignature);
@@ -960,7 +960,7 @@ _done:
 				} else {
 					for (U_32 i = 0; i < methodListSize; i++) {
 						PUSH_OBJECT_IN_SPECIAL_FRAME(currentThread, resultObject);
-						j9object_t element = vm->reflectFunctions.createDeclaredMethodObject(methodList[i], clazz, NULL, currentThread);
+						j9object_t element = vm->reflectFunctions.createDeclaredMethodObject(methodList + i, clazz, NULL, currentThread);
 						resultObject = POP_OBJECT_IN_SPECIAL_FRAME(currentThread);
 						if (NULL == element) {
 							break;
