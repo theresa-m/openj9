@@ -385,9 +385,10 @@ javaResolveInterfaceMethods(J9VMThread *currentThread, J9Class *targetClass, J9R
 			if (NULL != foundMethod) {
 				/* As per spec, prevent super-interface private or static methods from being processed */
 				if (J9_ARE_NO_BITS_SET(J9_ROM_METHOD_FROM_RAM_METHOD(foundMethod)->modifiers, J9AccPrivate | J9AccStatic)) {
-					J9Method* processedMethod = processMethod(currentThread, lookupOptions, foundMethod, interfaceClass, &data->exception, &data->exceptionClass, &data->errorType, nameAndSig, senderClass, targetClass);
+					J9Method* processedFoundMethod = processMethod(currentThread, lookupOptions, foundMethod, interfaceClass, &data->exception, &data->exceptionClass, &data->errorType, nameAndSig, senderClass, targetClass);
 					if (NULL != methodListSize) *methodListSize = 1;
-					resultMethods = &processedMethod;
+					Trc_VM_javaLookupMethodList_returninterface1(currentThread);
+					resultMethods = &processedFoundMethod;
 					return resultMethods;
 				}
 			}
@@ -509,6 +510,7 @@ doneItableSearch:
 		for (i = 0; i <= maxUsedSlotIndex; i++) {
 			if (workingArray[i] != NULL) {
 				if (NULL != methodListSize) *methodListSize = 1;
+				Trc_VM_javaLookupMethodList_returninterface2(currentThread);
 				resultMethods = &workingArray[i];
 				break;
 			}
@@ -552,6 +554,7 @@ doneItableSearch:
 			}
 
 			/* The error handling code below clears the resultMethod */
+			Trc_VM_javaLookupMethodList_returninterface3(currentThread);
 			resultMethods = &candidate;
 
 			if (conflict && J9_ARE_ANY_BITS_SET(lookupOptions, J9_LOOK_HANDLE_DEFAULT_METHOD_CONFLICTS)) {
@@ -570,6 +573,7 @@ doneItableSearch:
 			 *methodListSize = numElements;
 		 }
 	} else {
+		Trc_VM_javaLookupMethodList_returninterface4(currentThread);
 		/* No methods were found */
 		resultMethods = NULL;
 	}
@@ -727,17 +731,17 @@ retry:
 		}
 	
 		/* Search for a matching method in the target class and its superclasses. */
-	
+		Trc_VM_javaLookupMethodList_SearchSuperclass(currentThread);
 		while (lookupClass != NULL) {
 			J9Method* foundMethod = searchClassForMethodCommon(lookupClass, name, nameLength, sig, sigLength, J9_ARE_ANY_BITS_SET(lookupOptions, J9_LOOK_PARTIAL_SIGNATURE));
 
 			if (foundMethod != NULL) {
-				J9Method* processedMethod = processMethod(currentThread, lookupOptions, foundMethod, lookupClass, &exception, &exceptionClass, &errorType, nameAndSig, senderClass, targetClass);
+				J9Method* processedFoundMethod = processMethod(currentThread, lookupOptions, foundMethod, lookupClass, &exception, &exceptionClass, &errorType, nameAndSig, senderClass, targetClass);
 				if (NULL != currentThread->currentException) {
 					goto end;
 				}
 
-				if (processedMethod == NULL) {
+				if (processedFoundMethod == NULL) {
 					if (J9VMCONSTANTPOOL_JAVALANGINCOMPATIBLECLASSCHANGEERROR == exception) {
 						/* Incompatible method found - caller may request to ignore this case */
 						if (J9_ARE_ANY_BITS_SET(lookupOptions, J9_LOOK_IGNORE_INCOMPATIBLE_METHODS)) {
@@ -758,11 +762,14 @@ retry:
 					/* interface found inaccessable method in Object - keep looking
 					 * as valid interface method may be found by the iTable search
 					 */
-				} else if (!isInterfaceLookup) {
+				} else  {
+					Trc_VM_javaLookupMethodList_superclassresultfound(currentThread);
 					if (NULL != methodListSize) *methodListSize = 1;
-					resultMethods = &processedMethod;
-					/* success */
-					goto done;
+					resultMethods = &processedFoundMethod;
+					if (!isInterfaceLookup) {
+						/* success */
+						goto done;
+					}
 				}
 			}
 			if (isInterfaceLookup && J9_ARE_ANY_BITS_SET(lookupOptions, J9_LOOK_NO_JLOBJECT)) {
@@ -787,6 +794,7 @@ nextClass:
 			data.methods = NULL;
 			data.elements = 0;
 
+			Trc_VM_javaLookupMethodList_SearchSuperInterfaces(currentThread);
 			tempResultMethods = javaResolveInterfaceMethods(currentThread, targetClass, nameAndSig, senderClass, lookupOptions, &data, methodListSize);
 			if (NULL != currentThread->currentException) {
 				exceptionThrown = TRUE;
@@ -851,7 +859,7 @@ done:
 			/* JNI throws NoSuchMethodError in all error cases */
 
 			if (lookupOptions & J9_LOOK_JNI) {
-				exception = J9VMCONSTANTPOOL_JAVALANGNOSUCHMETHODERROR;
+				exception = J9VMCONSTANTPOOL_JAVALANGNOSUCHMETHODERROR; // error here
 				exceptionClass = targetClass;
 				errorType = J9_VISIBILITY_NON_MODULE_ACCESS_ERROR;
 			}
@@ -953,11 +961,13 @@ done:
 		}
 	}
 end:
+	Trc_VM_javaLookupMethodList_Name(currentThread, nameLength, name);
 	if (NULL == methodListSize) {
-		Trc_VM_javaLookupMethodList_Exit(currentThread, (NULL == resultMethods) ? NULL : resultMethods[0]);
+		Trc_VM_javaLookupMethodList2_Exit(currentThread, (NULL == resultMethods) ? NULL : resultMethods[0]);
 	} else {
+		Trc_VM_javaLookupMethodList1_Exit(currentThread, *methodListSize);
 		for (i = 0; i < *methodListSize; i++) {
-			Trc_VM_javaLookupMethodList_Exit(currentThread, resultMethods[i]);
+			Trc_VM_javaLookupMethodList2_Exit(currentThread, resultMethods[i]);
 		}
 	}
 	return resultMethods;

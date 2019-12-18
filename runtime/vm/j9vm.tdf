@@ -781,6 +781,15 @@ TraceEvent=Trc_VM_CreateRAMClassFromROMClass_valueTypeIsFlattened Overhead=1 Lev
 
 TraceException=Trc_VM_classInitStateMachine_classRelationshipValidationFailed Group=classinit Overhead=1 Level=1 Template="Class relationship validation failed between child: %.*s and parent: %.*s"
 
-TraceEntry=Trc_VM_javaLookupMethodList_Entry Overhead=1 Level=3 Template="javaLookupMethodList(vmStruct %p, targetClass %p, nameAndSig %p, senderClass %p, lookupOptions %d)"
+TraceEntry=Trc_VM_javaLookupMethodList_Entry Overhead=1 Level=3 Template="enter javaLookupMethodList(vmStruct %p, targetClass %p, nameAndSig %p, senderClass %p, lookupOptions %d)"
 TraceEvent=Trc_VM_javaLookupMethodList_Name Overhead=1 Level=3 Template="javaLookupMethodList - methodName %.*s"
-TraceExit=Trc_VM_javaLookupMethodList_Exit Overhead=1 Level=3 Template="exit javaLookupMethodList resultMethod %p"
+TraceEvent=Trc_VM_javaLookupMethodList_SearchSuperclass Overhead=1 Level=3 Template="javaLookupMethodList - search superclass"
+TraceEvent=Trc_VM_javaLookupMethodList_SearchSuperInterfaces Overhead=1 Level=3 Template="javaLookupMethodList - search interfaces"
+TraceExit=Trc_VM_javaLookupMethodList1_Exit Overhead=1 Level=3 Template="exit javaLookupMethodList with %d results"
+TraceExit=Trc_VM_javaLookupMethodList2_Exit Overhead=1 Level=3 Template="exit javaLookupMethodList resultMethod %p"
+
+TraceEvent=Trc_VM_javaLookupMethodList_returninterface1 Overhead=1 Level=3 Template="return single interface 1"
+TraceEvent=Trc_VM_javaLookupMethodList_returninterface2 Overhead=1 Level=3 Template="return single interface 2"
+TraceEvent=Trc_VM_javaLookupMethodList_returninterface3 Overhead=1 Level=3 Template="return single interface 3"
+TraceEvent=Trc_VM_javaLookupMethodList_returninterface4 Overhead=1 Level=3 Template="return single interface 4"
+TraceEvent=Trc_VM_javaLookupMethodList_superclassresultfound Overhead=1 Level=3 Template="superclass result found"
