@@ -792,4 +792,7 @@ TraceEvent=Trc_VM_javaLookupMethodList_returninterface1 Overhead=1 Level=3 Templ
 TraceEvent=Trc_VM_javaLookupMethodList_returninterface2 Overhead=1 Level=3 Template="return single interface 2"
 TraceEvent=Trc_VM_javaLookupMethodList_returninterface3 Overhead=1 Level=3 Template="return single interface 3"
 TraceEvent=Trc_VM_javaLookupMethodList_returninterface4 Overhead=1 Level=3 Template="return single interface 4"
+TraceEvent=Trc_VM_javaLookupMethodList_returninterface5 Overhead=1 Level=3 Template="return single interface 5"
 TraceEvent=Trc_VM_javaLookupMethodList_superclassresultfound Overhead=1 Level=3 Template="superclass result found"
+TraceEvent=Trc_VM_javaLookupMethodList_printresult Overhead=1 Level=3 Template="print javaLookupMethodList call %d resultMethod %p"
+TraceEvent=Trc_VM_javaLookupMethodList_isitnull Overhead=1 Level=3 Template="is it null? %d"
