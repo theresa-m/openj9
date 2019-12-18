@@ -386,9 +386,11 @@ javaResolveInterfaceMethods(J9VMThread *currentThread, J9Class *targetClass, J9R
 				/* As per spec, prevent super-interface private or static methods from being processed */
 				if (J9_ARE_NO_BITS_SET(J9_ROM_METHOD_FROM_RAM_METHOD(foundMethod)->modifiers, J9AccPrivate | J9AccStatic)) {
 					J9Method* processedFoundMethod = processMethod(currentThread, lookupOptions, foundMethod, interfaceClass, &data->exception, &data->exceptionClass, &data->errorType, nameAndSig, senderClass, targetClass);
-					if (NULL != methodListSize) *methodListSize = 1;
 					Trc_VM_javaLookupMethodList_returninterface1(currentThread);
-					resultMethods = &processedFoundMethod;
+					if (processedFoundMethod != NULL) {
+						if (NULL != methodListSize) *methodListSize = 1;
+						resultMethods = &processedFoundMethod;
+					}
 					return resultMethods;
 				}
 			}
@@ -737,6 +739,14 @@ retry:
 
 			if (foundMethod != NULL) {
 				J9Method* processedFoundMethod = processMethod(currentThread, lookupOptions, foundMethod, lookupClass, &exception, &exceptionClass, &errorType, nameAndSig, senderClass, targetClass);
+				if (processedFoundMethod != NULL) {
+					Trc_VM_javaLookupMethodList_superclassresultfound(currentThread);
+					if (NULL != methodListSize) *methodListSize = 1;
+					resultMethods = &processedFoundMethod;
+				} else {
+					resultMethods = NULL;
+				}
+
 				if (NULL != currentThread->currentException) {
 					goto end;
 				}
@@ -762,14 +772,9 @@ retry:
 					/* interface found inaccessable method in Object - keep looking
 					 * as valid interface method may be found by the iTable search
 					 */
-				} else  {
-					Trc_VM_javaLookupMethodList_superclassresultfound(currentThread);
-					if (NULL != methodListSize) *methodListSize = 1;
-					resultMethods = &processedFoundMethod;
-					if (!isInterfaceLookup) {
-						/* success */
-						goto done;
-					}
+				} else {//if (!isInterfaceLookup) {
+					/* success */
+					goto done;
 				}
 			}
 			if (isInterfaceLookup && J9_ARE_ANY_BITS_SET(lookupOptions, J9_LOOK_NO_JLOBJECT)) {
