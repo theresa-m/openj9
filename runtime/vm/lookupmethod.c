@@ -676,6 +676,7 @@ javaLookupMethodList(J9VMThread *currentThread, J9Class *targetClass, J9ROMNameA
 	resultMethods = NULL;
 	superclassResult = NULL;
 	badMethod = NULL;
+	if (NULL != methodListSize) *methodListSize = 0;
 
 	/* Get the name and signature data and length */
 

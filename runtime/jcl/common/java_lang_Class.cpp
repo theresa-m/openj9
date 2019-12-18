@@ -907,7 +907,7 @@ Java_java_lang_Class_getMethodImpl(JNIEnv *env, jobject recv, jobject name, jobj
 		/* primitives doesn't have local methods */
 		if ((NULL != arrayClass) && (!J9ROMCLASS_IS_PRIMITIVE_TYPE(romClass))) {
 			J9Method** methodList = NULL;
-			U_32 methodListSize;
+			U_32 methodListSize = 0;
 			j9object_t nameObject = J9_JNI_UNWRAP_REFERENCE(name);
 			j9object_t signatureObject = J9_JNI_UNWRAP_REFERENCE(partialSignature);
 			UDATA lookupFLags = J9_LOOK_JNI | J9_LOOK_NO_THROW | J9_LOOK_PARTIAL_SIGNATURE | (J9ROMCLASS_IS_INTERFACE(romClass) ? (J9_LOOK_INTERFACE | J9_LOOK_NO_JLOBJECT) : 0);
@@ -941,10 +941,6 @@ Java_java_lang_Class_getMethodImpl(JNIEnv *env, jobject recv, jobject name, jobj
 				lookupFLags |= J9_LOOK_STATIC;
 				methodList = vmFuncs->javaLookupMethodList(currentThread, clazz, ((J9ROMNameAndSignature *) &nameAndSig), NULL, lookupFLags, NULL, &methodListSize);
 			}
-
-			for (U_32 i = 0; i < methodListSize; i++) {
-				Trc_JCL_getMethodImpl_result(currentThread, nameAndSig.nameLength, nameAndSig.name, nameAndSig.signatureLength, nameAndSig.signature, methodList[i]);
-			}
 _done:
 			if (nameAndSig.name != nameBuffer) {
 				j9mem_free_memory((void *)nameAndSig.name);
@@ -953,7 +949,11 @@ _done:
 				j9mem_free_memory((void *)nameAndSig.signature);
 			}
 
-			if (NULL != methodList) {
+			if ((NULL != methodList) && (methodListSize > 0)) {
+				for (U_32 i = 0; i < methodListSize; i++) {
+					Trc_JCL_getMethodImpl_result(currentThread, nameAndSig.nameLength, nameAndSig.name, nameAndSig.signatureLength, nameAndSig.signature, methodList[i]);
+				}
+
 				resultObject = mmFuncs->J9AllocateIndexableObject(currentThread, arrayClass, methodListSize, J9_GC_ALLOCATE_OBJECT_NON_INSTRUMENTABLE);
 				if (NULL == resultObject) {
 					vmFuncs->setHeapOutOfMemoryError(currentThread);
