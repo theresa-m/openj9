@@ -157,9 +157,12 @@ processMethod(J9VMThread * currentThread, UDATA lookupOptions, J9Method * method
 	U_32 modifiers = romMethod->modifiers;
 	J9JavaVM * vm = currentThread->javaVM;
 
+	Trc_VM_processMethod_print(currentThread, 1);
+
 	/* Check that the found method is visible from the sender */
 
 	if (J9_ARE_NO_BITS_SET(lookupOptions, J9_LOOK_NO_VISIBILITY_CHECK) && (NULL != senderClass) && !J9CLASS_IS_EXEMPT_FROM_VALIDATION(senderClass)) {
+		Trc_VM_processMethod_print(currentThread, 2);
 		U_32 newModifiers = modifiers;
 		BOOLEAN doVisibilityCheck = TRUE;
 
@@ -189,6 +192,7 @@ processMethod(J9VMThread * currentThread, UDATA lookupOptions, J9Method * method
 						 * method of the same name in class Object and throws no checked exceptions.
 						 */
 						doVisibilityCheck = FALSE;
+						Trc_VM_processMethod_print(currentThread, 3);
 					} else {
 						*exception = J9VMCONSTANTPOOL_JAVALANGILLEGALACCESSERROR;
 						*exceptionClass = methodClass;
@@ -200,8 +204,10 @@ processMethod(J9VMThread * currentThread, UDATA lookupOptions, J9Method * method
 		}
 
 		if (doVisibilityCheck) {
+			Trc_VM_processMethod_print(currentThread, 4);
 			IDATA checkResult = checkVisibility(currentThread, senderClass, methodClass, newModifiers, lookupOptions);
 			if (checkResult < J9_VISIBILITY_ALLOWED) {
+				Trc_VM_processMethod_print(currentThread, 5);
 				*exception = J9VMCONSTANTPOOL_JAVALANGILLEGALACCESSERROR;
 				*exceptionClass = methodClass;
 				*errorType = checkResult;
@@ -260,6 +266,7 @@ processMethod(J9VMThread * currentThread, UDATA lookupOptions, J9Method * method
 	}
 
 	/* Method is valid */
+	Trc_VM_processMethod_print(currentThread, 6);
 
 	return method;
 }
@@ -667,7 +674,7 @@ javaLookupMethodList(J9VMThread *currentThread, J9Class *targetClass, J9ROMNameA
 	BOOLEAN isInterfaceLookup = FALSE;
 	UDATA i;
 
-	Trc_VM_javaLookupMethodList_Entry(currentThread, currentThread, targetClass, nameAndSig, senderClass, lookupOptions);
+	Trc_VM_javaLookupMethodList_Entry(currentThread, currentThread, targetClass, nameAndSig, senderClass, lookupOptions, methodListSize);
 
 	/* If no method is found, the default error is NoSuchMethodError */
 
@@ -709,7 +716,7 @@ javaLookupMethodList(J9VMThread *currentThread, J9Class *targetClass, J9ROMNameA
 		sigLength = J9UTF8_LENGTH(sigUTF);
 	}
 
-	Trc_VM_javaLookupMethodList_Name(currentThread, nameLength, name);
+	Trc_VM_javaLookupMethodList_NameSig(currentThread, nameLength, name, sigLength, sig);
 
 	if (nameLength != 0) {
 		/* If the name begins with < then it is either <init> or <clinit>.  In both of these cases, do not climb. */
@@ -746,10 +753,10 @@ retry:
 					Trc_VM_javaLookupMethodList_superclassresultfound(currentThread);
 					if (NULL != methodListSize) *methodListSize = 1;
 					resultMethods = &superclassResult;
-					Trc_VM_javaLookupMethodList_printresult(currentThread, 1, superclassResult);
 				}
 
 				if (NULL != currentThread->currentException) {
+					Trc_VM_javaLookupMethodList_shouldthrowexception(currentThread);
 					goto end;
 				}
 
@@ -774,7 +781,7 @@ retry:
 					/* interface found inaccessable method in Object - keep looking
 					 * as valid interface method may be found by the iTable search
 					 */
-				} else if (!isInterfaceLookup) { // TODO removing this makes things pass...
+				} else if (!isInterfaceLookup) {
 					/* success */
 					goto done;
 				}
@@ -788,7 +795,6 @@ nextClass:
 			}
 			lookupClass = SUPERCLASS(lookupClass);
 		}
-		Trc_VM_javaLookupMethodList_printresult(currentThread, 2, superclassResult);
 	
 		/* Not found in class hierarchy, search all superinterfaces unless directed not to */
 	
@@ -803,20 +809,14 @@ nextClass:
 			data.elements = 0;
 
 			Trc_VM_javaLookupMethodList_SearchSuperInterfaces(currentThread);
-			Trc_VM_javaLookupMethodList_printresult(currentThread, 7, superclassResult); // 00000000065A7B70
 			interfaceResults = javaResolveInterfaceMethods(currentThread, targetClass, nameAndSig, senderClass, lookupOptions, &data, methodListSize);
-			Trc_VM_javaLookupMethodList_printresult(currentThread, 8, superclassResult); // 0000000000000000
-			Trc_VM_javaLookupMethodList_printresult(currentThread, 9, (interfaceResults == NULL) ? NULL : interfaceResults[0]); // 00000000065A7B70
 			if (NULL != currentThread->currentException) {
 				exceptionThrown = TRUE;
 				goto done;
 			} else
 			
-			if (NULL == interfaceResults) {
-				Trc_VM_javaLookupMethodList_printresult(currentThread, 6, superclassResult);
-			} else {
+			if (NULL != interfaceResults) {
 				resultMethods = interfaceResults;
-				Trc_VM_javaLookupMethodList_printresult(currentThread, 3, resultMethods[0]); // 00000000065A7B70
 			}
 			
 			exception = data.exception;
@@ -843,8 +843,6 @@ nextClass:
 			}
 		}
 	}
-
-	Trc_VM_javaLookupMethodList_printresult(currentThread, 4, resultMethods[0]);
 
 done:
 	if ((NULL == resultMethods) && (FALSE == exceptionThrown)) {
@@ -977,7 +975,6 @@ done:
 			}
 		}
 	}
-	Trc_VM_javaLookupMethodList_printresult(currentThread, 5, resultMethods[0]);
 end:
 	if (NULL == methodListSize) {
 		Trc_VM_javaLookupMethodList2_Exit(currentThread, (NULL == resultMethods) ? NULL : resultMethods[0]);
