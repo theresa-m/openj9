@@ -1500,7 +1500,10 @@ Method getMethodHelper(
 		/* If there is more than one method candidate returned, there are multiple potential
 		 * results from superinterfaces. Find the one with the most specific return type. */
 		for (Method candidate : resultArray) {
-			if (result == null) {
+			if (null == candidate) {
+				continue;
+			}
+			if (null == result) {
 				result = candidate;
 				continue;
 			}

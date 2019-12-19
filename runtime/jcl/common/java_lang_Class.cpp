@@ -958,14 +958,23 @@ _done:
 				if (NULL == resultObject) {
 					vmFuncs->setHeapOutOfMemoryError(currentThread);
 				} else {
+					U_32 nonNullMethodIndex = 0;
 					for (U_32 i = 0; i < methodListSize; i++) {
-						PUSH_OBJECT_IN_SPECIAL_FRAME(currentThread, resultObject);
-						j9object_t element = vm->reflectFunctions.createDeclaredMethodObject(methodList + i, clazz, NULL, currentThread);
-						resultObject = POP_OBJECT_IN_SPECIAL_FRAME(currentThread);
-						if (NULL == element) {
-							break;
+						J9ROMMethod *romMethod = J9_ROM_METHOD_FROM_RAM_METHOD(methodList + i);
+						if (J9_ARE_ALL_BITS_SET(romMethod->modifiers, J9AccPublic) && !isSpecialMethod(romMethod)) {
+							j9object_t parameterTypesObject = NULL;
+							if (NULL != parameterTypes) {
+								parameterTypesObject = J9_JNI_UNWRAP_REFERENCE(parameterTypes);
+							}
+							PUSH_OBJECT_IN_SPECIAL_FRAME(currentThread, resultObject);
+							j9object_t element = vm->reflectFunctions.createMethodObject(methodList + i, clazz, (j9array_t)parameterTypesObject, currentThread);
+							resultObject = POP_OBJECT_IN_SPECIAL_FRAME(currentThread);
+							if (NULL == element) {
+								break;
+							}
+							J9JAVAARRAYOFOBJECT_STORE(currentThread, resultObject, nonNullMethodIndex, element);
+							nonNullMethodIndex++;
 						}
-						J9JAVAARRAYOFOBJECT_STORE(currentThread, resultObject, i, element);
 					}
 				}
 			}
