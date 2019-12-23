@@ -1,4 +1,4 @@
-package org.openj9.test.java.lang;
+package org.openj9.test.utilities;
 
 /*******************************************************************************
  * Copyright (c) 2019, 2019 IBM Corp. and others
@@ -22,7 +22,7 @@ package org.openj9.test.java.lang;
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
-class CustomClassLoader extends ClassLoader {
+public class CustomClassLoader extends ClassLoader {
 	public Class<?> getClass(String name, byte[] bytes){
 		return defineClass(name, bytes, 0, bytes.length);
 	}

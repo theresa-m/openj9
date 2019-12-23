@@ -25,8 +25,6 @@ package org.openj9.test.java.lang;
 import org.testng.annotations.Test;
 import org.testng.log4testng.Logger;
 
-import jdk.jfr.Timestamp;
-
 import org.testng.AssertJUnit;
 
 import java.lang.annotation.Annotation;
@@ -39,7 +37,10 @@ import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Field;
 import java.lang.reflect.RecordComponent;
 
-/*
+import org.openj9.test.utilities.RecordClassGenerator;
+import org.openj9.test.utilities.CustomClassLoader;
+
+/**
  * Test JCL additions to java.lang.Class from JEP 359: Records preview.
  * 
  * New methods include:
@@ -58,7 +59,7 @@ import java.lang.reflect.RecordComponent;
     record TestRecordObj(String x, Double y, Object[] z) {}
 
     /* constants for asm tests */
-    String name = "TestRecordSignature";
+    String name = "TestRecordComponents";
     String rcName = "x";
     String rcType = "I";
     String rcSignature = "I";
