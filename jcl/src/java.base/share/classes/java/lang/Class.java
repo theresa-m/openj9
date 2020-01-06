@@ -1,6 +1,6 @@
 /*[INCLUDE-IF Sidecar18-SE]*/
 /*******************************************************************************
- * Copyright (c) 1998, 2019 IBM Corp. and others
+ * Copyright (c) 1998, 2020 IBM Corp. and others
  *
  * This program and the accompanying materials are made available under
  * the terms of the Eclipse Public License 2.0 which accompanies this
@@ -1497,12 +1497,16 @@ Method getMethodHelper(
 		/* Retrieve the specified method implemented by the superclass from the top to the bottom
 		 * Note: there is no need do so when the method is declared by the current class.
 		 */
-		if ((result != null) && result.getDeclaringClass().isInterface()
-			&& !this.isInterface() && (this != Object.class)
-		) {
-			HashSet<Class<?>> interfaceSet = new HashSet();
-			result = getMostSpecificMethodFromAllInterfaces(this, interfaceSet, name, strSig, parameterTypes);
-			candidateFromInteface = true;
+		if ((result != null) && result.getDeclaringClass().isInterface() && (this != Object.class)) {
+			if (!this.isInterface()) {
+				HashSet<Class<?>> interfaceSet = new HashSet();
+				result = getMostSpecificMethodFromAllInterfacesOfAllSuperclasses(this, interfaceSet, name, strSig, parameterTypes);
+				candidateFromInteface = true;
+			} else if (result.getDeclaringClass() != this) { /* only applies if resulting class is not the base class */
+				HashSet<Class<?>> interfaceSet = new HashSet();
+				result = getMostSpecificMethodFromAllInterfacesOfCurrentClass(this, interfaceSet, null, name, strSig, parameterTypes);
+				candidateFromInteface = true;
+			}
 		}
 	}
 	
@@ -1580,15 +1584,15 @@ Method getMethodHelper(
  * @param name the specified method's name
  * @param strSig the string of the specified method's signature
  * @param parameterTypes the types of the arguments of the specified method
- * @return the most specific method selected from all interfaces;
+ * @return the most specific method selected from all interfaces from each superclass of the current class;
  *         otherwise, return the method of the first interface from the top superclass
  *         if the return types of all specified methods are identical.
  */
-private Method getMostSpecificMethodFromAllInterfaces(Class<?> currentClass, HashSet<Class<?>> interfaceSet, String name, String strSig, Class<?>... parameterTypes) {
+private Method getMostSpecificMethodFromAllInterfacesOfAllSuperclasses(Class<?> currentClass, HashSet<Class<?>> interfaceSet, String name, String strSig, Class<?>... parameterTypes) {
 	Method candidateMethod = null;
 
 	if (currentClass != Object.class) {
-		candidateMethod = getMostSpecificMethodFromAllInterfaces(currentClass.getSuperclass(), 
+		candidateMethod = getMostSpecificMethodFromAllInterfacesOfAllSuperclasses(currentClass.getSuperclass(),
 														interfaceSet, name, strSig, parameterTypes);
 		
 		/* getMethodImpl returns the specified method declared by an interface given that
@@ -1596,30 +1600,65 @@ private Method getMostSpecificMethodFromAllInterfaces(Class<?> currentClass, Has
 		 */
 		Method resultFromInterface = currentClass.getMethodImpl(name, parameterTypes, strSig);
 		if (resultFromInterface != null) {
-			Class<?>[] interfacesFromCurrentClass = currentClass.getInterfaces();
-			for (Class<?> nextInterface : interfacesFromCurrentClass) {				
-				/* No need to search for the duplicate interface */
-				if (!interfaceSet.contains(nextInterface)) {
-					interfaceSet.add(nextInterface);
-					Method resultMethod = getMoreSpecificMethodFromInterface(nextInterface, name, strSig, parameterTypes);
-					
-					if (resultMethod != null) {
-						if (candidateMethod == null) {
-							candidateMethod = resultMethod;
-						} else {
-							Class<?> resultRetType = resultMethod.getReturnType();
-							Class<?> CandidateRetType = candidateMethod.getReturnType();
-							if ((CandidateRetType != resultRetType) && CandidateRetType.isAssignableFrom(resultRetType)) {
-								candidateMethod = resultMethod;
-							}
-						}
-					}
+			candidateMethod = getMostSpecificMethodFromAllInterfacesOfCurrentClass(currentClass, interfaceSet, candidateMethod, name, strSig, parameterTypes);
+		}
+	}
+	return candidateMethod;
+}
+
+/**
+ * Helper method searches all interfaces implemented by the current class or interface 
+ * for the most specific method declared in one of these interfaces.
+ *
+ * @param currentClass the class or interface to be searched
+ * @param interfaceSet the set of interfaces to be collected
+ * @param potentialCandidate potential candidate from superclass, null if currentClass is an interface
+ * @param name the specified method's name
+ * @param strSig the string of the specified method's signature
+ * @param parameterTypes the types of the arguments of the specified method
+ * @return the most specific method selected from all interfaces;
+ *         otherwise if return types from all qualifying methods are identical, return an arbitrary method.
+ */
+private Method getMostSpecificMethodFromAllInterfacesOfCurrentClass(Class<?> currentClass, HashSet<Class<?>> interfaceSet, Method potentialCandidate, String name, String strSig, Class<?>... parameterTypes) {
+	Method candidateMethod = potentialCandidate;
+	Class<?>[] interfacesFromCurrentClass = currentClass.getInterfaces();
+	for (Class<?> nextInterface : interfacesFromCurrentClass) {
+		/* No need to search for the duplicate interface */
+		if (!interfaceSet.contains(nextInterface)) {
+			interfaceSet.add(nextInterface);
+			Method resultMethod = getMoreSpecificMethodFromInterface(nextInterface, name, strSig, parameterTypes);
+
+			if (resultMethod == null) {
+				/* search superinterfaces until a match is found. The first result should be sufficient because interface methods
+				 * cannot inherit from a more specific return type. */
+				resultMethod = getMostSpecificMethodFromAllInterfacesOfCurrentClass(nextInterface, interfaceSet, null, name, strSig, parameterTypes);
+			}
+
+			if (resultMethod != null) {
+				if (candidateMethod == null) {
+					candidateMethod = resultMethod;
+				} else if (resultShouldReplaceCandidate(resultMethod, candidateMethod)) {
+					candidateMethod = resultMethod;
 				}
 			}
 		}
 	}
-	
 	return candidateMethod;
+}
+
+private static boolean resultShouldReplaceCandidate(Method resultMethod, Method candidateMethod) {
+	Class<?> candidateRetType = candidateMethod.getReturnType();
+	Class<?> resultRetType = resultMethod.getReturnType();
+
+	if (candidateRetType == resultRetType) {
+		/* if all return types end up being the same, non-static methods take priority over static methods and sub-interfaces take
+		 * priority over superinterface */
+		return ((Modifier.STATIC == (candidateMethod.getModifiers() & Modifier.STATIC)) && (0 == (resultMethod.getModifiers() & Modifier.STATIC)))
+			|| candidateMethod.getDeclaringClass().isAssignableFrom(resultMethod.getDeclaringClass());
+	} else {
+		/* resulting method should have the most specific return type */
+		return candidateRetType.isAssignableFrom(resultRetType);
+	}
 }
 
 /**
