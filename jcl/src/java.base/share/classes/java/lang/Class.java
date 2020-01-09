@@ -3923,7 +3923,7 @@ private class MethodInfo {
 			int methodCursor = 0;
 			boolean addMethod = true;
 			boolean replacedMethod = false;
-			while (methodCursor < jlrMethods.size() && addMethod) {
+			while (methodCursor < jlrMethods.size()) {
 				int increment = 1;
 				Method m = jlrMethods.get(methodCursor);
 				if (newMethod.equals(m)) { /* already have this method */
