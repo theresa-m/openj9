@@ -1505,6 +1505,7 @@ Method getMethodHelper(
 			} else if (result.getDeclaringClass() != this) { /* only applies if resulting class is not the base class */
 				HashSet<Class<?>> interfaceSet = new HashSet();
 				interfaceSet.add(result.getDeclaringClass());
+				// TODO result needs to be checked if its the most specific in its the other default methods
 				result = getMostSpecificMethodFromAllInterfacesOfCurrentClass(this, interfaceSet, result, name, strSig, parameterTypes);
 				candidateFromInteface = true;
 			}
@@ -1661,6 +1662,16 @@ private static boolean resultShouldReplaceCandidate(Method resultMethod, Method 
 		int candidateMods = candidateMethod.getModifiers();
 		Class<?> resultClass = resultMethod.getDeclaringClass();
 		Class<?> candidateClass = candidateMethod.getDeclaringClass();
+
+		/*[IF !Sidecar19-SE]*/
+		/* In Java 8 abstract methods in subinterfaces do not hide abstract methods in subinterfaces. In this
+		 * case the first occuring result is sufficient.
+		 */
+		if (Modifier.isAbstract(resultMods) && Modifier.isAbstract(resultMods)) {
+			return false;
+		}
+		/*[ENDIF]*/
+
 		return methodAOverridesMethodB(resultClass, Modifier.isAbstract(resultMods), resultClass.isInterface(),
 				candidateClass, Modifier.isAbstract(candidateMods), candidateClass.isInterface());
 	} else {
