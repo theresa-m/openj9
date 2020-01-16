@@ -1497,14 +1497,15 @@ Method getMethodHelper(
 		/* Retrieve the specified method implemented by the superclass from the top to the bottom
 		 * Note: there is no need do so when the method is declared by the current class.
 		 */
-		if ((result != null) && result.getDeclaringClass().isInterface() && (this != Object.class)) {
+		if ((result != null) && result.getDeclaringClass().isInterface()) {
 			if (!this.isInterface()) {
 				HashSet<Class<?>> interfaceSet = new HashSet();
-				result = getMostSpecificMethodFromAllInterfacesOfAllSuperclasses(this, interfaceSet, name, strSig, parameterTypes);
+				result = getMostSpecificMethodFromAllInterfacesOfAllSuperclasses(this, interfaceSet, result, name, strSig, parameterTypes);
 				candidateFromInteface = true;
 			} else if (result.getDeclaringClass() != this) { /* only applies if resulting class is not the base class */
 				HashSet<Class<?>> interfaceSet = new HashSet();
-				result = getMostSpecificMethodFromAllInterfacesOfCurrentClass(this, interfaceSet, null, name, strSig, parameterTypes);
+				interfaceSet.add(result.getDeclaringClass());
+				result = getMostSpecificMethodFromAllInterfacesOfCurrentClass(this, interfaceSet, result, name, strSig, parameterTypes);
 				candidateFromInteface = true;
 			}
 		}
@@ -1588,17 +1589,22 @@ Method getMethodHelper(
  *         otherwise, return the method of the first interface from the top superclass
  *         if the return types of all specified methods are identical.
  */
-private Method getMostSpecificMethodFromAllInterfacesOfAllSuperclasses(Class<?> currentClass, HashSet<Class<?>> interfaceSet, String name, String strSig, Class<?>... parameterTypes) {
+private Method getMostSpecificMethodFromAllInterfacesOfAllSuperclasses(Class<?> currentClass, HashSet<Class<?>> interfaceSet, Method potentialCandidate, String name, String strSig, Class<?>... parameterTypes) {
 	Method candidateMethod = null;
 
 	if (currentClass != Object.class) {
 		candidateMethod = getMostSpecificMethodFromAllInterfacesOfAllSuperclasses(currentClass.getSuperclass(),
-														interfaceSet, name, strSig, parameterTypes);
+														interfaceSet, null, name, strSig, parameterTypes);
 		
 		/* getMethodImpl returns the specified method declared by an interface given that
 		 * the current class has not yet implemented this method.
 		 */
-		Method resultFromInterface = currentClass.getMethodImpl(name, parameterTypes, strSig);
+		Method resultFromInterface;
+		if (null != potentialCandidate) {
+			resultFromInterface = potentialCandidate;
+		} else {
+			resultFromInterface = currentClass.getMethodImpl(name, parameterTypes, strSig);
+		}
 		if (resultFromInterface != null) {
 			candidateMethod = getMostSpecificMethodFromAllInterfacesOfCurrentClass(currentClass, interfaceSet, candidateMethod, name, strSig, parameterTypes);
 		}
@@ -1651,10 +1657,12 @@ private static boolean resultShouldReplaceCandidate(Method resultMethod, Method 
 	Class<?> resultRetType = resultMethod.getReturnType();
 
 	if (candidateRetType == resultRetType) {
-		/* if all return types end up being the same, non-static methods take priority over static methods and sub-interfaces take
-		 * priority over superinterface */
-		return ((Modifier.STATIC == (candidateMethod.getModifiers() & Modifier.STATIC)) && (0 == (resultMethod.getModifiers() & Modifier.STATIC)))
-			|| candidateMethod.getDeclaringClass().isAssignableFrom(resultMethod.getDeclaringClass());
+		int resultMods = resultMethod.getModifiers();
+		int candidateMods = candidateMethod.getModifiers();
+		Class<?> resultClass = resultMethod.getDeclaringClass();
+		Class<?> candidateClass = candidateMethod.getDeclaringClass();
+		return methodAOverridesMethodB(resultClass, Modifier.isAbstract(resultMods), resultClass.isInterface(),
+				candidateClass, Modifier.isAbstract(candidateMods), candidateClass.isInterface());
 	} else {
 		/* resulting method should have the most specific return type */
 		return candidateRetType.isAssignableFrom(resultRetType);
