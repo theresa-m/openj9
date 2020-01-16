@@ -1455,7 +1455,6 @@ Method getMethodHelper(
 	boolean throwException, boolean forDeclaredMethod, List<Method> methodList, String name, Class<?>... parameterTypes)
 	throws NoSuchMethodException {
 	Method result;
-	Method bestCandidate;
 	String strSig;
 	boolean candidateFromInteface = false;
 	
@@ -1505,7 +1504,8 @@ Method getMethodHelper(
 			} else if (result.getDeclaringClass() != this) { /* only applies if resulting class is not the base class */
 				HashSet<Class<?>> interfaceSet = new HashSet();
 				interfaceSet.add(result.getDeclaringClass());
-				// TODO result needs to be checked if its the most specific in its the other default methods
+				/* find local method with most specific return type since this step will be skipped for result */
+				result = findMostSpecificLocalMethod(forDeclaredMethod, result, methodList,  name, parameterTypes, strSig);
 				result = getMostSpecificMethodFromAllInterfacesOfCurrentClass(this, interfaceSet, result, name, strSig, parameterTypes);
 				candidateFromInteface = true;
 			}
@@ -1552,29 +1552,36 @@ Method getMethodHelper(
 	 * S is the same as or a subtype of R.
 	 * Otherwise, the result method is chosen arbitrarily from specific methods.
 	 */
-	bestCandidate = result;
 	if (!candidateFromInteface) {
-		Class<?> declaringClass = forDeclaredMethod ? this : result.getDeclaringClass();
-		while (true) {
-			result = declaringClass.getDeclaredMethodImpl(name, parameterTypes, strSig, result);
-			if (result == null) {
-				break;
-			}
-			boolean publicMethod = ((result.getModifiers() & Modifier.PUBLIC) != 0);
-			if ((methodList != null) && publicMethod) {
-				methodList.add(result);
-			}
-			if (forDeclaredMethod || publicMethod) {
-				// bestCandidate and result have same declaringClass.
-				Class<?> candidateRetType = bestCandidate.getReturnType();
-				Class<?> resultRetType = result.getReturnType();
-				if ((candidateRetType != resultRetType) && candidateRetType.isAssignableFrom(resultRetType)) {
-					bestCandidate = result;
-				}
+		result = findMostSpecificLocalMethod(forDeclaredMethod, result, methodList,  name, parameterTypes, strSig);
+
+	}
+	return cacheMethod(result);
+}
+
+private Method findMostSpecificLocalMethod(boolean forDeclaredMethod, Method startingResult, List<Method> methodList,  String name, Class<?>[] parameterTypes, String strSig) {
+	Method bestCandidate = startingResult;
+	Method result = startingResult;
+	Class<?> declaringClass = forDeclaredMethod ? this : result.getDeclaringClass();
+	while (true) {
+		result = declaringClass.getDeclaredMethodImpl(name, parameterTypes, strSig, result);
+		if (result == null) {
+			break;
+		}
+		boolean publicMethod = ((result.getModifiers() & Modifier.PUBLIC) != 0);
+		if ((methodList != null) && publicMethod) {
+			methodList.add(result);
+		}
+		if (forDeclaredMethod || publicMethod) {
+			// bestCandidate and result have same declaringClass.
+			Class<?> candidateRetType = bestCandidate.getReturnType();
+			Class<?> resultRetType = result.getReturnType();
+			if ((candidateRetType != resultRetType) && candidateRetType.isAssignableFrom(resultRetType)) {
+				bestCandidate = result;
 			}
 		}
 	}
-	return cacheMethod(bestCandidate);
+	return bestCandidate;
 }
 
 /**
