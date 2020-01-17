@@ -1669,15 +1669,13 @@ private static boolean resultShouldReplaceCandidate(Method resultMethod, Method 
 		Class<?> candidateClass = candidateMethod.getDeclaringClass();
 
 		// TODO for Java 8: return first result, except when types don't match, then return most specific - add this comment in
+		// TODO add in if sidecar
 
-
-		/*[IF !Sidecar19-SE]*/
 		int resultMods = resultMethod.getModifiers();
 		int candidateMods = candidateMethod.getModifiers();
 		if (Modifier.isAbstract(resultMods) == Modifier.isAbstract(candidateMods)) {
 			return false;
 		}
-		/*[ENDIF]*/
 
 		return candidateClass.isAssignableFrom(resultClass);
 	} else {
