@@ -1660,13 +1660,18 @@ private Method getMostSpecificMethodFromAllInterfacesOfCurrentClass(Class<?> cur
 private static boolean resultInterfaceMethodShouldReplaceCandidateInterfaceMethod(Method resultMethod, Method candidateMethod) {
 	Class<?> candidateRetType = candidateMethod.getReturnType();
 	Class<?> resultRetType = resultMethod.getReturnType();
+	Class<?> resultClass = resultMethod.getDeclaringClass();
+	Class<?> candidateClass = candidateMethod.getDeclaringClass();
+	int resultMods = resultClass.getModifiers();
+	int candidateMods = candidateClass.getModifiers();
+
+	if (Modifier.isStatic(resultMods) && !Modifier.isStatic(candidateMods)) {
+		return false;
+	}
 
 	if (candidateRetType == resultRetType) {
-		Class<?> resultClass = resultMethod.getDeclaringClass();
-		Class<?> candidateClass = candidateMethod.getDeclaringClass();
-
-		boolean candidateMethodIsAbstract = Modifier.isAbstract(candidateMethod.getModifiers());
-		boolean resultMethodIsAbstract = Modifier.isAbstract(resultMethod.getModifiers());
+		boolean resultMethodIsAbstract = Modifier.isAbstract(resultMods);
+		boolean candidateMethodIsAbstract = Modifier.isAbstract(candidateMods);
 		/*[IF !Sidecar19-SE]*/
 		if (resultMethodIsAbstract && candidateMethodIsAbstract) {
 			return false;
