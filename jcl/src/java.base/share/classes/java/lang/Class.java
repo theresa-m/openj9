@@ -1503,10 +1503,10 @@ Method getMethodHelper(
 				candidateFromInteface = true;
 			} else if (result.getDeclaringClass() != this) { /* only applies if resulting class is not the base class */
 				HashSet<Class<?>> interfaceSet = new HashSet();
-				interfaceSet.add(result.getDeclaringClass());
+				//interfaceSet.add(result.getDeclaringClass());
 				/* find local method with most specific return type since this step will be skipped for result */
 				result = findMostSpecificLocalMethod(forDeclaredMethod, result, methodList,  name, parameterTypes, strSig);
-				result = getMostSpecificMethodFromAllInterfacesOfCurrentClass(this, interfaceSet, result, name, strSig, parameterTypes);
+				result = getMostSpecificMethodFromAllInterfacesOfCurrentClass(this, interfaceSet, null, name, strSig, parameterTypes);
 				candidateFromInteface = true;
 			}
 		}
@@ -1651,7 +1651,7 @@ private Method getMostSpecificMethodFromAllInterfacesOfCurrentClass(Class<?> cur
 			if (resultMethod != null) {
 				if (candidateMethod == null) {
 					candidateMethod = resultMethod;
-				} else if (resultShouldReplaceCandidate(resultMethod, candidateMethod)) {
+				} else if (resultInterfaceMethodShouldReplaceCandidateInterfaceMethod(resultMethod, candidateMethod)) {
 					candidateMethod = resultMethod;
 				}
 			}
@@ -1660,7 +1660,7 @@ private Method getMostSpecificMethodFromAllInterfacesOfCurrentClass(Class<?> cur
 	return candidateMethod;
 }
 
-private static boolean resultShouldReplaceCandidate(Method resultMethod, Method candidateMethod) {
+private static boolean resultInterfaceMethodShouldReplaceCandidateInterfaceMethod(Method resultMethod, Method candidateMethod) {
 	Class<?> candidateRetType = candidateMethod.getReturnType();
 	Class<?> resultRetType = resultMethod.getReturnType();
 
@@ -1671,13 +1671,15 @@ private static boolean resultShouldReplaceCandidate(Method resultMethod, Method 
 		// TODO for Java 8: return first result, except when types don't match, then return most specific - add this comment in
 		// TODO add in if sidecar
 
-		int resultMods = resultMethod.getModifiers();
-		int candidateMods = candidateMethod.getModifiers();
-		if (Modifier.isAbstract(resultMods) == Modifier.isAbstract(candidateMods)) {
+		boolean candidateMethodIsAbstract = Modifier.isAbstract(candidateMethod.getModifiers());
+		boolean resultMethodIsAbstract = Modifier.isAbstract(resultMethod.getModifiers());
+		if (resultMethodIsAbstract && candidateMethodIsAbstract) {
 			return false;
 		}
 
-		return candidateClass.isAssignableFrom(resultClass);
+		return candidateClass.isAssignableFrom(resultClass) && !resultMethodIsAbstract;
+		//return methodAOverridesMethodB(resultClass, resultMethodIsAbstract, true,
+		//	candidateClass, candidateMethodIsAbstract, true);
 	} else {
 		/* resulting method should have the most specific return type */
 		return candidateRetType.isAssignableFrom(resultRetType);
