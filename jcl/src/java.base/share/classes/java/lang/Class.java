@@ -1665,22 +1665,21 @@ private static boolean resultShouldReplaceCandidate(Method resultMethod, Method 
 	Class<?> resultRetType = resultMethod.getReturnType();
 
 	if (candidateRetType == resultRetType) {
-		int resultMods = resultMethod.getModifiers();
-		int candidateMods = candidateMethod.getModifiers();
 		Class<?> resultClass = resultMethod.getDeclaringClass();
 		Class<?> candidateClass = candidateMethod.getDeclaringClass();
 
+		// TODO for Java 8: return first result, except when types don't match, then return most specific - add this comment in
+
+
 		/*[IF !Sidecar19-SE]*/
-		/* In Java 8 abstract methods in subinterfaces do not hide abstract methods in subinterfaces. In this
-		 * case the first occuring result is sufficient.
-		 */
-		if (Modifier.isAbstract(resultMods) && Modifier.isAbstract(resultMods)) {
+		int resultMods = resultMethod.getModifiers();
+		int candidateMods = candidateMethod.getModifiers();
+		if (Modifier.isAbstract(resultMods) == Modifier.isAbstract(candidateMods)) {
 			return false;
 		}
 		/*[ENDIF]*/
 
-		return methodAOverridesMethodB(resultClass, Modifier.isAbstract(resultMods), resultClass.isInterface(),
-				candidateClass, Modifier.isAbstract(candidateMods), candidateClass.isInterface());
+		return candidateClass.isAssignableFrom(resultClass);
 	} else {
 		/* resulting method should have the most specific return type */
 		return candidateRetType.isAssignableFrom(resultRetType);
