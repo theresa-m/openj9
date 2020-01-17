@@ -1505,6 +1505,7 @@ Method getMethodHelper(
 				HashSet<Class<?>> interfaceSet = new HashSet();
 				//interfaceSet.add(result.getDeclaringClass());
 				/* find local method with most specific return type since this step will be skipped for result */
+				// TODO refactor all of this
 				result = findMostSpecificLocalMethod(forDeclaredMethod, result, methodList,  name, parameterTypes, strSig);
 				result = getMostSpecificMethodFromAllInterfacesOfCurrentClass(this, interfaceSet, null, name, strSig, parameterTypes);
 				candidateFromInteface = true;
@@ -1638,7 +1639,7 @@ private Method getMostSpecificMethodFromAllInterfacesOfCurrentClass(Class<?> cur
 	Class<?>[] interfacesFromCurrentClass = currentClass.getInterfaces();
 	for (Class<?> nextInterface : interfacesFromCurrentClass) {
 		/* No need to search for the duplicate interface */
-		if (!interfaceSet.contains(nextInterface)) {
+		if (!interfaceSet.contains(nextInterface)) { // TODO maybe I can use interface set to help with my default search?
 			interfaceSet.add(nextInterface);
 			Method resultMethod = getMoreSpecificMethodFromInterface(nextInterface, name, strSig, parameterTypes);
 
@@ -1651,7 +1652,7 @@ private Method getMostSpecificMethodFromAllInterfacesOfCurrentClass(Class<?> cur
 			if (resultMethod != null) {
 				if (candidateMethod == null) {
 					candidateMethod = resultMethod;
-				} else if (resultInterfaceMethodShouldReplaceCandidateInterfaceMethod(resultMethod, candidateMethod)) {
+				} else if (resultInterfaceMethodShouldReplaceCandidateInterfaceMethod(resultMethod, candidateMethod, name, strSig, parameterTypes)) {
 					candidateMethod = resultMethod;
 				}
 			}
@@ -1660,7 +1661,7 @@ private Method getMostSpecificMethodFromAllInterfacesOfCurrentClass(Class<?> cur
 	return candidateMethod;
 }
 
-private static boolean resultInterfaceMethodShouldReplaceCandidateInterfaceMethod(Method resultMethod, Method candidateMethod) {
+private static boolean resultInterfaceMethodShouldReplaceCandidateInterfaceMethod(Method resultMethod, Method candidateMethod, String name, String strSig, Class<?>... parameterTypes) {
 	Class<?> candidateRetType = candidateMethod.getReturnType();
 	Class<?> resultRetType = resultMethod.getReturnType();
 
@@ -1668,16 +1669,45 @@ private static boolean resultInterfaceMethodShouldReplaceCandidateInterfaceMetho
 		Class<?> resultClass = resultMethod.getDeclaringClass();
 		Class<?> candidateClass = candidateMethod.getDeclaringClass();
 
-		// TODO for Java 8: return first result, except when types don't match, then return most specific - add this comment in
-		// TODO add in if sidecar
-
 		boolean candidateMethodIsAbstract = Modifier.isAbstract(candidateMethod.getModifiers());
 		boolean resultMethodIsAbstract = Modifier.isAbstract(resultMethod.getModifiers());
+
+		/* for all abstract, just pick the first one */
 		if (resultMethodIsAbstract && candidateMethodIsAbstract) {
 			return false;
 		}
 
-		return candidateClass.isAssignableFrom(resultClass) && !resultMethodIsAbstract;
+		/* for all default pick the longest */
+		if (!resultMethodIsAbstract && !candidateMethodIsAbstract) {
+			return candidateClass.isAssignableFrom(resultClass);
+		}
+ 
+		// TODO keep in mind this only matters for Java 8...
+		/* get the inherited default method from the abstract class */ // maybe I need a special version of getInterface just for default methods
+		Class<?> abstractClass = (resultMethodIsAbstract) ? resultClass : candidateClass;
+		Class<?> defaultClass = (resultMethodIsAbstract) ? candidateClass : resultClass;
+
+		if (abstractClass.isAssignableFrom(defaultClass)) {
+			/* default wins */
+			return (abstractClass == resultClass) ? false : true;
+		}
+
+		Class<?>[] abs = abstractClass.getInterfaces();
+		for (Class<?> inter : abs) {
+			Method result = getMoreSpecificMethodFromInterface(inter, name, strSig, parameterTypes);
+			if (result != null && !Modifier.isAbstract(result.getModifiers())) { // TODO if its abstract we will need to repeat this whole process
+				if ((defaultClass != result.getDeclaringClass()) && defaultClass.isAssignableFrom(result.getDeclaringClass())) {
+					/* abstract class wins */
+					return (abstractClass == resultClass) ? true : false;
+				}
+			}
+		}
+
+		/* order preference */
+		return false;
+		/* default wins */
+		//return (abstractClass == resultClass) ? false : true;
+		//return candidateClass.isAssignableFrom(resultClass) && !resultMethodIsAbstract;
 		//return methodAOverridesMethodB(resultClass, resultMethodIsAbstract, true,
 		//	candidateClass, candidateMethodIsAbstract, true);
 	} else {
@@ -1695,7 +1725,7 @@ private static boolean resultInterfaceMethodShouldReplaceCandidateInterfaceMetho
  * @param parameterTypes the types of the arguments of the specified method
  * @return the more specific method declared in this interface
  */
-private Method getMoreSpecificMethodFromInterface(Class<?> currentInterface, String name, String strSig, Class<?>... parameterTypes) {
+private static Method getMoreSpecificMethodFromInterface(Class<?> currentInterface, String name, String strSig, Class<?>... parameterTypes) {
 	Method resultMethod = currentInterface.getDeclaredMethodImpl(name, parameterTypes, strSig, null);
 	Method bestCandidate = resultMethod;
 	
