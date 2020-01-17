@@ -1492,21 +1492,18 @@ Method getMethodHelper(
 	if (forDeclaredMethod) {
 		result = getDeclaredMethodImpl(name, parameterTypes, strSig, null);
 	} else {
-		result = getMethodImpl(name, parameterTypes, strSig);
-		/* Retrieve the specified method implemented by the superclass from the top to the bottom
-		 * Note: there is no need do so when the method is declared by the current class.
-		 */
-		if ((result != null) && result.getDeclaringClass().isInterface()) {
-			if (!this.isInterface()) {
+		if (this.isInterface()) {
+			result = getDeclaredMethodImpl(name, parameterTypes, strSig, null);
+			if (result == null) {
+				HashSet<Class<?>> interfaceSet = new HashSet();
+				result = getMostSpecificMethodFromAllInterfacesOfCurrentClass(this, interfaceSet, null, name, strSig, parameterTypes);
+				candidateFromInteface = true;
+			}
+		} else {
+			result = getMethodImpl(name, parameterTypes, strSig);
+			if ((result != null) && result.getDeclaringClass().isInterface()) {
 				HashSet<Class<?>> interfaceSet = new HashSet();
 				result = getMostSpecificMethodFromAllInterfacesOfAllSuperclasses(this, interfaceSet, result, name, strSig, parameterTypes);
-				candidateFromInteface = true;
-			} else if (result.getDeclaringClass() != this) { /* only applies if resulting class is not the base class */
-				HashSet<Class<?>> interfaceSet = new HashSet();
-				//interfaceSet.add(result.getDeclaringClass());
-				/* find local method with most specific return type since this step will be skipped for result */
-				result = findMostSpecificLocalMethod(forDeclaredMethod, result, methodList,  name, parameterTypes, strSig);
-				result = getMostSpecificMethodFromAllInterfacesOfCurrentClass(this, interfaceSet, null, name, strSig, parameterTypes);
 				candidateFromInteface = true;
 			}
 		}
@@ -1668,18 +1665,16 @@ private static boolean resultInterfaceMethodShouldReplaceCandidateInterfaceMetho
 		Class<?> resultClass = resultMethod.getDeclaringClass();
 		Class<?> candidateClass = candidateMethod.getDeclaringClass();
 
-		// TODO for Java 8: return first result, except when types don't match, then return most specific - add this comment in
-		// TODO add in if sidecar
-
 		boolean candidateMethodIsAbstract = Modifier.isAbstract(candidateMethod.getModifiers());
 		boolean resultMethodIsAbstract = Modifier.isAbstract(resultMethod.getModifiers());
+		/*[IF !Sidecar19-SE]*/
 		if (resultMethodIsAbstract && candidateMethodIsAbstract) {
 			return false;
 		}
+		/*[ENDIF]*/
 
-		return candidateClass.isAssignableFrom(resultClass) && !resultMethodIsAbstract;
-		//return methodAOverridesMethodB(resultClass, resultMethodIsAbstract, true,
-		//	candidateClass, candidateMethodIsAbstract, true);
+		return methodAOverridesMethodB(resultClass, resultMethodIsAbstract, true,
+			candidateClass, candidateMethodIsAbstract, true);
 	} else {
 		/* resulting method should have the most specific return type */
 		return candidateRetType.isAssignableFrom(resultRetType);
