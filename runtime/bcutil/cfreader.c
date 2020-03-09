@@ -141,7 +141,6 @@ readAttributes(J9CfrClassFile * classfile, J9CfrAttribute *** pAttributes, U_32 
 	J9CfrExceptionTableEntry *exception;
 	J9CfrAttributeInnerClasses *classes;
 	J9CfrParameterAnnotations *parameterAnnotations;
-	J9CfrTypeAnnotation *typeAnnotations = NULL;
 	J9CfrAttributeStackMap *stackMap;
 	J9CfrAttributeBootstrapMethods *bootstrapMethods;
 	J9CfrAttributeRecord *record;
@@ -641,21 +640,33 @@ readAttributes(J9CfrClassFile * classfile, J9CfrAttribute *** pAttributes, U_32 
 				return -2;
 			}
 			annotations = (J9CfrAttributeRuntimeVisibleTypeAnnotations *)attrib;
+			annotations->numberOfAnnotations = 0;
+			annotations->typeAnnotations = NULL;
 			annotations->rawAttributeData = NULL;
 			annotations->rawDataLength = 0; /* 0 indicates attribute is well-formed */
-			CHECK_EOF(2);
-			NEXT_U16(annotations->numberOfAnnotations, index);
-			if (!ALLOC_ARRAY(annotations->typeAnnotations, annotations->numberOfAnnotations, J9CfrTypeAnnotation))
-			{
+
+			/* In the case of a malformed attribute numberOfAnnotations may not exist even if the file did not end. 
+			 * Don't read a bogus numberOfAnnotations. 
+			 */
+			Trc_BCU_ClassFileOracle_seg_string("length is:");
+			Trc_BCU_ClassFileOracle_seg(length);
+			if (length > 1) {
+				CHECK_EOF(2);
+				NEXT_U16(annotations->numberOfAnnotations, index);
+			}
+
+			Trc_BCU_ClassFileOracle_seg_string("num annotations:");
+			Trc_BCU_ClassFileOracle_seg(annotations->numberOfAnnotations);
+
+			if (!ALLOC_ARRAY(annotations->typeAnnotations, annotations->numberOfAnnotations, J9CfrTypeAnnotation)) {
 				return -2;
 			}
-			typeAnnotations = annotations->typeAnnotations;
 			/*
-			 * we are now at the start of the first type_annotation
-			 * Silently ignore errors.
-			 */
-			for (j = 0; j < annotations->numberOfAnnotations; j++, typeAnnotations++) {
-				result = readTypeAnnotation(classfile, typeAnnotations, data, dataEnd, segment, segmentEnd, &index, &freePointer, flags);
+			* we are now at the start of the first type_annotation
+			* Silently ignore errors.
+			*/
+			for (j = 0; j < annotations->numberOfAnnotations; j++, annotations->typeAnnotations++) {
+				result = readTypeAnnotation(classfile, annotations->typeAnnotations, data, dataEnd, segment, segmentEnd, &index, &freePointer, flags);
 				if (BCT_ERR_NO_ERROR != result) {
 					break;
 				}
