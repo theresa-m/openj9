@@ -418,33 +418,51 @@ readAttributes(J9CfrClassFile * classfile, J9CfrAttribute *** pAttributes, U_32 
 			}
 
 			annotations = (J9CfrAttributeRuntimeVisibleAnnotations *)attrib;
+			annotations->numberOfAnnotations = 0;
+			annotations->annotations = NULL;
 			annotations->rawAttributeData = NULL;
 			annotations->rawDataLength = 0; /* 0 indicates attribute is well-formed */
-			CHECK_EOF(2);
-			NEXT_U16(annotations->numberOfAnnotations, index);
 
-			if (!ALLOC_ARRAY(annotations->annotations, annotations->numberOfAnnotations, J9CfrAnnotation))
-			{
-				return BCT_ERR_OUT_OF_ROM;
+			/* In the case of a malformed attribute numberOfAnnotations may not exist even if the file did not end. 
+			 * Don't read a bogus numberOfAnnotations.
+			 */
+			if (length > 1) {
+				CHECK_EOF(2);
+				NEXT_U16(annotations->numberOfAnnotations, index);
+
+				if (!ALLOC_ARRAY(annotations->annotations, annotations->numberOfAnnotations, J9CfrAnnotation))
+				{
+					return BCT_ERR_OUT_OF_ROM;
+				}
+
+				result = readAnnotations(classfile, annotations->annotations, annotations->numberOfAnnotations, data, dataEnd, segment, segmentEnd, &index, &freePointer, flags);
 			}
-
-			result = readAnnotations(classfile, annotations->annotations, annotations->numberOfAnnotations, data, dataEnd, segment, segmentEnd, &index, &freePointer, flags);
 
 			if (BCT_ERR_OUT_OF_ROM == result) {
 				/* Return out of memory error code to allocate larger buffer for classfile */
 				return result;
-			} else if ((BCT_ERR_NO_ERROR != result) || (index != end)) {
+			} else if ((BCT_ERR_NO_ERROR != result) || (0 == length) || (index != end)) {
 				U_32 cursor = 0;
 				Trc_BCU_MalformedAnnotation(address);
 
-				annotations->rawDataLength = length;
-				if (!ALLOC_ARRAY(annotations->rawAttributeData, length, U_8)) {
-					return BCT_ERR_OUT_OF_ROM;
-				}
-				index = attributeStart; /* rewind to the start of the attribute */
-				for (cursor = 0; cursor < annotations->rawDataLength; ++cursor) {
-					CHECK_EOF(1);
-					NEXT_U8(annotations->rawAttributeData[cursor], index);
+				if (0 == length) {
+					/* rawDataLength should be zero to indicate an error. Add an extra byte to the annotation 
+					 * to indicate an error. This case will not be common. */
+					annotations->rawDataLength = 1;
+					if (!ALLOC_ARRAY(annotations->rawAttributeData, 1, U_8)) {
+						return BCT_ERR_OUT_OF_ROM;
+					}
+					annotations->rawAttributeData[0] = 0;
+				} else {
+					annotations->rawDataLength = length;
+					if (!ALLOC_ARRAY(annotations->rawAttributeData, length, U_8)) {
+						return BCT_ERR_OUT_OF_ROM;
+					}
+					index = attributeStart; /* rewind to the start of the attribute */
+					for (cursor = 0; cursor < annotations->rawDataLength; ++cursor) {
+						CHECK_EOF(1);
+						NEXT_U8(annotations->rawAttributeData[cursor], index);
+					}
 				}
 			}
 		}

@@ -378,3 +378,6 @@ TraceEvent=Trc_BCU_compareROMClassForEquality_event NoEnv Overhead=1 Level=7 Tem
 TraceAssert=Trc_BCU_Assert_True_Level1 NoEnv Overhead=1 Level=1 Assert="(P1)"
 
 TraceEvent=Trc_BCU_ClassFileOracle_walkRecordComponents_UnknownAttribute Noenv Overhead=1 Level=3 Template="BCU ClassFileOracle::walkRecordComponents: Unknown attribute tag=%d name=%.*s length=%d"
+
+TraceEvent=Trc_BCU_ClassFileOracle_seg_string Noenv Overhead=1 Level=3 Template="debug message: %s"
+TraceEvent=Trc_BCU_ClassFileOracle_seg Noenv Overhead=1 Level=3 Template="debug: %d"
