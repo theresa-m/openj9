@@ -424,14 +424,15 @@ readAttributes(J9CfrClassFile * classfile, J9CfrAttribute *** pAttributes, U_32 
 			annotations->rawDataLength = 0; /* 0 indicates attribute is well-formed */
 
 			/* In the case of a malformed attribute numberOfAnnotations may not exist even if the file did not end. 
-			 * Don't read a bogus numberOfAnnotations.
+			 * There must be at least two bytes to have a valid numberOfAnnotations.
+			 * Length of 0 will be treated as an error below. Length of 1 will be an error as well since the index
+			 * will not match the end value.
 			 */
 			if (length > 1) {
 				CHECK_EOF(2);
 				NEXT_U16(annotations->numberOfAnnotations, index);
 
-				if (!ALLOC_ARRAY(annotations->annotations, annotations->numberOfAnnotations, J9CfrAnnotation))
-				{
+				if (!ALLOC_ARRAY(annotations->annotations, annotations->numberOfAnnotations, J9CfrAnnotation)) {
 					return BCT_ERR_OUT_OF_ROM;
 				}
 
@@ -647,7 +648,9 @@ readAttributes(J9CfrClassFile * classfile, J9CfrAttribute *** pAttributes, U_32 
 			annotations->rawDataLength = 0; /* 0 indicates attribute is well-formed */
 
 			/* In the case of a malformed attribute numberOfAnnotations may not exist even if the file did not end. 
-			 * Don't read a bogus numberOfAnnotations. 
+			 * There must be at least two bytes to have a valid numberOfAnnotations.
+			 * Length of 0 will be treated as an error below. Length of 1 will be an error as well since the index
+			 * will not match the end value.
 			 */
 			if (length > 1) {
 				CHECK_EOF(2);
@@ -673,29 +676,32 @@ readAttributes(J9CfrClassFile * classfile, J9CfrAttribute *** pAttributes, U_32 
 				/* Return out of memory error code to allocate larger buffer for classfile */
 				return result;
 			} else if ((BCT_ERR_NO_ERROR != result) || (0 == length) || (index != end)) {
-				U_32 cursor = 0;
 				/*
 				 * give up parsing.
 				 * Copy the raw data, insert a bogus type_annotation,
 				 * i.e. an illegal target_type byte immediately after the num_annotations field,
 				 * to indicate that the attribute is malformed.
 				 */
+				U_32 cursor = 0;
+
+				/* The minimum number of raw data bytes needed to create a bogus type_annotation is:
+				 * num_annotations (2 bytes)
+				 * target_type (1 byte)
+				 */
+				const U_32 minimumRawDataBytes = 3;
+
 				Trc_BCU_MalformedTypeAnnotation(address);
 
-				/* calculate the length needed to insert the illegal type_annotation.
-				 * The minimum number of bytes needed is three for
-				 * num_annotations and target_type
-				 */
+				/* use at least the minimum number of bytes, or add an extra slot for the illegal target_type */
+				annotations->rawDataLength = OMR_MAX(minimumRawDataBytes, length + 1);
+
+				/* special case for length = 1. To ensure index is incremented correctly, 
+				 * add this extra byte to the end of the raw data array. */
 				if (1 == length) {
-					/* Treat one byte as part of the type_annotation to reach the correct index. */
-					annotations->rawDataLength = 4;
-				} else if (length < 3) {
-					annotations->rawDataLength = 3;
-				} else {
-					/* Extra slot for illegal target_type */
-					annotations->rawDataLength = length + 1;
+					annotations->rawDataLength++;
 				}
 
+				/* create raw data array. */
 				if (!ALLOC_ARRAY(annotations->rawAttributeData, annotations->rawDataLength, U_8)) {
 					return -2;
 				}
@@ -705,12 +711,14 @@ readAttributes(J9CfrClassFile * classfile, J9CfrAttribute *** pAttributes, U_32 
 				if (length >= 2) {
 					NEXT_U16(annotations->rawAttributeData[0], index);
 				} else {
+					/* there should be at least one type_annotation here for the illegal 
+					 * entry that is being created. */
 					annotations->rawAttributeData[0] = 0;
 					annotations->rawAttributeData[1] = 1;
 				}
 
 				/* set illegal target_type followed by raw data */
-				if (3 == annotations->rawDataLength) { /* final slot is reserved for illegal target_type */
+				if (minimumRawDataBytes == annotations->rawDataLength) { /* final slot is reserved for illegal target_type */
 					annotations->rawAttributeData[2] = CFR_TARGET_TYPE_ErrorInAttribute;
 				} else {
 					NEXT_U8(annotations->rawAttributeData[2], index);
