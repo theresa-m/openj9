@@ -677,31 +677,27 @@ readAttributes(J9CfrClassFile * classfile, J9CfrAttribute *** pAttributes, U_32 
 				return result;
 			} else if ((BCT_ERR_NO_ERROR != result) || (0 == length) || (index != end)) {
 				/*
-				 * give up parsing.
+				 * Give up parsing.
+				 * 
 				 * Copy the raw data, insert a bogus type_annotation,
-				 * i.e. an illegal target_type byte immediately after the num_annotations field,
-				 * to indicate that the attribute is malformed.
-				 */
-				U_32 cursor = 0;
-
-				/* The minimum number of raw data bytes needed to create a bogus type_annotation is:
+				 * i.e. an illegal target_type byte immediately after the num_annotations field
+				 * to indicate that the attribute is malformed. The remaining raw data should follow
+				 * the illegal target_type.
+				 * 
+				 * The minimum number of raw data bytes needed to create a bogus type_annotation is:
 				 * num_annotations (2 bytes)
 				 * target_type (1 byte)
+				 * extra raw data (at least 1 byte)
+				 * 
+				 * Length will be adjusted during rawAttributeData assignment if it is determined that 
+				 * an extra slot is not needed.
 				 */
-				const U_32 minimumRawDataBytes = 3;
+				const U_32 minimumRawDataBytes = 4;
 
 				Trc_BCU_MalformedTypeAnnotation(address);
 
-				/* use at least the minimum number of bytes, or add an extra slot for the illegal target_type */
 				annotations->rawDataLength = OMR_MAX(minimumRawDataBytes, length + 1);
 
-				/* special case for length = 1. To ensure index is incremented correctly, 
-				 * add this extra byte to the end of the raw data array. */
-				if (1 == length) {
-					annotations->rawDataLength++;
-				}
-
-				/* create raw data array. */
 				if (!ALLOC_ARRAY(annotations->rawAttributeData, annotations->rawDataLength, U_8)) {
 					return -2;
 				}
@@ -717,26 +713,34 @@ readAttributes(J9CfrClassFile * classfile, J9CfrAttribute *** pAttributes, U_32 
 					annotations->rawAttributeData[1] = 1;
 				}
 
-				/* set illegal target_type followed by raw data */
-				if (minimumRawDataBytes == annotations->rawDataLength) { /* final slot is reserved for illegal target_type */
+				/* Insert illegal target_type followed by remaining raw data. */
+				if (index == end) {
+					/* There is no remaining raw data. */
 					annotations->rawAttributeData[2] = CFR_TARGET_TYPE_ErrorInAttribute;
+
+					/* Adjust rawDataLength since there was no need to insert an extra byte. */
+					annotations->rawDataLength--;
 				} else {
+					/* cursor is the starting point in raw data array to write remaining raw data. */
+					U_32 cursor = 0;
+
 					NEXT_U8(annotations->rawAttributeData[2], index);
 
 					if (CFR_TARGET_TYPE_ErrorInAttribute != annotations->rawAttributeData[2]) {
 						/* insert an error marker */
 						annotations->rawAttributeData[3] = annotations->rawAttributeData[2];
 						annotations->rawAttributeData[2] = CFR_TARGET_TYPE_ErrorInAttribute;
+						cursor = 4;
 					} else { /* the attribute is already marked bad */
-						annotations->rawAttributeData[3] = 0;
-						if (index != end) {
-							NEXT_U8(annotations->rawAttributeData[3], index);
-						}
-						annotations->rawDataLength = length - 1; /* won't be using the extra slot */
+						/* Adjust rawDataLength since there was no need to insert an extra byte. */
+						annotations->rawDataLength--;
+						cursor = 3;
 					}
-					for (cursor = 4; cursor < annotations->rawDataLength; ++cursor) {
+
+					while (index != end) {
 						CHECK_EOF(1);
 						NEXT_U8(annotations->rawAttributeData[cursor], index);
+						cursor++;
 					}
 				}
 			}
