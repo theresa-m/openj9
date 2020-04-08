@@ -547,7 +547,7 @@ prepareForDump(struct J9JavaVM *vm, struct J9RASdumpAgent *agent, struct J9RASdu
 	RasGlobalStorage * j9ras = (RasGlobalStorage *)vm->j9rasGlobalStorage;
 	UtInterface * uteInterface = (UtInterface *)(j9ras ? j9ras->utIntf : NULL);
 	BOOLEAN exclusiveHeld = J9_XACCESS_NONE != vm->exclusiveAccessState;
-	printf("prepareForDump: thread %d flags %d\n", (int)vmThread, (int)vmThread->publicFlags);
+	printf("prepareForDump: thread %p flags %d\n", vmThread, (int)vmThread->publicFlags);
 
 	/* Is trace running? */
 	if( uteInterface && uteInterface->server ) {
