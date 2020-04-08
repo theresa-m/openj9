@@ -437,7 +437,7 @@ static const J9RASdumpSpec rasDumpSpecs[] =
 		  NULL,
 		  NULL,
 		  0,
-		  J9RAS_DUMP_DO_EXCLUSIVE_VM_ACCESS,
+		  J9RAS_DUMP_DO_SUSPEND_OTHER_DUMPS,
 		  NULL }
 	}
 };

@@ -547,6 +547,7 @@ prepareForDump(struct J9JavaVM *vm, struct J9RASdumpAgent *agent, struct J9RASdu
 	RasGlobalStorage * j9ras = (RasGlobalStorage *)vm->j9rasGlobalStorage;
 	UtInterface * uteInterface = (UtInterface *)(j9ras ? j9ras->utIntf : NULL);
 	BOOLEAN exclusiveHeld = J9_XACCESS_NONE != vm->exclusiveAccessState;
+	printf("prepareForDump: %d\n", (int)vmThread->publicFlags);
 
 	/* Is trace running? */
 	if( uteInterface && uteInterface->server ) {
@@ -677,6 +678,11 @@ prepareForDump(struct J9JavaVM *vm, struct J9RASdumpAgent *agent, struct J9RASdu
 			newKey = dumpKey;
 		}
 
+		// TODO combine this with previous ?
+		// if (agent->requestMask & J9RAS_DUMP_DO_SUSPEND_OTHER_DUMPS) {
+		// 	vm->internalVMFunctions->internalReleaseVMAccess(vmThread);
+		// }
+
 		/* Always wait for the lock, but only grab it when requested */
 		while (compareAndSwapUDATA(&rasDumpSuspendKey, 0, newKey) != 0) {
 			if (rasDumpFirstThread == dumpKey) {
@@ -686,6 +692,10 @@ prepareForDump(struct J9JavaVM *vm, struct J9RASdumpAgent *agent, struct J9RASdu
 				omrthread_sleep(200);
 			}
 		}
+
+		// if (agent->requestMask & J9RAS_DUMP_DO_SUSPEND_OTHER_DUMPS) {
+		// 	vm->internalVMFunctions->internalAcquireVMAccess(vmThread); // here
+		// }
 	}
 
 	return newState;
