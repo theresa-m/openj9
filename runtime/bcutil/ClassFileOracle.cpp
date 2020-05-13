@@ -1302,6 +1302,66 @@ ClassFileOracle::walkMethodCodeAttributeAttributes(U_16 methodIndex)
 		}
 	}
 
+	/* Verify that each LVTT entry belongs to a local variable. Since there is no guarunteed order
+	 * for code attributes, all LocalVariableInfo entries may not be set until this point.
+	 * 
+	 * According to the JVM spec: ”Each entry in the local_variable_type_table array ... 
+	 * indicates the index into the local variable array of the current frame at which 
+	 * that local variable can be found.”
+	 * 
+	 * While multiple LocalVariableTypeTable attributes may exist, it is the common case in Java upon observation
+	 * that there is usually only one per code attribute. To take advantage of this I tracked the last LVTT that was
+	 * gone through and if the next is the same, there's no need to go through it again. (TODO write this out better)
+	 * 
+	 * Worst case performance: :(
+	 * maxLocals*maxLocals*maxLocals
+	 * 
+	 * Common case performance:
+	 * maxLocals*maxLocals
+	 * 
+	 */
+	if (_context->shouldPreserveLocalVariablesInfo() && (NULL != _methodsInfo[methodIndex].localVariablesInfo)) {
+		J9CfrAttributeLocalVariableTypeTable *lastLVTTAttribute = NULL;
+
+		for (UDATA varIndex = 0; varIndex < codeAttribute->maxLocals; varIndex++) {
+			J9CfrAttributeLocalVariableTable *localVariableTableAttribute = _methodsInfo[methodIndex].localVariablesInfo[varIndex].localVariableTableAttribute;
+			J9CfrAttributeLocalVariableTypeTable *localVariableTypeTableAttribute = _methodsInfo[methodIndex].localVariablesInfo[varIndex].localVariableTypeTableAttribute;
+
+			if ((NULL == localVariableTableAttribute) || (NULL == localVariableTypeTableAttribute)) {
+				continue;
+			}
+			if (NULL == lastLVTTAttribute) {
+				lastLVTTAttribute = localVariableTypeTableAttribute;
+			}
+			if (localVariableTypeTableAttribute == lastLVTTAttribute) {
+				continue;
+			}
+
+			/* Verify that each entry in the LocalVariableTypeTable has a match */
+			for (U_16 lvttIndex = 0; lvttIndex < localVariableTypeTableAttribute->localVariableTypeTableLength; lvttIndex++) {
+				J9CfrLocalVariableTypeTableEntry *lvttEntry = &(localVariableTypeTableAttribute->localVariableTypeTable[lvttIndex]);
+				UDATA foundMatch = FALSE;
+				/* Search for match in LVT attribute with matching index. */
+				// TODO we can start at a smart point for LVT
+				for (U_16 lvtIndex = 0; lvtIndex < localVariableTableAttribute->localVariableTableLength; lvtIndex++) {
+					J9CfrLocalVariableTableEntry *lvtEntry = &(localVariableTableAttribute->localVariableTable[lvtIndex]);
+					if ((lvttEntry->startPC == lvtEntry->startPC)
+						&& (lvttEntry->length == lvtEntry->length)
+						&& (lvttEntry->nameIndex == lvtEntry->nameIndex)
+						&& (lvttEntry->index == lvtEntry->index)
+					) {
+						foundMatch = TRUE;
+						break;
+					}
+				}
+
+				/* throw error if there is no variable match. */
+				if (!foundMatch) {
+					throwGenericErrorWithCustomMsg(J9NLS_CFR_LVTT_DOES_NOT_MATCH_LVT__ID, lvttIndex);
+				}
+			}
+		}
+	}
 	if ((OK == _buildResult) && (0 != lineNumbersCount)) {
 		ROMCLASS_VERBOSE_PHASE_HOT(_context, CompressLineNumbers);
 		compressLineNumberTable(methodIndex, lineNumbersCount);
