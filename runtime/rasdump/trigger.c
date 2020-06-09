@@ -555,6 +555,46 @@ prepareForDump(struct J9JavaVM *vm, struct J9RASdumpAgent *agent, struct J9RASdu
 		newState |= J9RAS_DUMP_TRACE_DISABLED;
 	}
 
+	/* Release vm access until this thread has the dumpKey and is ready to run. This will allow 
+	 * other threads to obtain exclusiveVMAccess in the meantime. */
+	vm->internalVMFunctions->internalReleaseVMAccess(vmThread);
+
+	/*
+	 * The following actions are considered safe to call during a crash situation...
+	 */
+
+	/* For fatal events, the first failing thread sets the global rasDumpFirstThread. It then gets higher priority on the
+	 * serial dump lock, see below. This allows the first failing thread to complete its dumps and exit the VM, reducing
+	 * the number of dumps written and out-time if multiple threads crash.
+	 */
+	if (0 != (context->eventFlags & (J9RAS_DUMP_ON_GP_FAULT | J9RAS_DUMP_ON_ABORT_SIGNAL | J9RAS_DUMP_ON_TRACE_ASSERT))) {
+		compareAndSwapUDATA(&rasDumpFirstThread, 0, dumpKey);
+	}
+
+	if (rasDumpSuspendKey == dumpKey) {
+		/* We already have the lock */
+	} else {
+		UDATA newKey = 0;
+
+		/* Grab the dump lock? */
+		if (agent->requestMask & J9RAS_DUMP_DO_SUSPEND_OTHER_DUMPS) {
+			newState |= J9RAS_DUMP_GOT_LOCK;
+			newKey = dumpKey;
+		}
+
+		/* Always wait for the lock, but only grab it when requested */
+		while (compareAndSwapUDATA(&rasDumpSuspendKey, 0, newKey) != 0) {
+			if (rasDumpFirstThread == dumpKey) {
+				/* First failing thread gets a simple priority boost over other threads waiting for lock */
+				omrthread_sleep(20);
+			} else {
+				omrthread_sleep(200);
+			}
+		}
+	}
+
+	vm->internalVMFunctions->internalAcquireVMAccess(vmThread);
+
 	if ((context->eventFlags & (J9RAS_DUMP_ON_GP_FAULT | J9RAS_DUMP_ON_ABORT_SIGNAL | J9RAS_DUMP_ON_TRACE_ASSERT)) == 0) {
 		/*
 		 * The following actions may deadlock, so don't use them
@@ -654,40 +694,6 @@ prepareForDump(struct J9JavaVM *vm, struct J9RASdumpAgent *agent, struct J9RASdu
 		newState |= J9RAS_DUMP_THREADS_HALTED;
 	}
 
-	/*
-	 * The following actions are considered safe to call during a crash situation...
-	 */
-
-	/* For fatal events, the first failing thread sets the global rasDumpFirstThread. It then gets higher priority on the
-	 * serial dump lock, see below. This allows the first failing thread to complete its dumps and exit the VM, reducing
-	 * the number of dumps written and out-time if multiple threads crash.
-	 */
-	if (0 != (context->eventFlags & (J9RAS_DUMP_ON_GP_FAULT | J9RAS_DUMP_ON_ABORT_SIGNAL | J9RAS_DUMP_ON_TRACE_ASSERT))) {
-		compareAndSwapUDATA(&rasDumpFirstThread, 0, dumpKey);
-	}
-
-	if (rasDumpSuspendKey == dumpKey) {
-		/* We already have the lock */
-	} else {
-		UDATA newKey = 0;
-
-		/* Grab the dump lock? */
-		if (agent->requestMask & J9RAS_DUMP_DO_SUSPEND_OTHER_DUMPS) {
-			newState |= J9RAS_DUMP_GOT_LOCK;
-			newKey = dumpKey;
-		}
-
-		/* Always wait for the lock, but only grab it when requested */
-		while (compareAndSwapUDATA(&rasDumpSuspendKey, 0, newKey) != 0) {
-			if (rasDumpFirstThread == dumpKey) {
-				/* First failing thread gets a simple priority boost over other threads waiting for lock */
-				omrthread_sleep(20);
-			} else {
-				omrthread_sleep(200);
-			}
-		}
-	}
-
 	return newState;
 }
 #endif /* J9VM_RAS_DUMP_AGENTS */
@@ -705,13 +711,6 @@ unwindAfterDump(struct J9JavaVM *vm, struct J9RASdumpContext *context, UDATA sta
 	/*
 	 * Must be in reverse order to the requested actions
 	 */
-
-	if (state & J9RAS_DUMP_GOT_LOCK) {
-
-		/* Should work unless omrthread_self returns a different value than before, which is unlikely */
-		compareAndSwapUDATA(&rasDumpSuspendKey, dumpKey, 0);
-		newState &= ~J9RAS_DUMP_GOT_LOCK;
-	}
 
 	if (state & J9RAS_DUMP_THREADS_HALTED) {
 
@@ -747,6 +746,12 @@ unwindAfterDump(struct J9JavaVM *vm, struct J9RASdumpContext *context, UDATA sta
 		(*((JavaVM *)vm))->DetachCurrentThread((JavaVM *)vm);
 		context->onThread = NULL;
 		newState &= ~J9RAS_DUMP_ATTACHED_THREAD;
+	}
+
+	if (state & J9RAS_DUMP_GOT_LOCK) {
+		/* Should work unless omrthread_self returns a different value than before, which is unlikely */
+		compareAndSwapUDATA(&rasDumpSuspendKey, dumpKey, 0);
+		newState &= ~J9RAS_DUMP_GOT_LOCK;
 	}
 
 	if( state & J9RAS_DUMP_TRACE_DISABLED) {
