@@ -557,13 +557,9 @@ prepareForDump(struct J9JavaVM *vm, struct J9RASdumpAgent *agent, struct J9RASdu
 	}
 
 	/* Release vm access until this thread has the dumpKey and is ready to run. This will allow other threads to obtain exclusiveVMAccess in the meantime. */
-	if (vmThread) {
+	if (vmThread && !vmThread->inNative) {
 		if (J9_ARE_ANY_BITS_SET(vmThread->publicFlags, J9_PUBLIC_FLAGS_VM_ACCESS)) {
-			if (vmThread->inNative) {
-				vm->internalVMFunctions->internalExitVMToJNI(vmThread);
-			} else {
-				vm->internalVMFunctions->internalReleaseVMAccess(vmThread);
-			}
+			vm->internalVMFunctions->internalReleaseVMAccess(vmThread);
 			acquireVMAccessAfterWait = TRUE;
 		}
 	}
@@ -592,7 +588,7 @@ prepareForDump(struct J9JavaVM *vm, struct J9RASdumpAgent *agent, struct J9RASdu
 		}
 
 		/* Always wait for the lock, but only grab it when requested */
-		while (compareAndSwapUDATA(&rasDumpSuspendKey, 0, newKey) != 0) {
+		while (0 != compareAndSwapUDATA(&rasDumpSuspendKey, 0, newKey)) {
 			if (rasDumpFirstThread == dumpKey) {
 				/* First failing thread gets a simple priority boost over other threads waiting for lock */
 				omrthread_sleep(20);
@@ -603,11 +599,7 @@ prepareForDump(struct J9JavaVM *vm, struct J9RASdumpAgent *agent, struct J9RASdu
 	}
 
 	if (acquireVMAccessAfterWait) {
-		if (vmThread->inNative) {
-			vm->internalVMFunctions->internalEnterVMFromJNI(vmThread);
-		} else {
-			vm->internalVMFunctions->internalAcquireVMAccess(vmThread);
-		}
+		vm->internalVMFunctions->internalAcquireVMAccess(vmThread);
 	}
 
 	if (J9_ARE_NO_BITS_SET(context->eventFlags, J9RAS_DUMP_ON_GP_FAULT | J9RAS_DUMP_ON_ABORT_SIGNAL | J9RAS_DUMP_ON_TRACE_ASSERT)) {
