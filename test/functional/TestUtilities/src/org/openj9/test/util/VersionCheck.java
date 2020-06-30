@@ -51,9 +51,9 @@ public class VersionCheck {
 	
 	
 	/**
-	 * Get the Major version for the running JVM - either 8, 9, ....
+	 * Get the Major version for the running JVM
 	 * 
-	 * @return The JDK major version
+	 * @return The JDK major version, defaults to 8 if not available
 	 */
 	public static int major() {
 		if (versionInstance != null) {
@@ -64,5 +64,13 @@ public class VersionCheck {
 			}
 		}
 		return 8;
+	}
+
+	/* Get the highest available class file version for this JDK.
+	 *
+	 * @return The highest available class file version
+	 */ 
+	public static int classFile() {
+		return major() + 44;
 	}
 }
