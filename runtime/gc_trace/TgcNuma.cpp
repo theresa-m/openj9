@@ -79,7 +79,7 @@ tgcHookReportNumaStatistics(J9HookInterface** hook, UDATA eventNum, void* eventD
 			}
 			numaExtensions->nodeData[threadNode].threads += 1;
 			
-			if ((walkThread == vmThread) || (env->getThreadType() == GC_SLAVE_THREAD)) {
+			if ((walkThread == vmThread) || (env->getThreadType() == GC_WORKER_THREAD)) {
 				numaExtensions->nodeData[threadNode].gcThreads += 1;
 			}
 		}

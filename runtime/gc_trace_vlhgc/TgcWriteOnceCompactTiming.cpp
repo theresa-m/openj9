@@ -55,8 +55,8 @@ tgcHookCompactEndWriteOnceCompactTiming(J9HookInterface** hook, UDATA eventNum, 
 	GC_VMThreadListIterator markThreadListIterator(vmThread);
 	while ((walkThread = markThreadListIterator.nextVMThread()) != NULL) {
 		MM_EnvironmentVLHGC *env = (MM_EnvironmentVLHGC*)walkThread->gcExtensions;
-		if ((walkThread == vmThread) || (env->getThreadType() == GC_SLAVE_THREAD)) {
-			tgcExtensions->printf("%5zu: %5llu %7llu %8llu %8llu %11llu %8llu %8llu (%8llu) %11llu %9llu %10llu %11llu", env->getSlaveID(),
+		if ((walkThread == vmThread) || (env->getThreadType() == GC_WORKER_THREAD)) {
+			tgcExtensions->printf("%5zu: %5llu %7llu %8llu %8llu %11llu %8llu %8llu (%8llu) %11llu %9llu %10llu %11llu", env->getWorkerID(),
 					j9time_hires_delta(env->_compactVLHGCStats._flushStartTime, env->_compactVLHGCStats._flushEndTime, J9PORT_TIME_DELTA_IN_MICROSECONDS),
 					j9time_hires_delta(env->_compactVLHGCStats._leafTaggingStartTime, env->_compactVLHGCStats._leafTaggingEndTime, J9PORT_TIME_DELTA_IN_MICROSECONDS),
 					j9time_hires_delta(env->_compactVLHGCStats._regionCompactDataInitStartTime, env->_compactVLHGCStats._regionCompactDataInitEndTime, J9PORT_TIME_DELTA_IN_MICROSECONDS),
