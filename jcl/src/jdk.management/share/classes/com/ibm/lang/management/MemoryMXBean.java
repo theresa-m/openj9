@@ -255,11 +255,11 @@ public interface MemoryMXBean extends java.lang.management.MemoryMXBean {
 	public long getGCMasterThreadCpuUsed();
 
 	/**
-     * Returns the total amount of CPU time spent in the GC by all slave threads, in milliseconds.
+     * Returns the total amount of CPU time spent in the GC by all worker threads, in milliseconds.
      * 
      * @return CPU time used in milliseconds
      */
-	public long getGCSlaveThreadsCpuUsed();
+	public long getGCWorkerThreadsCpuUsed();
 
 	/**
      * Returns the maximum number of GC worker threads.

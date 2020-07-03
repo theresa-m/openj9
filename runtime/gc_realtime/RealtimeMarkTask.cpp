@@ -81,7 +81,7 @@ MM_RealtimeMarkTask::cleanup(MM_EnvironmentBase *envBase)
 	/* record the thread-specific parallelism stats in the trace buffer. This partially duplicates info in -Xtgc:parallel */ 
 	Trc_MM_RealtimeMarkTask_parallelStats(
 		env->getLanguageVMThread(),
-		(U_32)env->getSlaveID(),
+		(U_32)env->getWorkerID(),
 		(U_32)omrtime_hires_delta(0, env->_workPacketStats._workStallTime, OMRPORT_TIME_DELTA_IN_MILLISECONDS),
 		(U_32)omrtime_hires_delta(0, env->_workPacketStats._completeStallTime, OMRPORT_TIME_DELTA_IN_MILLISECONDS),
 		(U_32)omrtime_hires_delta(0, env->_markStats._syncStallTime, OMRPORT_TIME_DELTA_IN_MILLISECONDS),

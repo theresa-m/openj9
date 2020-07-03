@@ -112,8 +112,8 @@ printRootScannerStats(OMR_VMThread *omrVMThread)
 			MM_EnvironmentBase* env = MM_EnvironmentBase::getEnvironment(thread->omrVMThread);
 	
 			/* print stats for this thread only if it reported stats on at least one of its roots */
-			if (((GC_SLAVE_THREAD == env->getThreadType()) || (thread == currentThread)) && env->_rootScannerStats._statsUsed) {
-				tgcExtensions->printf("\t<thread id=\"%zu\"", env->getSlaveID());
+			if (((GC_WORKER_THREAD == env->getThreadType()) || (thread == currentThread)) && env->_rootScannerStats._statsUsed) {
+				tgcExtensions->printf("\t<thread id=\"%zu\"", env->getWorkerID());
 
 				/* Scan collected entity data and print attribute/value pairs for entities that have
 				 * collected data.  Skip RootScannerEntity_None, located at index 0. */
