@@ -78,9 +78,9 @@ public:
 	bool initialize(MM_EnvironmentBase *env, MM_GlobalCollector *globalCollector, MM_MarkingScheme *markingScheme);
 	void tearDown(MM_EnvironmentBase *env);
 
-	void masterThreadGarbageCollectStarted(MM_EnvironmentBase *env);
+	void mainThreadGarbageCollectStarted(MM_EnvironmentBase *env);
 	void postMarkProcessing(MM_EnvironmentBase *env);
-	void masterThreadGarbageCollectFinished(MM_EnvironmentBase *env, bool compactedThisCycle);
+	void mainThreadGarbageCollectFinished(MM_EnvironmentBase *env, bool compactedThisCycle);
 	void postCollect(MM_EnvironmentBase* env, MM_MemorySubSpace* subSpace);
 
 	bool isAllowUserHeapWalk();

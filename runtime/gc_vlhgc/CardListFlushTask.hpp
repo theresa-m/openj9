@@ -71,8 +71,8 @@ public:
 	virtual void setup(MM_EnvironmentBase *env);
 	virtual void cleanup(MM_EnvironmentBase *env);
 	
-	void masterSetup(MM_EnvironmentBase *env);
-	void masterCleanup(MM_EnvironmentBase *env);
+	void mainSetup(MM_EnvironmentBase *env);
+	void mainCleanup(MM_EnvironmentBase *env);
 
 	/**
 	 * Checks the state of the given card and updates its content based on what state it should transition the old one from, given that we want
@@ -85,7 +85,7 @@ public:
 
 #if defined(J9MODRON_TGC_PARALLEL_STATISTICS)
 	virtual void synchronizeGCThreads(MM_EnvironmentBase *env, const char *id);
-	virtual bool synchronizeGCThreadsAndReleaseMaster(MM_EnvironmentBase *env, const char *id);
+	virtual bool synchronizeGCThreadsAndReleaseMain(MM_EnvironmentBase *env, const char *id);
 	virtual bool synchronizeGCThreadsAndReleaseSingleThread(MM_EnvironmentBase *env, const char *id);
 #endif /* J9MODRON_TGC_PARALLEL_STATISTICS */
 

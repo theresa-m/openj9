@@ -777,18 +777,18 @@ public class MemoryMXBeanImpl extends LazyDelegatingNotifier implements MemoryMX
 	private native String getGCModeImpl();
 
 	/**
-	 * Returns the amount of CPU time spent in the GC by the master thread, in milliseconds.
+	 * Returns the amount of CPU time spent in the GC by the main thread, in milliseconds.
 	 *
 	 * @return CPU time used in milliseconds
-	 * @see #getGCMasterThreadCpuUsed()
+	 * @see #getGCMainThreadCpuUsed()
 	 */
-	private native long getGCMasterThreadCpuUsedImpl();
+	private native long getGCMainThreadCpuUsedImpl();
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public long getGCMasterThreadCpuUsed() {
-		return getGCMasterThreadCpuUsedImpl();
+	public long getGCMainThreadCpuUsed() {
+		return getGCMainThreadCpuUsedImpl();
 	}
 
 	/**

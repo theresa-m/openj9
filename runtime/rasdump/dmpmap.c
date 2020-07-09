@@ -516,7 +516,7 @@ mapDumpSwitches(J9JavaVM *vm, J9RASdumpOption agentOpts[], IDATA *agentNum)
 }
 
 /**
- * Master disable heap, java, snap, and system dumps on out of memory
+ * Fully disable heap, java, snap, and system dumps on out of memory
  * @param @agentOpts dump agent options
  * @param agentNum number of agents
  */
@@ -540,7 +540,7 @@ disableDumpOnOutOfMemoryError(J9RASdumpOption agentOpts[], IDATA agentNum)
 }
 
 /**
- * Master enable heap, java, snap, and system dumps on out of memory
+ * Fully enable heap, java, snap, and system dumps on out of memory
  * @param @agentOpts dump agent options
  * @param agentNum pointer to number of agents, updated by reference
  */

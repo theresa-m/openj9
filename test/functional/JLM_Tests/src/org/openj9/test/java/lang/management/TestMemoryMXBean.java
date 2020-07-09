@@ -107,7 +107,7 @@ public class TestMemoryMXBean {
 				new AttributeData(Long.TYPE.getName(), true, false, false));
 		attribs.put("SharedClassCacheFreeSpace", new AttributeData(Long.TYPE.getName(), true, false, false));
 		attribs.put("GCMode", new AttributeData(String.class.getName(), true, false, false));
-		attribs.put("GCMasterThreadCpuUsed", new AttributeData(Long.TYPE.getName(), true, false, false));
+		attribs.put("GCMainThreadCpuUsed", new AttributeData(Long.TYPE.getName(), true, false, false));
 		attribs.put("GCWorkerThreadsCpuUsed", new AttributeData(Long.TYPE.getName(), true, false, false));
 		attribs.put("MaximumGCThreads", new AttributeData(Integer.TYPE.getName(), true, false, false));
 		attribs.put("CurrentGCThreads", new AttributeData(Integer.TYPE.getName(), true, false, false));

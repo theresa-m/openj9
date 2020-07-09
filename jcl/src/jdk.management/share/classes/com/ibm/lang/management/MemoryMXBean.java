@@ -248,11 +248,11 @@ public interface MemoryMXBean extends java.lang.management.MemoryMXBean {
 	public String getGCMode();
 
 	/**
-     * Returns the amount of CPU time spent in the GC by the master thread, in milliseconds.
+     * Returns the amount of CPU time spent in the GC by the main thread, in milliseconds.
      * 
      * @return CPU time used in milliseconds
      */
-	public long getGCMasterThreadCpuUsed();
+	public long getGCMainThreadCpuUsed();
 
 	/**
      * Returns the total amount of CPU time spent in the GC by all worker threads, in milliseconds.

@@ -412,7 +412,7 @@ Java_com_ibm_java_lang_management_internal_MemoryMXBeanImpl_getMaxHeapSizeLimitI
 extern J9_CFUNC jlong JNICALL
 Java_com_ibm_java_lang_management_internal_MemoryMXBeanImpl_getMinHeapSizeImpl (JNIEnv *env, jobject beanInstance);
 extern J9_CFUNC jlong JNICALL
-Java_com_ibm_java_lang_management_internal_MemoryMXBeanImpl_getGCMasterThreadCpuUsedImpl(JNIEnv *env, jobject beanInstance);
+Java_com_ibm_java_lang_management_internal_MemoryMXBeanImpl_getGCMainThreadCpuUsedImpl(JNIEnv *env, jobject beanInstance);
 extern J9_CFUNC jlong JNICALL
 Java_com_ibm_java_lang_management_internal_MemoryMXBeanImpl_getGCWorkerThreadsCpuUsedImpl(JNIEnv *env, jobject beanInstance);
 extern J9_CFUNC jint JNICALL 

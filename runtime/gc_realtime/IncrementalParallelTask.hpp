@@ -47,7 +47,7 @@ private:
 
 protected:
 	virtual void synchronizeGCThreads(MM_EnvironmentBase *env, const char *id);
-	virtual bool synchronizeGCThreadsAndReleaseMaster(MM_EnvironmentBase *env, const char *id);
+	virtual bool synchronizeGCThreadsAndReleaseMain(MM_EnvironmentBase *env, const char *id);
 	virtual bool synchronizeGCThreadsAndReleaseSingleThread(MM_EnvironmentBase *env, const char *id);
 	virtual void releaseSynchronizedGCThreads(MM_EnvironmentBase *env);
 public:

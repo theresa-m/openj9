@@ -76,7 +76,7 @@ public:
 
 	void workerCleanupAfterGC(MM_EnvironmentBase *env);
 
-	void masterSetupForGC(MM_EnvironmentBase *env);
+	void mainSetupForGC(MM_EnvironmentBase *env);
 
 	MM_CompactDelegate()
 		: _compactScheme(NULL)

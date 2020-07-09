@@ -59,7 +59,7 @@ public class TestMonitors extends DDRExtTesterBase {
 		}
 
 		/*
-		 * On Windows, OMR defines a monitor named "portLibrary_omrsig_master_exception_monitor".
+		 * On Windows, OMR defines a monitor named "portLibrary_omrsig_main_exception_monitor".
 		 * Fail if the string 'exception' is present, but only if it does not follow an underscore ('_').
 		 */
 		assertTrue(validate(output,

@@ -308,7 +308,7 @@ MM_RealtimeRootScanner::scanMonitorLookupCaches(MM_EnvironmentBase *env)
 void
 MM_RealtimeRootScanner::scanStringTable(MM_EnvironmentBase *env)
 {
-	if (env->_currentTask->synchronizeGCThreadsAndReleaseMaster(env, UNIQUE_ID)) {
+	if (env->_currentTask->synchronizeGCThreadsAndReleaseMain(env, UNIQUE_ID)) {
 		/* We can't rely on using _unmarkedImpliesCleared because clearable phase can mark more objects.
 		 * Only at this point can we assume unmarked strings are truly dead.
 		 */

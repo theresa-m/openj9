@@ -132,7 +132,7 @@ MM_CompactDelegate::workerCleanupAfterGC(MM_EnvironmentBase *env)
 }
 
 void
-MM_CompactDelegate::masterSetupForGC(MM_EnvironmentBase *env)
+MM_CompactDelegate::mainSetupForGC(MM_EnvironmentBase *env)
 {
 	MM_GCExtensionsBase *extensions = env->getExtensions();
 	MM_HeapRegionDescriptorStandard *region = NULL;

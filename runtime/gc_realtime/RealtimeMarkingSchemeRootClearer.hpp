@@ -148,7 +148,7 @@ public:
 		MM_EnvironmentRealtime *env = MM_EnvironmentRealtime::getEnvironment(envBase);
 		reportScanningStarted(RootScannerEntity_WeakReferenceObjectsComplete);
 
-		if (env->_currentTask->synchronizeGCThreadsAndReleaseMaster(env, UNIQUE_ID)) {
+		if (env->_currentTask->synchronizeGCThreadsAndReleaseMain(env, UNIQUE_ID)) {
 			env->_cycleState->_referenceObjectOptions |= MM_CycleState::references_clear_weak;
 			env->_currentTask->releaseSynchronizedGCThreads(env);
 		}
@@ -170,7 +170,7 @@ public:
 	virtual CompletePhaseCode scanSoftReferencesComplete(MM_EnvironmentBase *envBase) {
 		MM_EnvironmentRealtime *env = MM_EnvironmentRealtime::getEnvironment(envBase);
 		reportScanningStarted(RootScannerEntity_SoftReferenceObjectsComplete);
-		if (env->_currentTask->synchronizeGCThreadsAndReleaseMaster(env, UNIQUE_ID)) {
+		if (env->_currentTask->synchronizeGCThreadsAndReleaseMain(env, UNIQUE_ID)) {
 			env->_cycleState->_referenceObjectOptions |= MM_CycleState::references_clear_soft;
 			env->_currentTask->releaseSynchronizedGCThreads(env);
 		}
@@ -190,7 +190,7 @@ public:
 	virtual CompletePhaseCode scanPhantomReferencesComplete(MM_EnvironmentBase *envBase) {
 		MM_EnvironmentRealtime *env = MM_EnvironmentRealtime::getEnvironment(envBase);
 		reportScanningStarted(RootScannerEntity_PhantomReferenceObjectsComplete);
-		if (env->_currentTask->synchronizeGCThreadsAndReleaseMaster(env, UNIQUE_ID)) {
+		if (env->_currentTask->synchronizeGCThreadsAndReleaseMain(env, UNIQUE_ID)) {
 			env->_cycleState->_referenceObjectOptions |= MM_CycleState::references_clear_phantom;
 			env->_currentTask->releaseSynchronizedGCThreads(env);
 		}
