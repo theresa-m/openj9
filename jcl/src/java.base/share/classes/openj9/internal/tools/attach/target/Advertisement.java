@@ -109,7 +109,7 @@ public final class Advertisement {
 		addKeyAsciiValue(contentBuffer, KEY_PROCESS_ID, Long.toString(IPC.getProcessId()));
 		addKeyValue(contentBuffer, KEY_VM_ID, vmId);
 		addKeyValue(contentBuffer, KEY_DISPLAY_NAME, (((null == displayName) || (displayName.length() == 0))? vmId: displayName));
-		addKeyValue(contentBuffer, KEY_NOTIFIER, CommonDirectory.MASTER_NOTIFIER);
+		addKeyValue(contentBuffer, KEY_NOTIFIER, CommonDirectory.CONTROLLER_NOTIFIER);
 		addKeyValue(contentBuffer, GLOBAL_SEMAPHORE, Boolean.TRUE.toString());
 		File tmpTargetDirectoryFileObject = TargetDirectory.getTargetDirectoryFileObject();
 		File tmpSyncFileObject = TargetDirectory.getSyncFileObject();

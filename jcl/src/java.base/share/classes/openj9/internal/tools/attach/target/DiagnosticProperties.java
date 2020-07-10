@@ -38,7 +38,7 @@ public class DiagnosticProperties {
 	private final Properties baseProperties;
 
 	/**
-	 * Master prefix for property keys
+	 * Main prefix for property keys
 	 */
 	public static final String OPENJ9_DIAGNOSTICS_PREFIX = "openj9_diagnostics."; //$NON-NLS-1$
 
