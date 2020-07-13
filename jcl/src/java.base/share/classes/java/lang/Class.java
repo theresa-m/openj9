@@ -4756,10 +4756,7 @@ public Class<?>[] getNestMembers() throws LinkageError, SecurityException {
 
 		for (int i = 0; i < permittedSubclassesNames.length; i++) {
 			String subclassName = permittedSubclassesNames[i];
-			// TODO assuming this isn't needed update the comments for native methods
-			/* ClassDesc.of requires a dot separated name. */
-			// subclassName = subclassName.replace('/', '.');
-			permittedSubclasses[i] = ClassDesc.of(subclassName);
+			permittedSubclasses[i] = ClassDesc.of(permittedSubclassesNames[i]);
 		}
 		return permittedSubclasses;
 	}
