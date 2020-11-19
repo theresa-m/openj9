@@ -45,6 +45,13 @@ typedef struct {
 	J9HashTable *registeredNatives;
 } VMIntermediateSnapshotState;
 
+/* Used during snapshot to track relationships of omr_monitor_t address's to their fixup references. */
+typedef struct J9AcquiredMonitorHashStruct {
+	UDATA omrMonitorAddress;
+	UDATA isObjectMonitor;
+	UDATA j9MonitorReference; /* if object-monitor this will be the address of j9object_t, else the ID for vm fixup. */
+} J9AcquiredMonitorHashStruct;
+
 class VMSnapshotImpl
 {
 
@@ -55,6 +62,9 @@ private:
 	J9JavaVM *_vm;
 	J9PortLibrary *_portLibrary;
 	J9SnapshotHeader *_snapshotHeader;
+	J9AcquiredMonitorHeader *_acquiredMonitorHeader;
+	J9AcquiredMonitor *_acquiredMonitors;
+	J9WaitingThread *_waitingThreads;
 	J9MemoryRegion *_memoryRegions;
 	J9Heap *_heap;
 	J9Heap *_heap32;
@@ -73,6 +83,10 @@ public:
 	static const UDATA GENERAL_MEMORY_SECTION_SIZE = 512 * 1024 * 1024;
 	static const UDATA SUB4G_MEMORY_SECTION_SIZE = 100 * 1024 * 1024;
 	static const UDATA CLASS_LOADER_REMOVE_COUNT = 8;
+
+	// TODO this size likely needs to increase for large applications
+	static const UDATA MAX_NUM_ALLOCATED_MONITORS = 8;
+	static const UDATA MAX_NUM_WAITING_THREADS = 8;
 
 	/*
 	 * Function Members
@@ -94,7 +108,7 @@ private:
 	void leaveSnapshotMode(J9VMThread *currentThread);
 	bool registerGCForSnapshot(J9VMThread *currentThread);
 
-	/* Fixup functions called during teardown sequence */
+	/* Fixup functions called during snapshot sequence */
 	void fixupClassLoaders(void);
 	void fixupClasses(J9VMThread *currentThread);
 	void fixupClass(J9VMThread *currentThread, J9Class *clazz);
@@ -104,6 +118,10 @@ private:
 	void fixupClassPathEntries(J9ClassLoader *classLoader);
 	void removeUnpersistedClassLoaders(void);
 	void saveJ9JavaVMStructures(void);
+	bool saveThreadWaitingData(J9VMThread *thread, J9WaitingThread **cursor, J9HashTable *omrToJ9MonitorTable);
+	bool saveOmrToJ9MonitorMapping(J9HashTable *omrToJ9MonitorTable, omrthread_monitor_t monitor, UDATA isObjectMonitor, UDATA fixupReference);
+	bool saveAcquiredMonitor(J9VMThread *currentThread, J9AcquiredMonitor **cursor, J9HashTable *omrToJ9MonitorTable, omrthread_monitor_t monitor, UDATA isObjectMonitor, UDATA fixupReference);
+	bool saveThreadsAndMonitors(void);
 	bool restorePrimitiveAndArrayClasses(void);
 	bool restoreJ9JavaVMStructures(void);
 	void savePrimitiveAndArrayClasses(void);
@@ -142,6 +160,12 @@ public:
 	void freeJ9JavaVMStructures(void);
 
 	bool postPortLibInitstage(bool isSnapShotRun);
+
+	bool restoreAcquiredObjectMonitor(J9AcquiredMonitor **monitor, UDATA *monitorCount, j9object_t object);
+	bool restoreSystemMonitor(J9AcquiredMonitor **monitor, UDATA *monitorCount, omrthread_monitor_t omrMonitorReference, UDATA fixupReference);
+	bool restoreThreadWaitingOnObjectMonitor_Stack(J9VMThread* thread, j9object_t monitor);
+	bool restoreWaitingThread(J9WaitingThread *waitingThread);
+	bool restoreMonitors(void);
 
 	/* Suballocator functions */
 	void* subAllocateMemory(uintptr_t byteAmount, bool sub4G);
