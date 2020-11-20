@@ -602,8 +602,19 @@ JCL_OnUnload(J9JavaVM *vm, void *reserved)
 	if (vm->bootstrapClassPath) {
 #if defined(J9VM_OPT_SNAPSHOTS)
 		if (IS_SNAPSHOTTING_ENABLED(vm)) {
-			VMSNAPSHOTIMPLPORT_ACCESS_FROM_JAVAVM(vm);
-			vmsnapshot_free_memory(vm->bootstrapClassPath);
+			if (J9_ARE_ALL_BITS_SET(vm->extendedRuntimeFlags2, J9_EXTENDED_RUNTIME2_SNAPSHOT_STATE_SNAPSHOT_TRIGGERED)) {
+				VMSNAPSHOTIMPLPORT_ACCESS_FROM_JAVAVM(vm);
+				vmsnapshot_free_memory(vm->bootstrapClassPath);
+			} else {
+				/* bootstrapClassPath will not have been allocated in snapshot memory if
+				 * snapshot point was never triggered. This is a good indicator that the 
+				 * users trigger point was entered incorrectly.
+				 */
+				printf("ERROR: Snapshot method entered on command line was never called.\n");
+				j9mem_free_memory(vm->bootstrapClassPath);
+				return JNI_ERR;
+			}
+			
 		} else
 #endif /* defined(J9VM_OPT_SNAPSHOTS) */
 		{
