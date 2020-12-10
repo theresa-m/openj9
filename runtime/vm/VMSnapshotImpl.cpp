@@ -1674,13 +1674,22 @@ VMSnapshotImpl::restoreAcquiredObjectMonitor(J9AcquiredMonitor** monitor, UDATA*
 			goto done;
 		}
 
+		omrthread_monitor_t omrMonitor = objectMonitor->monitor;
+
+		/* monitor count may be wrong since objectMonitorInflate sets it to J9_FLATLOCK_COUNT(lock).
+		 * notes for this macro indicate that the value may be incorrect for an inflated monitor.
+		 * this monitor has been previously inflated during snapshot run */
+		((J9ThreadAbstractMonitor*)omrMonitor)->count = 1;
+
 		/* objectMonitorInflate has already acquired the monitor once. Acquire additional times to restore proper count. */
 		for (U_32 i = 1; i < (*monitor)->ownerCount; i++) {
-			if (0 != omrthread_monitor_try_enter_using_threadId(objectMonitor->monitor, omrThread)) {
+			if (0 != omrthread_monitor_try_enter_using_threadId(omrMonitor, omrThread)) {
 				rc = false;
 				goto done;
 			}
 		}
+
+		Assert_VM_true((*monitor)->ownerCount == omrthread_monitor_getNumOfTimesAcquired(omrMonitor));
 
 		*monitor = *monitor + 1;
 		*monitorCount = *monitorCount - 1;
@@ -1881,11 +1890,13 @@ procRestoreThreadState(void* arg)
 {
 	J9VMThread* vmThread = (J9VMThread*)arg;
 
-	Assert_VM_true((UDATA)(vmThread->pc) <= J9SF_MAX_SPECIAL_FRAME_TYPE);
-	if (J9_ARE_ALL_BITS_SET((UDATA)(vmThread->pc), J9SF_FRAME_TYPE_NATIVE_METHOD)) {
-		VM_OutOfLineINL_Helpers::restoreInternalNativeStackFrame(vmThread);
-	} else {
-		VM_OutOfLineINL_Helpers::restoreSpecialStackFrameLeavingArgs(vmThread, vmThread->arg0EA);
+	/* Restore special frame. Otherwise last bytecode will be run. */
+	if ((UDATA)(vmThread->pc) <= J9SF_MAX_SPECIAL_FRAME_TYPE) {
+		if (J9_ARE_ALL_BITS_SET((UDATA)(vmThread->pc), J9SF_FRAME_TYPE_NATIVE_METHOD)) {
+			VM_OutOfLineINL_Helpers::restoreInternalNativeStackFrame(vmThread);
+		} else {
+			VM_OutOfLineINL_Helpers::restoreSpecialStackFrameLeavingArgs(vmThread, vmThread->arg0EA);
+		}
 	}
 	restoreThreadState(vmThread);
 
