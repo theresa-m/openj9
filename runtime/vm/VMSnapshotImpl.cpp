@@ -1040,6 +1040,42 @@ done:
 	return success;
 }
 
+/**
+ * Find fixup id for monitor. Return 0 is monitor
+ * has no matching id meaning don't bother to persist. 
+ * @param monitor
+ * @return UDATA fixupId
+ */
+UDATA
+VMSnapshotImpl::systemMonitorToFixupId(omrthread_monitor_t monitor) {
+	UDATA fixupId = 0;
+	if (monitor == _vm->unsafeMemoryTrackingMutex) {
+		fixupId = FIXUPREFVM_UNSAFE_MEMORY_TRACKING_MUTEX;
+	} else if (monitor == _vm->verboseStateMutex) {
+		fixupId = FIXUPREFVM_VERBOSE_STATE_MUTEX;
+	} else if (monitor == _vm->jclCacheMutex) {
+		fixupId = FIXUPREFVM_JCL_CACHE_MUTEX;
+	} else if (monitor == _vm->constantDynamicMutex) {
+		fixupId= FIXUPREFVM_CONSTANT_DYNAMIC_MUTEX;
+	}
+	return fixupId;
+}
+
+/**
+ * If thread is waiting to acquire a monitor save fixup
+ * information for restore. Any monitor that is waiting
+ * to be acquired should already have been saved in
+ * _acquiredMonitorHeader for its owner to acquire on restore.
+ * @param thread
+ */
+void
+VMSnapshotImpl::saveSystemMonitorWaiting(J9VMThread *thread) {
+	omrthread_monitor_t monitor = omrthread_waiting_to_acquire(thread->osThread);
+	if (NULL != monitor) {
+		thread->waitingMonitorFixupId = systemMonitorToFixupId(monitor);
+	}
+}
+
 /** 
  * At this stage the VM is at a standstill so its safe to start recording lock information.
  * 
@@ -1077,6 +1113,9 @@ VMSnapshotImpl::saveThreadsAndMonitors(void)
 			success = false;
 			goto done;
 		}
+
+		/* fixup information for thread waiting to acquire a monitor. */
+		saveSystemMonitorWaiting(threadCursor);
 
 		/* Save thread's object monitors that are inflated and acquired. */
 		infoLen = vmFuncs->getOwnedObjectMonitors(threadCursor, threadCursor, NULL, 0);
@@ -1676,6 +1715,29 @@ done:
 }
 
 /**
+ * If vmThread should be waiting on a system monitor
+ * attempt to acquire it here.
+ * @param vmThread
+ */
+static void
+restoreSystemMonitorWaiting(J9VMThread* vmThread) {
+	UDATA fixupId = vmThread->waitingMonitorFixupId;
+	if (0 != fixupId) {
+		J9JavaVM* vm = vmThread->javaVM;
+		switch(fixupId) {
+		case FIXUPREFVM_UNSAFE_MEMORY_TRACKING_MUTEX:
+			omrthread_monitor_enter(vm->unsafeMemoryTrackingMutex);
+		case FIXUPREFVM_VERBOSE_STATE_MUTEX:
+			omrthread_monitor_enter(vm->verboseStateMutex);
+		case FIXUPREFVM_JCL_CACHE_MUTEX:
+			omrthread_monitor_enter(vm->jclCacheMutex);
+		case FIXUPREFVM_CONSTANT_DYNAMIC_MUTEX:
+			omrthread_monitor_enter(vm->constantDynamicMutex);
+		}
+	}
+}
+
+/**
  * Process resumes interpreter for arg thread
  * 
  * @param thread associated with running OMR thread.
@@ -1694,6 +1756,10 @@ procRestoreThreadState(void* arg)
 			VM_OutOfLineINL_Helpers::restoreSpecialStackFrameLeavingArgs(vmThread, vmThread->arg0EA);
 		}
 	}
+
+	/* if thread is waiting to acquire a vm monitor stat waiting here. */
+	restoreSystemMonitorWaiting(vmThread);
+
 	restoreThreadState(vmThread);
 
 	/* Destroy Java thread similarly to what happens in Java_java_lang_Thread_startImpl */
