@@ -51,7 +51,6 @@ VMSnapshotImpl::VMSnapshotImpl(J9PortLibrary *portLibrary, const char* ramCache,
 	_snapshotHeader(NULL),
 	_acquiredMonitorHeader(NULL),
 	_acquiredMonitors(NULL),
-	_waitingThreads(NULL),
 	_memoryRegions(NULL),
 	_heap(NULL),
 	_heap32(NULL),
@@ -190,7 +189,6 @@ VMSnapshotImpl::~VMSnapshotImpl()
 			}
 		}
 		j9mem_free_memory((void *)_memoryRegions);
-		j9mem_free_memory((void *)_waitingThreads);
 		j9mem_free_memory((void *)_acquiredMonitors);
 		j9mem_free_memory((void *)_acquiredMonitorHeader);
 		j9mem_free_memory((void *)_snapshotHeader);
@@ -310,21 +308,15 @@ VMSnapshotImpl::allocateImageMemory()
 	}
 
 	_acquiredMonitorHeader->numOfAcquiredMonitors = 0;
-	_acquiredMonitorHeader->numOfWaitingThreads = 0;
 
 	_acquiredMonitors = (J9AcquiredMonitor *) j9mem_allocate_memory(sizeof(J9AcquiredMonitor) * MAX_NUM_ALLOCATED_MONITORS, J9MEM_CATEGORY_CLASSES);
 	if (NULL == _acquiredMonitors) {
 		goto freeAcquiredMonitorHeader;
 	}
 
-	_waitingThreads = (J9WaitingThread *) j9mem_allocate_memory(sizeof(J9WaitingThread) * MAX_NUM_WAITING_THREADS, J9MEM_CATEGORY_CLASSES);
-	if (NULL == _waitingThreads) {
-		goto freeAcquiredMonitors;
-	}
-
 	_memoryRegions = (J9MemoryRegion *) j9mem_allocate_memory(sizeof(J9MemoryRegion) * NUM_OF_MEMORY_SECTIONS, J9MEM_CATEGORY_CLASSES);
 	if (NULL == _memoryRegions) {
-		goto freeWaitingThreads;
+		goto freeAcquiredMonitors;
 	}
 
 	//generalMemorySection = j9mem_allocate_memory(GENERAL_MEMORY_SECTION_SIZE + pageSize, J9MEM_CATEGORY_CLASSES);
@@ -364,10 +356,6 @@ freeGeneralMemorySection:
 freeMemorySections:
 	j9mem_free_memory(_memoryRegions);
 	_memoryRegions = NULL;
-
-freeWaitingThreads:
-	j9mem_free_memory(_waitingThreads);
-	_waitingThreads = NULL;
 
 freeAcquiredMonitors:
 	j9mem_free_memory(_acquiredMonitors);
@@ -894,16 +882,10 @@ VMSnapshotImpl::readImageFromFile(void)
 		goto freeAcquiredMonitorHeader;
 	}
 
-	_waitingThreads = (J9WaitingThread *) j9mem_allocate_memory(sizeof(J9WaitingThread) * MAX_NUM_WAITING_THREADS, J9MEM_CATEGORY_CLASSES);
-	if (NULL == _waitingThreads) {
-		rc = false;
-		goto freeAcquiredMonitors;
-	}
-
 	_memoryRegions = (J9MemoryRegion *) j9mem_allocate_memory(sizeof(J9MemoryRegion) * NUM_OF_MEMORY_SECTIONS, J9MEM_CATEGORY_CLASSES);
 	if (NULL == _memoryRegions) {
 		rc = false;
-		goto freeWaitingThreads;
+		goto freeAcquiredMonitors;
 	}
 
 	/* Read snapshot header and memory regions then mmap the rest of the image (heap) into memory */
@@ -919,11 +901,6 @@ VMSnapshotImpl::readImageFromFile(void)
 	}
 
 	if (-1 == omrfile_read(_snapshotFD, (void *)_acquiredMonitors, sizeof(J9AcquiredMonitor) * MAX_NUM_ALLOCATED_MONITORS)) {
-		rc = false;
-		goto freeMemorySections;
-	}
-
-	if (-1 == omrfile_read(_snapshotFD, (void *)_waitingThreads, sizeof(J9WaitingThread) * MAX_NUM_WAITING_THREADS)) {
 		rc = false;
 		goto freeMemorySections;
 	}
@@ -972,10 +949,6 @@ done:
 freeMemorySections: /* free all allocated memory */
 	j9mem_free_memory(_memoryRegions);
 	_memoryRegions = NULL;
-
-freeWaitingThreads:
-	j9mem_free_memory(_waitingThreads);
-	_waitingThreads = NULL;
 
 freeAcquiredMonitors:
 	j9mem_free_memory(_acquiredMonitors);
@@ -1026,82 +999,10 @@ VMSnapshotImpl::saveJ9JavaVMStructures(void)
 }
 
 /**
- * If thread is waiting to acquire a monitor save enough information to fix up state during restore.
- * 
- * @param thread J9VMThread that may be waiting on a monitor
- * @param cursor next empty spot in allocated snapshot memory for waiting threads. Will be incremented if slot is filled
- * @param omrToJ9MonitorTable hash table storing omrthread_monitor_t address to fixup reference translations
- * 
- * @return true if successful, else false
- */
-bool
-VMSnapshotImpl::saveThreadWaitingData(J9VMThread *thread, J9WaitingThread **cursor, J9HashTable* omrToJ9MonitorTable) {
-	bool success = true;
-
-	omrthread_monitor_t waitingOnMonitor = omrthread_waiting_to_acquire(thread->osThread);
-	if (NULL != waitingOnMonitor) {
-		/* If monitor has a mapping save it. Else we don't need to care about this monitor. It may be for the gc etc. */
-		J9AcquiredMonitorHashStruct entry = {0};
-		entry.omrMonitorAddress = (UDATA)waitingOnMonitor;
-
-		J9AcquiredMonitorHashStruct *mapEntry = (J9AcquiredMonitorHashStruct*)hashTableFind(omrToJ9MonitorTable, &entry);
-		if (NULL == mapEntry) {
-			/* success case - skip saving */
-			goto done;
-		}
-
-		/* verify that there is room in allocated snapshot memory */
-		if (MAX_NUM_WAITING_THREADS <= _acquiredMonitorHeader->numOfWaitingThreads) {
-			printf("Error: out of space for waiting thread data\n");
-			success = false;
-			goto done;
-		}
-
-		(*cursor)->waitingVMThreadAddress = (UDATA) thread;
-		(*cursor)->isObjectMonitor = mapEntry->isObjectMonitor;
-		(*cursor)->fixupReference = mapEntry->j9MonitorReference;
-
-		Trc_VM_Snapshot_SaveWaitingThread_WithName(thread, (UDATA)waitingOnMonitor, omrthread_monitor_name(waitingOnMonitor));
-
-		_acquiredMonitorHeader->numOfWaitingThreads++;
-		*cursor = *cursor + 1;
-	}
-
-done:
-	return success;
-}
-
-/**
- * Store omrthread_monitor_t address to snapshot fixup reference translation table.
- * 
- * @param omrToJ9MonitorTable hash table to store omrthread_monitor_t address to fixup reference translations
- * @param monitor
- * @param isObjectMonitor
- * @param fixupReference
- * 
- * @return true if successful, else false
- */
-bool
-VMSnapshotImpl::saveOmrToJ9MonitorMapping(J9HashTable* omrToJ9MonitorTable, omrthread_monitor_t monitor, UDATA isObjectMonitor, UDATA fixupReference)
-{
-	J9AcquiredMonitorHashStruct entry = {0};
-
-	entry.omrMonitorAddress = (UDATA)monitor;
-	entry.isObjectMonitor = isObjectMonitor;
-	entry.j9MonitorReference = fixupReference;
-
-	J9AcquiredMonitorHashStruct* resultEntry = (J9AcquiredMonitorHashStruct*)hashTableAdd(omrToJ9MonitorTable, &entry);
-
-	/* Saved mapping was successful if result is not null */
-	return (NULL != resultEntry);
-}
-
-/**
  * If monitor is acquired by thread save fixup information for image restore.
  * 
  * @param thread J9VMThread that may have acquired the monitor
  * @param cursor next empty spot in allocated snapshot memory for acquired monitors. Will be incremented if slot is filled
- * @param omrToJ9MonitorTable hash table storing omrthread_monitor_t address to fixup reference translations
  * @param monitor monitor to save if acquired by thread
  * @param isObjectMonitor
  * @param fixupReference
@@ -1109,7 +1010,7 @@ VMSnapshotImpl::saveOmrToJ9MonitorMapping(J9HashTable* omrToJ9MonitorTable, omrt
  * @return true if successful, else false
  */
 bool
-VMSnapshotImpl::saveAcquiredMonitor(J9VMThread *thread, J9AcquiredMonitor **cursor, J9HashTable* omrToJ9MonitorTable, omrthread_monitor_t monitor, UDATA isObjectMonitor, UDATA fixupReference)
+VMSnapshotImpl::saveAcquiredMonitor(J9VMThread *thread, J9AcquiredMonitor **cursor, omrthread_monitor_t monitor, UDATA isObjectMonitor, UDATA fixupReference)
 {
 	bool success = true;
 
@@ -1122,12 +1023,6 @@ VMSnapshotImpl::saveAcquiredMonitor(J9VMThread *thread, J9AcquiredMonitor **curs
 			if (MAX_NUM_ALLOCATED_MONITORS == _acquiredMonitorHeader->numOfAcquiredMonitors) {
 				printf("Error: out of space for persisted monitors\n");
 				success = false;
-				goto done;
-			}
-
-			success = saveOmrToJ9MonitorMapping(omrToJ9MonitorTable, monitor, isObjectMonitor, fixupReference);
-			if (false == success) {
-				printf("Error: omr to J9 monitor hash table mapping failed\n");
 				goto done;
 			}
 
@@ -1145,29 +1040,12 @@ done:
 	return success;
 }
 
-static UDATA 
-monitorMapHashFn(void *key, void *userData)
-{
-	/* omr monitor address is unique for each entry */
-	return ((J9AcquiredMonitorHashStruct*)key)->omrMonitorAddress;
-}
-
-static UDATA 
-monitorMapHashEqualFn(void *leftKey, void *rightKey, void *userData)
-{
-	J9AcquiredMonitorHashStruct *leftAcquiredMonitor = (J9AcquiredMonitorHashStruct*)leftKey;
-	J9AcquiredMonitorHashStruct *rightAcquiredMonitor = (J9AcquiredMonitorHashStruct*)rightKey;
-	
-	return (leftAcquiredMonitor->omrMonitorAddress == rightAcquiredMonitor->omrMonitorAddress);
-}
-
 /** 
  * At this stage the VM is at a standstill so its safe to start recording lock information.
  * 
  * OMR level threads and mutexes are not saved by the snapshot suballocator. Much of these structures is uneccessary 
  * and impossible (OS thread/mutexes) to persist. Instead save only whats useful to return to this
- * state on restore. This includes recording which threads have acquired what monitors how many times
- * and also information about threads that are waiting to acquire a monitor during snapshot.
+ * state on restore. This includes recording which threads have acquired what monitors how many times.
  * 
  * @return - false on error (likely memory allocation issue)
  */
@@ -1178,32 +1056,24 @@ VMSnapshotImpl::saveThreadsAndMonitors(void)
 	J9InternalVMFunctions* vmFuncs = _vm->internalVMFunctions;
 	J9VMThread* threadCursor = _vm->mainThread;
 	J9AcquiredMonitor* acquiredMonitorCursor = _acquiredMonitors;
-	J9WaitingThread* waitingThreadCursor = _waitingThreads;
-	/* Save mapping of omr to J9 Monitors in hash table for waiting monitor fixup */
-	J9HashTable* omrToJ9MonitorTable = hashTableNew(OMRPORT_FROM_J9PORT(_portLibrary), J9_GET_CALLSITE(), MAX_NUM_ALLOCATED_MONITORS, sizeof(J9AcquiredMonitorHashStruct), 
-		sizeof(char *), 0, J9MEM_CATEGORY_CLASSES, monitorMapHashFn, monitorMapHashEqualFn, NULL, NULL);
-	if (NULL == omrToJ9MonitorTable) {
-		success = false;
-		goto hashInitError;
-	}
 
 	do {
 		IDATA infoLen = 0;
 
 		/* Save VM JCL monitors. There may be other vm monitors that need to be saved... */
-		if (!saveAcquiredMonitor(threadCursor, &acquiredMonitorCursor, omrToJ9MonitorTable, _vm->unsafeMemoryTrackingMutex, FALSE, FIXUPREFVM_UNSAFE_MEMORY_TRACKING_MUTEX)) {
+		if (!saveAcquiredMonitor(threadCursor, &acquiredMonitorCursor, _vm->unsafeMemoryTrackingMutex, FALSE, FIXUPREFVM_UNSAFE_MEMORY_TRACKING_MUTEX)) {
 			success = false;
 			goto done;
 		}
-		if (!saveAcquiredMonitor(threadCursor, &acquiredMonitorCursor, omrToJ9MonitorTable, _vm->verboseStateMutex, FALSE, FIXUPREFVM_VERBOSE_STATE_MUTEX)) {
+		if (!saveAcquiredMonitor(threadCursor, &acquiredMonitorCursor, _vm->verboseStateMutex, FALSE, FIXUPREFVM_VERBOSE_STATE_MUTEX)) {
 			success = false;
 			goto done;
 		}
-		if (!saveAcquiredMonitor(threadCursor, &acquiredMonitorCursor, omrToJ9MonitorTable, _vm->jclCacheMutex, FALSE, FIXUPREFVM_JCL_CACHE_MUTEX)) {
+		if (!saveAcquiredMonitor(threadCursor, &acquiredMonitorCursor, _vm->jclCacheMutex, FALSE, FIXUPREFVM_JCL_CACHE_MUTEX)) {
 			success = false;
 			goto done;
 		}
-		if (!saveAcquiredMonitor(threadCursor, &acquiredMonitorCursor, omrToJ9MonitorTable, _vm->constantDynamicMutex, FALSE, FIXUPREFVM_CONSTANT_DYNAMIC_MUTEX)) { /* Java 11 */
+		if (!saveAcquiredMonitor(threadCursor, &acquiredMonitorCursor, _vm->constantDynamicMutex, FALSE, FIXUPREFVM_CONSTANT_DYNAMIC_MUTEX)) { /* Java 11 */
 			success = false;
 			goto done;
 		}
@@ -1230,7 +1100,7 @@ VMSnapshotImpl::saveThreadsAndMonitors(void)
 
 				/* objectMonitor will be NULL if deflated. */
 				if (objectMonitor) {
-					if (!saveAcquiredMonitor(threadCursor, &acquiredMonitorCursor, omrToJ9MonitorTable, objectMonitor->monitor, TRUE, (UDATA)info[i].object)) {
+					if (!saveAcquiredMonitor(threadCursor, &acquiredMonitorCursor, objectMonitor->monitor, TRUE, (UDATA)info[i].object)) {
 						success = false;
 						j9mem_free_memory(info);
 						goto done;
@@ -1273,23 +1143,7 @@ VMSnapshotImpl::saveThreadsAndMonitors(void)
 
 	Trc_VM_Snapshot_TotalSavedMonitors(_acquiredMonitorHeader->numOfAcquiredMonitors);
 
-	/* Save information about threads that are waiting on a monitor. Only save pre-recorded monitors since threads may be
-	 * saving gc or other monitors we don't care about persisting.
-	 */
-	threadCursor = _vm->mainThread;
-	do {
-		if (!saveThreadWaitingData(threadCursor, &waitingThreadCursor, omrToJ9MonitorTable)) {
-			success = false;
-			goto done;
-		}
-		threadCursor = threadCursor->linkNext;
-	} while (threadCursor != _vm->mainThread);
-
-	Trc_VM_Snapshot_TotalSavedWaitingThreads(_acquiredMonitorHeader->numOfWaitingThreads);
-
 done:
-	hashTableFree(omrToJ9MonitorTable);
-hashInitError:
 	return success;
 }
 
@@ -1436,13 +1290,6 @@ VMSnapshotImpl::writeImageToFile(J9VMThread *currentThread)
 	currentFileOffset += bytesWritten;
 	bytesWritten = omrfile_write(fileDescriptor, (void *)_acquiredMonitors, sizeof(J9AcquiredMonitor) * MAX_NUM_ALLOCATED_MONITORS);
 	if ((MAX_NUM_ALLOCATED_MONITORS * sizeof(J9AcquiredMonitor)) != bytesWritten) {
-		rc = false;
-		goto done;
-	}
-
-	currentFileOffset += bytesWritten;
-	bytesWritten = omrfile_write(fileDescriptor, (void *)_waitingThreads, sizeof(J9WaitingThread) * MAX_NUM_WAITING_THREADS);
-	if ((MAX_NUM_ALLOCATED_MONITORS * sizeof(J9WaitingThread)) != bytesWritten) {
 		rc = false;
 		goto done;
 	}
@@ -1733,46 +1580,7 @@ done:
 }
 
 /**
- * Restore stack of thread waiting on an object-monitor to run "monitorenter" bytecode when 
- * resumed. At this point the monitor should already be acquired by its owner thread.
- * 
- * @param thread
- * @param objectMonitor
- * 
- * @return true if successful, else false
- */
-bool
-VMSnapshotImpl::restoreThreadWaitingOnObjectMonitor_Stack(J9VMThread* thread, j9object_t objectMonitor)
-{
-	bool rc = true;
-
-	// TODO adjust frame to rerun "monitorenter" byte code
-
-	return rc;
-}
-
-/**
- * Restore thread to a state where it can wait on a monitor when thread execution is resumed.
- * 
- * @param waitingThread
- * 
- * @return true if successful, else false
- */
-bool
-VMSnapshotImpl::restoreWaitingThread(J9WaitingThread *waitingThread)
-{
-	bool rc = true;
-	J9VMThread* thread = (J9VMThread*)(waitingThread->waitingVMThreadAddress);
-
-	if (waitingThread->isObjectMonitor) {
-		rc = restoreThreadWaitingOnObjectMonitor_Stack(thread, (j9object_t)(waitingThread->fixupReference));
-	} /* TODO eventually will need a case for system monitors */
-
-	return rc;
-}
-
-/**
- * Restore the state of acquired monitors and threads waiting to acquire monitors.
+ * Restore the state of acquired monitors.
  * 
  * @return true if successful, else false
  */
@@ -1860,18 +1668,6 @@ VMSnapshotImpl::restoreMonitors(void)
 		if (monitorCount > 0) {
 			printf("ERROR: somehow not all monitors were restored\n");
 			rc = false;
-		}
-	}
-
-	/* After all monitors have been fixed up and reaquire fixup threads that should be waiting on a monitor. */
-	if (_acquiredMonitorHeader->numOfWaitingThreads > 0) {
-		J9WaitingThread* waitingThreadData = _waitingThreads;
-		for (UDATA i = 0; i < _acquiredMonitorHeader->numOfWaitingThreads; i++) {
-			rc = restoreWaitingThread(waitingThreadData);
-			if (false == rc) {
-				goto done;
-			}
-			waitingThreadData = waitingThreadData + 1;
 		}
 	}
 

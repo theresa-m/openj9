@@ -51,23 +51,8 @@ typedef struct J9AcquiredMonitor {
 	UDATA ownerVmThreadAddress;
 } J9AcquiredMonitor;
 
-/**
- * Information to restore thread waiting to acquire a monitor.
- * 
- * Fields:
- * waitingVMThreadAddress - J9VMThread address of monitor waiting on a mutex
- * isObjectMonitor - true for object monitor, false for system monitor
- * fixupReference - if object-monitor this will be the address of j9object_t, else the ID for vm fixup
- */
-typedef struct J9WaitingThread {
-	UDATA waitingVMThreadAddress;
-	UDATA isObjectMonitor;
-	UDATA fixupReference;
-} J9WaitingThread;
-
 typedef struct J9AcquiredMonitorHeader {
 	UDATA numOfAcquiredMonitors;
-	UDATA numOfWaitingThreads;
 } J9AcquiredMonitorHeader;
 
 /**
@@ -160,8 +145,6 @@ typedef struct J9SnapshotHeader {
  *  AcquiredMonitorsHeader
  * --------------------
  *  AcquiredMonitors data
- * --------------------
- *  J9WaitingThread data
  * --------------------
  *   MemoryRegion header
  * --------------------
