@@ -1659,19 +1659,6 @@ VMSnapshotImpl::restoreMonitors(void)
 		/* Restore object monitors. This should be done one thread at a time in the same order in which they were saved. */
 		threadCursor = _vm->mainThread;
 		do {
-			/* Fixup vmMonitorLookupCache - omrthread_monitor_t mutex in J9ObjectMonitor will not have been persisted */
-			// TODO other options for this is to throw away the cache and start over or don't fix up until monitor_enter is called
-			for (UDATA i = 0; i < J9VM_OBJECT_MONITOR_CACHE_SIZE; i++) {
-				j9objectmonitor_t cacheEntry = threadCursor->objectMonitorLookupCache[i];
-				if (0 != cacheEntry) {
-					J9ObjectMonitor* objectMonitor = (J9ObjectMonitor*) ((UDATA) cacheEntry);
-					if (0 != omrthread_monitor_init_with_name(&(objectMonitor->monitor), J9THREAD_MONITOR_OBJECT, NULL)) {
-						rc = false;
-						goto done;
-					}
-				}
-			}
-
 			infoLen = vmFuncs->getOwnedObjectMonitors(threadCursor, threadCursor, NULL, 0);
 			if (infoLen > 0) {
 				PORT_ACCESS_FROM_PORT(_portLibrary);
@@ -1863,6 +1850,19 @@ initRestoreThreads(void *vmSnapshotImpl, J9JavaVM *vm, omrthread_t mainOSThread)
 			/* on Linux this is done by the new thread when it starts running */
 			omrthread_set_name(restoreOSThread, threadName);
 		#endif
+
+			/* Fixup objectMonitorLookupCache - omrthread_monitor_t mutex in J9ObjectMonitor will not have been persisted */
+			for (UDATA i = 0; i < J9VM_OBJECT_MONITOR_CACHE_SIZE; i++) {
+				j9objectmonitor_t cacheEntry = restoreThread->objectMonitorLookupCache[i];
+				if (0 != cacheEntry) {
+					J9ObjectMonitor* objectMonitor = (J9ObjectMonitor*) ((UDATA) cacheEntry);
+					printf("om is: %p\n", objectMonitor);
+					if (J9_LOCK_IS_INFLATED(objectMonitor->alternateLockword)) {
+						printf("om is inflated\n");
+
+					}
+				}
+			}
 		}
 
 		restoreThread = restoreThread->linkNext;
