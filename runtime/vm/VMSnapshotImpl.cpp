@@ -1714,8 +1714,10 @@ restoreSystemMonitorWaiting(J9VMThread* vmThread) {
 		switch(fixupId) {
 		case FIXUPREFVM_UNSAFE_MEMORY_TRACKING_MUTEX:
 			omrthread_monitor_enter(vm->unsafeMemoryTrackingMutex);
+			break;
 		case FIXUPREFVM_VERBOSE_STATE_MUTEX:
 			omrthread_monitor_enter(vm->verboseStateMutex);
+			break;
 		case FIXUPREFVM_JCL_CACHE_MUTEX:
 			omrthread_monitor_enter(vm->jclCacheMutex);
 		case FIXUPREFVM_CONSTANT_DYNAMIC_MUTEX:
