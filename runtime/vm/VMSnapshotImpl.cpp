@@ -1142,7 +1142,7 @@ VMSnapshotImpl::saveThreadsAndMonitors(void)
 				J9ObjectMonitor *objectMonitor = monitorTablePeek(_vm, info[i].object);
 
 				/* objectMonitor will be NULL if deflated. */
-				if (NULL == objectMonitor) {
+				if (NULL != objectMonitor) {
 					if (!saveAcquiredMonitor(threadCursor, &acquiredMonitorCursor, objectMonitor->monitor, TRUE, (UDATA)info[i].object)) {
 						success = false;
 						j9mem_free_memory(info);
