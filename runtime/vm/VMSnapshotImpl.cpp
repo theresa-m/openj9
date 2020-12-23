@@ -1178,6 +1178,13 @@ VMSnapshotImpl::saveThreadsAndMonitors(void)
 			 * Creating a copy of this large structure will impact footprint.
 			 */
 			memcpy(&(threadCursor->restoreEls), threadCursor->entryLocalStorage, sizeof(J9VMEntryLocalStorage));
+
+			/* TODO refresh tlh - here or on restore? */
+			success = threadCursor->javaVM->memoryManagerFunctions->J9RefreshTLH(threadCursor);
+			if (false == success) {
+				printf("Snapshot TLH refresh was unsuccessful\n");
+				goto done;
+			}
 		} else {
 			Trc_VM_Snapshot_NotPersistingThread(threadCursor);
 		}
@@ -1756,6 +1763,13 @@ procRestoreThreadState(void* arg)
 			VM_OutOfLineINL_Helpers::restoreSpecialStackFrameLeavingArgs(vmThread, vmThread->arg0EA);
 		}
 	}
+
+	/* refresh TLH - TODO does this need to be done in snapshot stage? */
+	//Assert_VM_true(vmThread->javaVM->memoryManagerFunctions->J9RefreshTLH(vmThread));
+	//bool success = vmThread->javaVM->memoryManagerFunctions->J9RefreshTLH(vmThread);
+	//if (false == success) {
+	//	printf("Restore TLH refresh was unsuccessful\n");
+	//}
 
 	/* if thread is waiting to acquire a vm monitor stat waiting here. */
 	restoreSystemMonitorWaiting(vmThread);
