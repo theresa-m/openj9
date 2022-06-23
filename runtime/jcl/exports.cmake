@@ -429,6 +429,10 @@ omr_add_exports(jclse
 	Java_sun_reflect_ConstantPool_getSize0
 	Java_sun_reflect_ConstantPool_getStringAt0
 	Java_sun_reflect_ConstantPool_getUTF8At0
+
+	Java_com_ibm_oti_vm_VM_LUDCLMarkFrame
+	Java_com_ibm_oti_vm_VM_LUDCLUnmarkFrameImpl
+	Java_com_ibm_oti_vm_VM_getLUDCL
 )
 
 if(JAVA_SPEC_VERSION LESS 17)

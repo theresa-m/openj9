@@ -246,6 +246,32 @@ static UDATA latestUserDefinedLoaderIterator(J9VMThread * currentThread, J9Stack
 	return J9_STACKWALK_KEEP_ITERATING;
 }
 
+jlong JNICALL
+Java_com_ibm_oti_vm_VM_getStackMarker(JNIEnv *env, jclass rcv)
+{
+	J9VMThread *vmThread = (J9VMThread *) env;
+	J9JavaVM *vm = vmThread->javaVM;
+	J9InternalVMFunctions *vmfuncs = vm->internalVMFunctions;
+	J9StackWalkState walkState;
+	jlong token = 0 ;
+
+	walkState.walkThread = vmThread;
+	walkState.skipCount = 2;
+	walkState.maxFrames = 2;
+	walkState.flags = J9_STACKWALK_VISIBLE_ONLY | J9_STACKWALK_COUNT_SPECIFIED | J9_STACKWALK_INCLUDE_NATIVES;
+	walkState.userData1 = NULL;
+
+	vmfuncs->internalEnterVMFromJNI(vmThread);
+	vm->walkStackFrames(vmThread, &walkState);
+	vmfuncs->internalExitVMToJNI(vmThread);
+
+	token = (vmThread->stackObject->end - walkState.bp) << 32 
+	token |= walkState.inlineDepth
+
+
+	return token;
+}
+
 /**
  * Walk the stackframes from the TOS and find the latest user-defined class loader.
  * This will terminate the walk early if it detects a "marked" frame.
@@ -273,3 +299,36 @@ Java_com_ibm_oti_vm_ORBVMHelpers_LatestUserDefinedLoader(JNIEnv *env, jclass rcv
 	return result;
 }
 
+
+jobject JNICALL
+Java_com_ibm_oti_vm_VM_getLUDCL(JNIEnv *env, jclass rcv, jlong token)
+{
+	J9VMThread * vmThread = (J9VMThread *) env;
+	J9JavaVM * vm = vmThread->javaVM;
+	J9StackWalkState walkState;
+	jobject result;
+	
+	/* temprarily overwrite the LUDCL vars in the thread */
+	U_32 savedInlineDepth = thread->ludclInlineDepth;
+	U_32 savedBPOffset = thread->ludclBPOffset;
+
+	thread->ludclInlineDepth = (U_32) token;
+	thread->savedBPOffset = (U_32) (token >> 32);
+
+
+	walkState.walkThread = vmThread;
+	walkState.skipCount = 0;
+	walkState.flags = J9_STACKWALK_VISIBLE_ONLY | J9_STACKWALK_ITERATE_FRAMES | J9_STACKWALK_INCLUDE_NATIVES;
+	walkState.userData1 = NULL;
+	walkState.frameWalkFunction = latestUserDefinedLoaderIterator;
+	vm->internalVMFunctions->internalEnterVMFromJNI(vmThread);
+	vm->walkStackFrames(vmThread, &walkState);
+
+	result = vm->internalVMFunctions->j9jni_createLocalRef(env, walkState.userData1);
+
+	thread->ludclInlineDepth = savedInlineDepth;
+	thread->ludclBPOffset = savedBPOffset;
+	vm->internalVMFunctions->internalExitVMToJNI(vmThread);
+
+	return result;
+}

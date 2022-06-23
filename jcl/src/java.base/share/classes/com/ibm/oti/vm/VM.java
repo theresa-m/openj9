@@ -638,6 +638,21 @@ public static Properties internalGetProperties() {
 	return getVMLangAccess().internalGetProperties();
 }
 
+/**
+ * Native method to mark the current frame as the point at which to
+ * terminate the Last User-Defined ClassLoader (LUDCL) search and
+ * always return null.
+ *
+ * The method marks the current frame and returns the values from the
+ * VMThread with the stackOffset encoded in the high 32 bits and the
+ * inlined depth encoded in the low 32 bits.
+ *
+ * It is the caller's responsibility to correctly "stack" these values.
+ * The VMThread will only ever track the "current" values.
+ */
+public static native long getStackMarker();
+public static native ClassLoader getLUDCL(long marker);
+
 /*[IF JFR_SUPPORT]*/
 
 public static native boolean isJFREnabled();
