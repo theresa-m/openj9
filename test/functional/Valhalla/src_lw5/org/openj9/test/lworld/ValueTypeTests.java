@@ -1653,6 +1653,6 @@ public class ValueTypeTests {
 	}
 
 	static void checkObject(Object ...objects) throws Throwable {
-		com.ibm.jvm.Dump.SystemDump();
+		//com.ibm.jvm.Dump.SystemDump();
 	}
 }
