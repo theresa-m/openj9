@@ -52,7 +52,7 @@ extern "C" {
 
 #define LOCAL_INTERFACE_ARRAY_SIZE 10
 
-#define DEFAULLT_NUMBER_OF_ENTRIES_IN_FLATTENED_CLASS_CACHE 8
+#define DEFAULT_NUMBER_OF_ENTRIES_IN_FLATTENED_CLASS_CACHE 8
 
 enum J9ClassFragments {
 	RAM_CLASS_HEADER_FRAGMENT,
@@ -2356,13 +2356,14 @@ nativeOOM:
 		if (J9ROMCLASS_IS_VALUE(romClass)) {
 			classFlags |= J9ClassIsValueType;
 #if defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES)
-			if (J9ROMCLASS_IS_PRIMITIVE_VALUE_TYPE(romClass)) {
+			// TODO implicitcreation support just needs to be redone in general
+			//if (J9ROMCLASS_IS_PRIMITIVE_VALUE_TYPE(romClass)) {
 				UDATA instanceSize = state->ramClass->totalInstanceSize;
-				classFlags |= J9ClassIsPrimitiveValueType;
+				classFlags |= J9ClassIsPrimitiveValueType; // TODO update to a different flag name?
 				if ((instanceSize <= javaVM->valueFlatteningThreshold)
 					&& !J9ROMCLASS_IS_CONTENDED(romClass)
 				) {
-					Trc_VM_CreateRAMClassFromROMClass_valueTypeIsFlattened(vmThread, J9UTF8_LENGTH(className), J9UTF8_DATA(className), state->ramClass);
+					Trc_VM_CreateRAMClassFromROMClass_valueTypeIsFlattened(vmThread, J9UTF8_LENGTH(className), J9UTF8_DATA(className), state->ramClass); /* j9vm.597 */
 					classFlags |= J9ClassIsFlattened;
 				}
 				if (J9_ARE_ALL_BITS_SET(state->valueTypeFlags, J9ClassCanSupportFastSubstitutability)) {
@@ -2376,7 +2377,7 @@ nativeOOM:
 				if (J9_ARE_ALL_BITS_SET(state->valueTypeFlags, J9ClassRequiresPrePadding)) {
 					classFlags |= J9ClassRequiresPrePadding;
 				}
-			}
+			//}
 #endif /* defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES) */
 		}
 #if defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES)
@@ -3550,7 +3551,7 @@ internalCreateRAMClassFromROMClass(J9VMThread *vmThread, J9ClassLoader *classLoa
 	UDATA romFieldCount = romClass->romFieldCount;
 	UDATA valueTypeFlags = 0;
 	UDATA flattenedClassCacheAllocSize = sizeof(J9FlattenedClassCache) + (sizeof(J9FlattenedClassCacheEntry) * romFieldCount);
-	U_8 flattenedClassCacheBuffer[sizeof(J9FlattenedClassCache) + (sizeof(J9FlattenedClassCacheEntry) * DEFAULLT_NUMBER_OF_ENTRIES_IN_FLATTENED_CLASS_CACHE)] = {0};
+	U_8 flattenedClassCacheBuffer[sizeof(J9FlattenedClassCache) + (sizeof(J9FlattenedClassCacheEntry) * DEFAULT_NUMBER_OF_ENTRIES_IN_FLATTENED_CLASS_CACHE)] = {0};
 	J9FlattenedClassCache *flattenedClassCache = (J9FlattenedClassCache *) flattenedClassCacheBuffer;
 	PORT_ACCESS_FROM_VMC(vmThread);
 #endif /* defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES) */
@@ -3663,7 +3664,7 @@ retry:
 		}
 	}
 #if defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES)
-	if (romFieldCount > DEFAULLT_NUMBER_OF_ENTRIES_IN_FLATTENED_CLASS_CACHE) {
+	if (romFieldCount > DEFAULT_NUMBER_OF_ENTRIES_IN_FLATTENED_CLASS_CACHE) {
 		flattenedClassCache = (J9FlattenedClassCache *) j9mem_allocate_memory(flattenedClassCacheAllocSize, J9MEM_CATEGORY_CLASSES);
 		if (NULL == flattenedClassCache) {
 			setNativeOutOfMemoryError(vmThread, 0, 0);
