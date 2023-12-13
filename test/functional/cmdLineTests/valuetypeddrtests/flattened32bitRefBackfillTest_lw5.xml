@@ -94,9 +94,9 @@ SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0-only WITH Classpath-ex
 			<input>!j9object $flatSingleBackfillInstance$</input>
 			<input>quit</input>
 		</command>
-		<output regex="no" type="success" showMatch="yes">l (offset = 4) (ValueLong)</output>
-		<output regex="no" type="success" showMatch="yes">o (offset = 12) (ValueObject)</output>
-		<output regex="no" type="success" showMatch="yes">i (offset = 0) (ValueInt)</output>
+		<output regex="yes" javaUtilPattern="yes" type="success" showMatch="yes">l \(offset = 4\) \(.*ValueLong\)</output>
+		<output regex="yes" javaUtilPattern="yes" type="success" showMatch="yes">o \(offset = 12\) \(.*ValueObject\)</output>
+		<output regex="yes" javaUtilPattern="yes" type="success" showMatch="yes">i \(offset = 0\) \(.*ValueInt\)</output>
 		<output regex="no" type="success" showMatch="yes">// FlatSingleBackfill</output>
 		<output regex="no" type="failure">Problem running command</output>
 	</test>
