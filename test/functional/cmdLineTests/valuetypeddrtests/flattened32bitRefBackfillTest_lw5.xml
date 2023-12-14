@@ -154,7 +154,7 @@ SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0-only WITH Classpath-ex
 			<input>!flatobject $objectBackfillInstance$</input>
 			<input>quit</input>
 		</command>
-		<output regex="no" type="success" showMatch="yes">J j = 0xFAFBFCFD11223344</output>
+		<output regex="no" type="success" showMatch="yes">J l = 0xFAFBFCFD11223344</output>
 		<saveoutput regex="no" type="required" saveName="objectBackfillInstanceO" splitIndex="1" splitBy="= !fj9object " showMatch="yes">Ljava/lang/Object; val = !fj9object 0x</saveoutput>
 		<output regex="no" type="failure">Problem running command</output>
 	</test>
