@@ -131,9 +131,9 @@ SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0-only WITH Classpath-ex
 			<input>!j9object $objectBackfillInstance$</input>
 			<input>quit</input>
 		</command>
-		<output regex="no" type="success" showMatch="yes">l (offset = 4) (ValueLong)</output>
-		<output regex="no" type="success" showMatch="yes">o (offset = 0) (ValueObject)</output>
-		<output regex="no" type="success" showMatch="yes">// FlatObjectBackfill</output>
+		<output regex="yes" javaUtilPattern="yes" type="success" showMatch="yes">l \(offset = 4\) \(.*ValueLong\)</output>
+		<output regex="yes" javaUtilPattern="yes" type="success" showMatch="yes">o \(offset = 0\) \(.*ValueObject\)</output>
+		<output regex="yes" javaUtilPattern="yes" type="success" showMatch="yes">// .*FlatObjectBackfill</output>
 		<output regex="no" type="failure">Problem running command</output>
 	</test>
 
@@ -144,7 +144,7 @@ SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0-only WITH Classpath-ex
 			<input>quit</input>
 		</command>
 		<output regex="no" type="success" showMatch="yes">J j = 0xFAFBFCFD11223344</output>
-		<output regex="no" type="success" showMatch="yes">// ValueLong</output>
+		<output regex="yes" javaUtilPattern="yes" type="success" showMatch="yes">// .*ValueLong</output>
 		<output regex="no" type="failure">Problem running command</output>
 	</test>
 
@@ -175,10 +175,10 @@ SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0-only WITH Classpath-ex
 			<input>!j9object $flatUnAlignedSingleBackfillInstance$</input>
 			<input>quit</input>
 		</command>
-		<output regex="no" type="success" showMatch="yes">l (offset = 4) (ValueLong)</output>
-		<output regex="no" type="success" showMatch="yes">singles (offset = 12) (FlatUnAlignedSingle)</output>
-		<output regex="no" type="success" showMatch="yes">o (offset = 0) (ValueObject)</output>
-		<output regex="no" type="success" showMatch="yes">// FlatUnAlignedSingleBackfill</output>
+		<output regex="yes" javaUtilPattern="yes" type="success" showMatch="yes">l \(offset = 4\) \(.*ValueLong\)</output>
+		<output regex="yes" javaUtilPattern="yes" type="success" showMatch="yes">singles \(offset = 12\) \(.*FlatUnAlignedSingle\)</output>
+		<output regex="yes" javaUtilPattern="yes" type="success" showMatch="yes">o \(offset = 0\) \(.*ValueObject\)</output>
+		<output regex="yes" javaUtilPattern="yes" type="success" showMatch="yes">// .*FlatUnAlignedSingleBackfill</output>
 		<output regex="no" type="failure">Problem running command</output>
 	</test>
 
@@ -249,10 +249,10 @@ SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0-only WITH Classpath-ex
 			<input>!j9object $flatUnAlignedSingleBackfill2Instance$</input>
 			<input>quit</input>
 		</command>
-		<output regex="no" type="success" showMatch="yes">l (offset = 12) (ValueLong)</output>
-		<output regex="no" type="success" showMatch="yes">singles (offset = 0) (FlatUnAlignedSingle)</output>
-		<output regex="no" type="success" showMatch="yes">singles2 (offset = 20) (FlatUnAlignedSingle)</output>
-		<output regex="no" type="success" showMatch="yes">// FlatUnAlignedSingleBackfill2</output>
+		<output regex="yes" javaUtilPattern="yes" type="success" showMatch="yes">l \(offset = 12\) /(.*ValueLong/)</output>
+		<output regex="yes" javaUtilPattern="yes" type="success" showMatch="yes">singles /(offset = 0/) /(.*FlatUnAlignedSingle/)</output>
+		<output regex="yes" javaUtilPattern="yes" type="success" showMatch="yes">singles2 /(offset = 20/) /(.*FlatUnAlignedSingle/)</output>
+		<output regex="yes" javaUtilPattern="yes" type="success" showMatch="yes">// .*FlatUnAlignedSingleBackfill2</output>
 		<output regex="no" type="failure">Problem running command</output>
 	</test>
 
@@ -305,10 +305,10 @@ SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0-only WITH Classpath-ex
 			<input>!j9object $flatUnAlignedObjectBackfill2Instance$</input>
 			<input>quit</input>
 		</command>
-		<output regex="no" type="success" showMatch="yes">o (offset = 0) (ValueObject)</output>
-		<output regex="no" type="success" showMatch="yes">objects (offset = 12) (FlatUnAlignedObject)</output>
-		<output regex="no" type="success" showMatch="yes">l (offset = 4) (ValueLong)</output>
-		<output regex="no" type="success" showMatch="yes">// FlatUnAlignedObjectBackfill2</output>
+		<output regex="yes" javaUtilPattern="yes" type="success" showMatch="yes">o \(offset = 0\) \(.*ValueObject\)</output>
+		<output regex="yes" javaUtilPattern="yes" type="success" showMatch="yes">objects \(offset = 12\) \(.*FlatUnAlignedObject\)</output>
+		<output regex="yes" javaUtilPattern="yes" type="success" showMatch="yes">l \(offset = 4\) \(.*ValueLong\)</output>
+		<output regex="yes" javaUtilPattern="yes" type="success" showMatch="yes">// .*FlatUnAlignedObjectBackfill2</output>
 		<output regex="no" type="failure">Problem running command</output>
 	</test>
 
@@ -332,10 +332,10 @@ SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0-only WITH Classpath-ex
 			<input>!j9object $singleBackfillInstance$</input>
 			<input>quit</input>
 		</command>
-		<output regex="no" type="success" showMatch="yes">J l = 0xFAFBFCFD11223344 (offset = 4) (SingleBackfill)</output>
-		<output regex="no" type="success" showMatch="yes">(offset = 12) (SingleBackfill)</output>
-		<output regex="no" type="success" showMatch="yes">I i = 0x12123434 (offset = 0) (SingleBackfill)</output>
-		<output regex="no" type="success" showMatch="yes">// SingleBackfill</output>
+		<output regex="yes" javaUtilPattern="yes" type="success" showMatch="yes">J l = 0xFAFBFCFD11223344 \(offset = 4\) \(.*SingleBackfill\)</output>
+		<output regex="yes" javaUtilPattern="yes" type="success" showMatch="yes">\(offset = 12\) \(.*SingleBackfill\)</output>
+		<output regex="yes" javaUtilPattern="yes" type="success" showMatch="yes">I i = 0x12123434 \(offset = 0\) \(.*SingleBackfill\)</output>
+		<output regex="yes" javaUtilPattern="yes" type="success" showMatch="yes">// .*SingleBackfill</output>
 		<output regex="no" type="failure">Problem running command</output>
 	</test>
 
@@ -368,8 +368,8 @@ SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0-only WITH Classpath-ex
 			<input>!j9object $objectBackfillInstance2$</input>
 			<input>quit</input>
 		</command>
-		<output regex="no" type="success" showMatch="yes">J l = 0xFAFBFCFD11223344 (offset = 4) (ObjectBackfill)</output>
-		<output regex="no" type="success" showMatch="yes">// ObjectBackfill</output>
+		<output regex="yes" javaUtilPattern="yes" type="success" showMatch="yes">J l = 0xFAFBFCFD11223344 \(offset = 4\) \(.*ObjectBackfill\)</output>
+		<output regex="yes" javaUtilPattern="yes" type="success" showMatch="yes">// .*ObjectBackfill</output>
 		<output regex="no" type="failure">Problem running command</output>
 	</test>
 

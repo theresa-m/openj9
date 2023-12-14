@@ -166,7 +166,7 @@
 		<output regex="yes" javaUtilPattern="yes" type="required" showMatch="yes">Point2D st (.)*[\n\r](.)*I x = 0xFFEEFFEE[\n\r](.)*I y = 0xAABBAABB</output>
 		<output regex="yes" javaUtilPattern="yes" type="required" showMatch="yes">Point2D en (.)*[\n\r](.)*I x = 0xCCDDCCDD[\n\r](.)*I y = 0x33443344</output>
 		<output regex="yes" javaUtilPattern="yes" type="required" showMatch="yes">ValueInt i (.)* \(offset = 72\)[\n\r](.)*I i = 0x12123434</output>
-		<output regex="yes" javaUtilPattern="yes" type="required" showMatch="yes">ValueFloat f (.)* \(offset = 80\)[\n\r](.)*F f = 0x7F7FFFFF</output>
+		<output regex="yes" javaUtilPattern="yes" type="required" showMatch="yes">ValueFloat f (.)* \(offset = 76\)[\n\r](.)*F f = 0x7F7FFFFF</output>
 		<output regex="no" type="failure">Problem running command</output>
 	</test>
 
