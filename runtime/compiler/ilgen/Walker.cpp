@@ -4977,6 +4977,8 @@ TR_J9ByteCodeIlGenerator::loadInstance(TR::SymbolReference * symRef)
    TR::ILOpCodes op = _generateReadBarriersForFieldWatch ? comp()->il.opCodeForIndirectReadBarrier(type): comp()->il.opCodeForIndirectLoad(type);
    dummyLoad = load = TR::Node::createWithSymRef(op, 1, 1, address, symRef);
 
+   printf("MER:%d\n", !address->isNonNull());
+
    if (symRef->isUnresolved())
       {
       if (!address->isNonNull())
@@ -7239,6 +7241,7 @@ TR_J9ByteCodeIlGenerator::storeFlattenableInstance(int32_t cpIndex)
          push(address);
          push(value);
 
+         printf("MER:loadInstance\n");
          loadInstance(loadFieldSymRef);
          storeInstance(fieldSymRef);
          }
