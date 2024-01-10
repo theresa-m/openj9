@@ -6978,14 +6978,14 @@ TR_J9ByteCodeIlGenerator::storeInstance(int32_t cpIndex)
          }
       else if (owningMethod->isFieldFlattened(comp(), cpIndex, false /* isStatic */))
          {
-            printf("MER:isflattened\n");
+            printf("MER:isflattened\n"); // failing case goes through here
          return comp()->getOption(TR_UseFlattenedFieldRuntimeHelpers) ?
                   storeFlattenableInstanceWithHelper(cpIndex) :
                   storeFlattenableInstance(cpIndex);
          }
       else
          {
-            printf("MER:else\n");
+            printf("MER:else\n"); // old case goes through here
          TR::Node *value = pop();
          if (comp()->getOption(TR_TraceILGen))
             {

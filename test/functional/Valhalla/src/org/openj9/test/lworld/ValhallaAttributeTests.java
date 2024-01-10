@@ -166,6 +166,19 @@ public class ValhallaAttributeTests {
 		testPutFieldNullToNullRestrictedFieldClass.newInstance();
 	}
 
+	static public Class<?> testOld = null;
+
+	@Test(priority=1)
+	static public void testCreateOld() throws Throwable {
+		testOld = ValhallaAttributeGenerator.generatePutFieldNullToFieldOld("TestOld", "TestOldField");
+	}
+
+	/* Instance field with NullRestricted attribute cannot be set to null. */
+	@Test(priority=2, invocationCount=2, expectedExceptions = java.lang.NullPointerException.class)
+	static public void testOld() throws Throwable {
+		testOld.newInstance();
+	}
+
 	// @Test(priority=1)
 	// static public void testCreateTestPutStaticNullToNullRestrictedField() throws Throwable {
 	// 	testPutStaticNullToNullRestrictedFieldClass = ValhallaAttributeGenerator.generatePutStaticNullToNullRestrictedField("TestPutStaticNullToNullRestrictedField", "TestPutStaticNullToNullRestrictedFieldField");
