@@ -4963,11 +4963,11 @@ TR_J9ByteCodeIlGenerator::loadInstance(int32_t cpIndex)
       }
 
    TR::SymbolReference * symRef = symRefTab()->findOrCreateShadowSymbol(_methodSymbol, cpIndex, false);
-   loadInstance(symRef);
+   loadInstance(symRef, false);
    }
 
 void
-TR_J9ByteCodeIlGenerator::loadInstance(TR::SymbolReference * symRef)
+TR_J9ByteCodeIlGenerator::loadInstance(TR::SymbolReference * symRef, bool ismer)
    {
    TR::Symbol * symbol = symRef->getSymbol();
    TR::DataType type = symbol->getDataType();
@@ -4977,7 +4977,9 @@ TR_J9ByteCodeIlGenerator::loadInstance(TR::SymbolReference * symRef)
    TR::ILOpCodes op = _generateReadBarriersForFieldWatch ? comp()->il.opCodeForIndirectReadBarrier(type): comp()->il.opCodeForIndirectLoad(type);
    dummyLoad = load = TR::Node::createWithSymRef(op, 1, 1, address, symRef);
 
+   if (ismer) {
    printf("MER:%d\n", !address->isNonNull());
+   }
 
    if (symRef->isUnresolved())
       {
@@ -5152,7 +5154,7 @@ TR_J9ByteCodeIlGenerator::loadFlattenableInstance(int32_t cpIndex)
             }
 
          push(address);
-         loadInstance(fieldSymRef);
+         loadInstance(fieldSymRef, false);
 
          flattenedFieldCount++;
          }
@@ -7242,7 +7244,7 @@ TR_J9ByteCodeIlGenerator::storeFlattenableInstance(int32_t cpIndex)
          push(value);
 
          printf("MER:loadInstance\n");
-         loadInstance(loadFieldSymRef);
+         loadInstance(loadFieldSymRef, true);
          storeInstance(fieldSymRef);
          }
       }

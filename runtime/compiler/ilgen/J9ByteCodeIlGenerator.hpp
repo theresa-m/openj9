@@ -177,7 +177,7 @@ private:
    // GenLoadStore
    //
    void         loadInstance(int32_t);
-   void         loadInstance(TR::SymbolReference *);
+   void         loadInstance(TR::SymbolReference *, bool);
    void         loadFlattenableInstance(int32_t);
    void         loadFlattenableInstanceWithHelper(int32_t cpIndex);
    void         loadStatic(int32_t);
