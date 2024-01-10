@@ -7144,8 +7144,10 @@ TR_J9ByteCodeIlGenerator::storeInstance(TR::SymbolReference * symRef)
 void
 TR_J9ByteCodeIlGenerator::storeFlattenableInstanceWithHelper(int32_t cpIndex)
    {
+      printf("MER:storeFlattenableInstanceWithHelper\n");
    TR::Node * value = pop();
    TR::Node * address = pop();
+   printf("MER:!address->isNonNull()\n");
    if (!address->isNonNull())
       {
       auto* nullchk = TR::Node::create(TR::PassThrough, 1, address);
@@ -7199,6 +7201,7 @@ TR_J9ByteCodeIlGenerator::storeFlattenableInstance(int32_t cpIndex)
     * n8n      (  2)    ==>iloadi
     * ---- stack after: empty -----------------
     */
+   printf("MER:storeFlattenableInstance\n");
    TR_ResolvedJ9Method * owningMethod = static_cast<TR_ResolvedJ9Method*>(_methodSymbol->getResolvedMethod());
 
    int32_t prefixLen = 0;
