@@ -6265,7 +6265,7 @@ TR_J9ByteCodeIlGenerator::genWithField(TR::SymbolReference * symRef, TR_OpaqueCl
                                                                      fieldEntry._typeSignature
                                                                      );
          push(originalObject);
-         loadInstance(fieldSymRef);
+         loadInstance(fieldSymRef, false);
          }
       }
 
@@ -6422,7 +6422,7 @@ TR_J9ByteCodeIlGenerator::genFlattenableWithField(int32_t fieldCpIndex, TR_Opaqu
                }
 
             push(newFieldValue);
-            loadInstance(newFieldValueSymRef);
+            loadInstance(newFieldValueSymRef, false);
             }
          else
             {
@@ -6436,7 +6436,7 @@ TR_J9ByteCodeIlGenerator::genFlattenableWithField(int32_t fieldCpIndex, TR_Opaqu
                                                                         fieldEntry._typeSignature
                                                                         );
             push(originalObject);
-            loadInstance(fieldSymRef);
+            loadInstance(fieldSymRef, false);
             }
          }
 
