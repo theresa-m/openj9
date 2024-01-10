@@ -167,7 +167,7 @@ public class ValhallaAttributeGenerator extends ClassLoader {
 		String fieldName = "field";
 
 		/* Generate field class - value class with ImplicitCreation attribute and ACC_DEFAULT flag set.  */
-		byte[] fieldClassBytes = generateClass(fieldClassName, ACC_PUBLIC + ACC_FINAL + ValhallaUtils.ACC_VALUE_TYPE + ValhallaUtils.ACC_PRIMITIVE);
+		byte[] fieldClassBytes = generateClass(fieldClassName, ACC_PUBLIC + ACC_FINAL + ValhallaUtils.ACC_VALUE_TYPE + ValhallaUtils.ACC_PRIMITIVE, null);
 		Class<?> fieldClass = generator.defineClass(fieldClassName, fieldClassBytes, 0, fieldClassBytes.length);
 
 		ClassWriter classWriter = new ClassWriter(0);
