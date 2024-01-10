@@ -7217,7 +7217,7 @@ printf("MER:gottohere2\n");
    int len;
    const char *fieldClassChars = owningMethod->fieldSignatureChars(cpIndex, len);
    TR_OpaqueClassBlock * fieldClass = fej9()->getClassFromSignature(fieldClassChars, len, owningMethod);
-   printf("MER:gottohere3\n");
+   printf("MER:fieldCount is %d\n", fieldCount);
    for (size_t idx = 0; idx < fieldCount; idx++)
       {
          printf("MER:infor\n");
