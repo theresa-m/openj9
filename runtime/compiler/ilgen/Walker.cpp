@@ -7206,18 +7206,18 @@ TR_J9ByteCodeIlGenerator::storeFlattenableInstance(int32_t cpIndex)
 
    int32_t prefixLen = 0;
    char * fieldNamePrefix = getTopLevelPrefixForFlattenedFields(owningMethod, cpIndex, prefixLen, comp()->trMemory()->currentStackRegion());
-
+printf("MER:gottohere1\n");
    TR_OpaqueClassBlock * containingClass = owningMethod->definingClassFromCPFieldRef(comp(), cpIndex, _methodSymbol->isStatic());
    const TR::TypeLayout *containingClassLayout = comp()->typeLayout(containingClass);
    size_t fieldCount = containingClassLayout->count();
-
+printf("MER:gottohere2\n");
    TR::Node * value = pop();
    TR::Node * address = pop();
 
    int len;
    const char *fieldClassChars = owningMethod->fieldSignatureChars(cpIndex, len);
    TR_OpaqueClassBlock * fieldClass = fej9()->getClassFromSignature(fieldClassChars, len, owningMethod);
-
+   printf("MER:gottohere3\n");
    for (size_t idx = 0; idx < fieldCount; idx++)
       {
          printf("MER:infor\n");
