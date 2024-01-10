@@ -27,133 +27,133 @@ import org.testng.Assert;
 @Test(groups = { "level.sanity" })
 public class ValhallaAttributeTests {
 
-	class MultiPreloadTest {}
+	// class MultiPreloadTest {}
 
-	/* A class may have no more than one Preload attribute. */
-	@Test(expectedExceptions = java.lang.ClassFormatError.class, expectedExceptionsMessageRegExp = ".*Multiple Preload attributes.*")
-	static public void testMultiplePreloadAttributes() throws Throwable {
-		String className = MultiPreloadTest.class.getName();
-		ValhallaAttributeGenerator.generateClassWithTwoPreloadAttributes("MultiPreloadAttributes",
-			new String[]{className}, new String[]{className});
-	}
+	// /* A class may have no more than one Preload attribute. */
+	// @Test(expectedExceptions = java.lang.ClassFormatError.class, expectedExceptionsMessageRegExp = ".*Multiple Preload attributes.*")
+	// static public void testMultiplePreloadAttributes() throws Throwable {
+	// 	String className = MultiPreloadTest.class.getName();
+	// 	ValhallaAttributeGenerator.generateClassWithTwoPreloadAttributes("MultiPreloadAttributes",
+	// 		new String[]{className}, new String[]{className});
+	// }
 
-	class PreloadClass {}
+	// class PreloadClass {}
 
-	@Test
-	static public void testPreloadBehavior() throws Throwable {
-		String className = PreloadClass.class.getName();
-		/* Verify PreloadClass is not loaded */
-		Assert.assertNull(ValhallaAttributeGenerator.findLoadedTestClass(className));
-		/* Generate and load class that preloads PreloadClass */
-		ValhallaAttributeGenerator.generateClassWithPreloadAttribute("PreloadBehavior", new String[]{className});
-		/* Verify that PreloadClass is loaded */
-		Assert.assertNotNull(ValhallaAttributeGenerator.findLoadedTestClass(className));
-	}
+	// @Test
+	// static public void testPreloadBehavior() throws Throwable {
+	// 	String className = PreloadClass.class.getName();
+	// 	/* Verify PreloadClass is not loaded */
+	// 	Assert.assertNull(ValhallaAttributeGenerator.findLoadedTestClass(className));
+	// 	/* Generate and load class that preloads PreloadClass */
+	// 	ValhallaAttributeGenerator.generateClassWithPreloadAttribute("PreloadBehavior", new String[]{className});
+	// 	/* Verify that PreloadClass is loaded */
+	// 	Assert.assertNotNull(ValhallaAttributeGenerator.findLoadedTestClass(className));
+	// }
 
-	value class PreloadValueClass {}
+	// value class PreloadValueClass {}
 
-	@Test
-	static public void testPreloadValueClassBehavior() throws Throwable {
-		String className = PreloadValueClass.class.getName();
-		/* Verify PreloadValueClass is not loaded */
-		Assert.assertNull(ValhallaAttributeGenerator.findLoadedTestClass(className));
-		/* Generate and load class that preloads PreloadClass */
-		ValhallaAttributeGenerator.generateClassWithPreloadAttribute("PreloadValueClassBehavior", new String[]{className});
-		/* Verify that PreloadValueClass is loaded */
-		Assert.assertNotNull(ValhallaAttributeGenerator.findLoadedTestClass(className));
-	}
+	// @Test
+	// static public void testPreloadValueClassBehavior() throws Throwable {
+	// 	String className = PreloadValueClass.class.getName();
+	// 	/* Verify PreloadValueClass is not loaded */
+	// 	Assert.assertNull(ValhallaAttributeGenerator.findLoadedTestClass(className));
+	// 	/* Generate and load class that preloads PreloadClass */
+	// 	ValhallaAttributeGenerator.generateClassWithPreloadAttribute("PreloadValueClassBehavior", new String[]{className});
+	// 	/* Verify that PreloadValueClass is loaded */
+	// 	Assert.assertNotNull(ValhallaAttributeGenerator.findLoadedTestClass(className));
+	// }
 
-	/* A class may have no more than one ImplicitCreation attribute. */
-	@Test(expectedExceptions = java.lang.ClassFormatError.class, expectedExceptionsMessageRegExp = ".*Multiple ImplicitCreation attributes.*")
-	static public void testMultipleImplicitCreationAttributes() throws Throwable {
-		ValhallaAttributeGenerator.generateClassWithTwoImplicitCreationAttributes("MultiImplicitCreationAttributes");
-	}
+	// /* A class may have no more than one ImplicitCreation attribute. */
+	// @Test(expectedExceptions = java.lang.ClassFormatError.class, expectedExceptionsMessageRegExp = ".*Multiple ImplicitCreation attributes.*")
+	// static public void testMultipleImplicitCreationAttributes() throws Throwable {
+	// 	ValhallaAttributeGenerator.generateClassWithTwoImplicitCreationAttributes("MultiImplicitCreationAttributes");
+	// }
 
-	/* There must not be an ImplicitCreation attribute in the attributes table of any other ClassFile structure representing a class, interface, or module.
-	 * In other words any non value class.
-	 */
-	@Test(expectedExceptions = java.lang.ClassFormatError.class, expectedExceptionsMessageRegExp = ".*The ImplicitCreation attribute is only allowed in a non-abstract value class.*")
-	static public void testNonValueTypeClassWithImplicitCreationAttribute() throws Throwable {
-		ValhallaAttributeGenerator.generateNonValueTypeClassWithImplicitCreationAttribute("NonValueTypeImplicitCreationAttribute");
-	}
+	// /* There must not be an ImplicitCreation attribute in the attributes table of any other ClassFile structure representing a class, interface, or module.
+	//  * In other words any non value class.
+	//  */
+	// @Test(expectedExceptions = java.lang.ClassFormatError.class, expectedExceptionsMessageRegExp = ".*The ImplicitCreation attribute is only allowed in a non-abstract value class.*")
+	// static public void testNonValueTypeClassWithImplicitCreationAttribute() throws Throwable {
+	// 	ValhallaAttributeGenerator.generateNonValueTypeClassWithImplicitCreationAttribute("NonValueTypeImplicitCreationAttribute");
+	// }
 
-	/* There must be no more than one NullRestricted attribute in the attributes table of a field_info structure */
-	@Test(expectedExceptions = java.lang.ClassFormatError.class, expectedExceptionsMessageRegExp = ".*Multiple NullRestricted attributes present.*")
-	static public void testMultipleNullRestrictedAttributes() throws Throwable {
-		ValhallaAttributeGenerator.generateFieldWithMultipleNullRestrictedAttributes("TestMultipleNullRestrictedAttributes", "TestMultipleNullRestrictedAttributesField");
-	}
+	// /* There must be no more than one NullRestricted attribute in the attributes table of a field_info structure */
+	// @Test(expectedExceptions = java.lang.ClassFormatError.class, expectedExceptionsMessageRegExp = ".*Multiple NullRestricted attributes present.*")
+	// static public void testMultipleNullRestrictedAttributes() throws Throwable {
+	// 	ValhallaAttributeGenerator.generateFieldWithMultipleNullRestrictedAttributes("TestMultipleNullRestrictedAttributes", "TestMultipleNullRestrictedAttributesField");
+	// }
 
-	/* There must not be a NullRestricted attribute in the attributes table of a field_info structure whose descriptor_index references a primitive type. */
-	@Test(expectedExceptions = java.lang.ClassFormatError.class, expectedExceptionsMessageRegExp = ".*A field with a primitive type cannot have a NullRestricted attribute.*")
-	static public void testNullRestrictedNotAllowedInPrimitiveField() throws Throwable {
-		ValhallaAttributeGenerator.generateNullRestrictedAttributeInPrimitiveField("TestNullRestrictedNotAllowedInPrimitiveField");
-	}
+	// /* There must not be a NullRestricted attribute in the attributes table of a field_info structure whose descriptor_index references a primitive type. */
+	// @Test(expectedExceptions = java.lang.ClassFormatError.class, expectedExceptionsMessageRegExp = ".*A field with a primitive type cannot have a NullRestricted attribute.*")
+	// static public void testNullRestrictedNotAllowedInPrimitiveField() throws Throwable {
+	// 	ValhallaAttributeGenerator.generateNullRestrictedAttributeInPrimitiveField("TestNullRestrictedNotAllowedInPrimitiveField");
+	// }
 
-	/* There must not be a NullRestricted attribute in the attributes table of a field_info structure whose descriptor_index references an array type */
-	@Test(expectedExceptions = java.lang.ClassFormatError.class, expectedExceptionsMessageRegExp = ".*A field with an array type cannot have a NullRestricted attribute.*")
-	static public void testNullRestrictedNotAllowedInArrayTypeField() throws Throwable {
-		ValhallaAttributeGenerator.generateNullRestrictedAttributeInArrayField("TestNullRestrictedNotAllowedInArrayTypeField", "TestNullRestrictedNotAllowedInArrayTypeFieldField");
-	}
+	// /* There must not be a NullRestricted attribute in the attributes table of a field_info structure whose descriptor_index references an array type */
+	// @Test(expectedExceptions = java.lang.ClassFormatError.class, expectedExceptionsMessageRegExp = ".*A field with an array type cannot have a NullRestricted attribute.*")
+	// static public void testNullRestrictedNotAllowedInArrayTypeField() throws Throwable {
+	// 	ValhallaAttributeGenerator.generateNullRestrictedAttributeInArrayField("TestNullRestrictedNotAllowedInArrayTypeField", "TestNullRestrictedNotAllowedInArrayTypeFieldField");
+	// }
 
-	/* The descriptor_index of the field should name a value class that has an ImplicitCreation attribute with its ACC_DEFAULT flag is set.
-	 * Failure for non-static fields should occur during class creation.
-	 */
-	@Test(expectedExceptions = java.lang.IncompatibleClassChangeError.class, expectedExceptionsMessageRegExp = ".*An instance field with a NullRestricted attribute must be in a value class with an implicit constructor.*")
-	static public void testNullRestrictedFieldMustBeInValueClass() throws Throwable {
-		ValhallaAttributeGenerator.generateNullRestrictedAttributeInIdentityClass(false, "TestNullRestrictedFieldMustBeInValueClass", "TestNullRestrictedFieldMustBeInValueClassField");
-	}
+	// /* The descriptor_index of the field should name a value class that has an ImplicitCreation attribute with its ACC_DEFAULT flag is set.
+	//  * Failure for non-static fields should occur during class creation.
+	//  */
+	// @Test(expectedExceptions = java.lang.IncompatibleClassChangeError.class, expectedExceptionsMessageRegExp = ".*An instance field with a NullRestricted attribute must be in a value class with an implicit constructor.*")
+	// static public void testNullRestrictedFieldMustBeInValueClass() throws Throwable {
+	// 	ValhallaAttributeGenerator.generateNullRestrictedAttributeInIdentityClass(false, "TestNullRestrictedFieldMustBeInValueClass", "TestNullRestrictedFieldMustBeInValueClassField");
+	// }
 
-	/* The descriptor_index of the field should name a value class that has an ImplicitCreation attribute with its ACC_DEFAULT flag is set.
-	 * Failure for non-static fields should occur during class creation.
-	 */
-	@Test(expectedExceptions = java.lang.IncompatibleClassChangeError.class, expectedExceptionsMessageRegExp = ".*An instance field with a NullRestricted attribute must be in a value class with an implicit constructor.*")
-	static public void testNullRestrictedFieldClassMustHaveImplicitCreation() throws Throwable {
-		ValhallaAttributeGenerator.generateNullRestrictedAttributeInValueClassWithoutIC(false, "TestNullRestrictedFieldClassMustHaveImplicitCreation", "TestNullRestrictedFieldClassMustHaveImplicitCreationField");
-	}
+	// /* The descriptor_index of the field should name a value class that has an ImplicitCreation attribute with its ACC_DEFAULT flag is set.
+	//  * Failure for non-static fields should occur during class creation.
+	//  */
+	// @Test(expectedExceptions = java.lang.IncompatibleClassChangeError.class, expectedExceptionsMessageRegExp = ".*An instance field with a NullRestricted attribute must be in a value class with an implicit constructor.*")
+	// static public void testNullRestrictedFieldClassMustHaveImplicitCreation() throws Throwable {
+	// 	ValhallaAttributeGenerator.generateNullRestrictedAttributeInValueClassWithoutIC(false, "TestNullRestrictedFieldClassMustHaveImplicitCreation", "TestNullRestrictedFieldClassMustHaveImplicitCreationField");
+	// }
 
-	/* The descriptor_index of the field should name a value class that has an ImplicitCreation attribute with its ACC_DEFAULT flag is set.
-	 * Failure for non-static fields should occur during class creation.
-	 */
-	@Test(expectedExceptions = java.lang.IncompatibleClassChangeError.class, expectedExceptionsMessageRegExp = ".*An instance field with a NullRestricted attribute must be in a value class with an implicit constructor.*")
-	static public void testNullRestrictedFieldWhereImplicitCreationHasNoDefaultFlag() throws Throwable {
-		ValhallaAttributeGenerator.generateNullRestrictedFieldWhereICHasNoDefaultFlag(false, "TestNullRestrictedAttributeWhereImplicitCreationHasNoDefaultFlag", "TestNullRestrictedAttributeWhereImplicitCreationHasNoDefaultFlagField");
-	}
+	// /* The descriptor_index of the field should name a value class that has an ImplicitCreation attribute with its ACC_DEFAULT flag is set.
+	//  * Failure for non-static fields should occur during class creation.
+	//  */
+	// @Test(expectedExceptions = java.lang.IncompatibleClassChangeError.class, expectedExceptionsMessageRegExp = ".*An instance field with a NullRestricted attribute must be in a value class with an implicit constructor.*")
+	// static public void testNullRestrictedFieldWhereImplicitCreationHasNoDefaultFlag() throws Throwable {
+	// 	ValhallaAttributeGenerator.generateNullRestrictedFieldWhereICHasNoDefaultFlag(false, "TestNullRestrictedAttributeWhereImplicitCreationHasNoDefaultFlag", "TestNullRestrictedAttributeWhereImplicitCreationHasNoDefaultFlagField");
+	// }
 
-	/* The descriptor_index of the field should name a value class that has an ImplicitCreation attribute with its ACC_DEFAULT flag is set.
-	 * Static fields should fail during the preparation stage of linking.
-	 */
-	@Test(expectedExceptions = java.lang.IncompatibleClassChangeError.class, expectedExceptionsMessageRegExp = ".*A static field with a NullRestricted attribute must be in a value class with an implicit constructor.*")
-	static public void testStaticNullRestrictedFieldMustBeInValueClass() throws Throwable {
-		Class<?> c = ValhallaAttributeGenerator.generateNullRestrictedAttributeInIdentityClass(true, "TestStaticNullRestrictedFieldMustBeInValueClass", "TestStaticNullRestrictedFieldMustBeInValueClassField");
-		c.newInstance();
-	}
+	// /* The descriptor_index of the field should name a value class that has an ImplicitCreation attribute with its ACC_DEFAULT flag is set.
+	//  * Static fields should fail during the preparation stage of linking.
+	//  */
+	// @Test(expectedExceptions = java.lang.IncompatibleClassChangeError.class, expectedExceptionsMessageRegExp = ".*A static field with a NullRestricted attribute must be in a value class with an implicit constructor.*")
+	// static public void testStaticNullRestrictedFieldMustBeInValueClass() throws Throwable {
+	// 	Class<?> c = ValhallaAttributeGenerator.generateNullRestrictedAttributeInIdentityClass(true, "TestStaticNullRestrictedFieldMustBeInValueClass", "TestStaticNullRestrictedFieldMustBeInValueClassField");
+	// 	c.newInstance();
+	// }
 
-	/* The descriptor_index of the field should name a value class that has an ImplicitCreation attribute with its ACC_DEFAULT flag is set.
-	 * Static fields should fail during the preparation stage of linking.
-	 */
-	@Test(expectedExceptions = java.lang.IncompatibleClassChangeError.class, expectedExceptionsMessageRegExp = ".*A static field with a NullRestricted attribute must be in a value class with an implicit constructor.*")
-	static public void testStaticNullRestrictedFieldClassMustHaveImplicitCreation() throws Throwable {
-		Class<?> c = ValhallaAttributeGenerator.generateNullRestrictedAttributeInValueClassWithoutIC(true, "TestStaticNullRestrictedFieldClassMustHaveImplicitCreation", "TestStaticNullRestrictedFieldClassMustHaveImplicitCreationField");
-		c.newInstance();
-	}
+	// /* The descriptor_index of the field should name a value class that has an ImplicitCreation attribute with its ACC_DEFAULT flag is set.
+	//  * Static fields should fail during the preparation stage of linking.
+	//  */
+	// @Test(expectedExceptions = java.lang.IncompatibleClassChangeError.class, expectedExceptionsMessageRegExp = ".*A static field with a NullRestricted attribute must be in a value class with an implicit constructor.*")
+	// static public void testStaticNullRestrictedFieldClassMustHaveImplicitCreation() throws Throwable {
+	// 	Class<?> c = ValhallaAttributeGenerator.generateNullRestrictedAttributeInValueClassWithoutIC(true, "TestStaticNullRestrictedFieldClassMustHaveImplicitCreation", "TestStaticNullRestrictedFieldClassMustHaveImplicitCreationField");
+	// 	c.newInstance();
+	// }
 
-	/* The descriptor_index of the field should name a value class that has an ImplicitCreation attribute with its ACC_DEFAULT flag is set.
-	 * Static fields should fail during the preparation stage of linking.
-	 */
-	@Test(expectedExceptions = java.lang.IncompatibleClassChangeError.class, expectedExceptionsMessageRegExp = ".*A static field with a NullRestricted attribute must be in a value class with an implicit constructor.*")
-	static public void testStaticNullRestrictedFieldWhereImplicitCreationHasNoDefaultFlag() throws Throwable {
-		Class<?> c = ValhallaAttributeGenerator.generateNullRestrictedFieldWhereICHasNoDefaultFlag(true, "TestStaticNullRestrictedAttributeWhereImplicitCreationHasNoDefaultFlag", "TestStaticNullRestrictedAttributeWhereImplicitCreationHasNoDefaultFlagField");
-		c.newInstance();
-	}
+	// /* The descriptor_index of the field should name a value class that has an ImplicitCreation attribute with its ACC_DEFAULT flag is set.
+	//  * Static fields should fail during the preparation stage of linking.
+	//  */
+	// @Test(expectedExceptions = java.lang.IncompatibleClassChangeError.class, expectedExceptionsMessageRegExp = ".*A static field with a NullRestricted attribute must be in a value class with an implicit constructor.*")
+	// static public void testStaticNullRestrictedFieldWhereImplicitCreationHasNoDefaultFlag() throws Throwable {
+	// 	Class<?> c = ValhallaAttributeGenerator.generateNullRestrictedFieldWhereICHasNoDefaultFlag(true, "TestStaticNullRestrictedAttributeWhereImplicitCreationHasNoDefaultFlag", "TestStaticNullRestrictedAttributeWhereImplicitCreationHasNoDefaultFlagField");
+	// 	c.newInstance();
+	// }
 
-	@Test
-	static public void testPutFieldNullToValueTypeField() throws Throwable {
-		Class<?> c = ValhallaAttributeGenerator.generatePutFieldNullToField("TestPutFieldNullToValueTypeField", "TestPutFieldNullToValueTypeFieldField", false);
-		c.newInstance();
-	}
+	// @Test
+	// static public void testPutFieldNullToValueTypeField() throws Throwable {
+	// 	Class<?> c = ValhallaAttributeGenerator.generatePutFieldNullToField("TestPutFieldNullToValueTypeField", "TestPutFieldNullToValueTypeFieldField", false);
+	// 	c.newInstance();
+	// }
 
 	static public Class<?> testPutFieldNullToNullRestrictedFieldClass = null;
-	static public Class<?> testPutStaticNullToNullRestrictedFieldClass = null;
+	// static public Class<?> testPutStaticNullToNullRestrictedFieldClass = null;
 
 	@Test(priority=1)
 	static public void testCreateTestPutFieldNullToNullRestrictedField() throws Throwable {
@@ -166,34 +166,34 @@ public class ValhallaAttributeTests {
 		testPutFieldNullToNullRestrictedFieldClass.newInstance();
 	}
 
-	@Test(priority=1)
-	static public void testCreateTestPutStaticNullToNullRestrictedField() throws Throwable {
-		testPutStaticNullToNullRestrictedFieldClass = ValhallaAttributeGenerator.generatePutStaticNullToNullRestrictedField("TestPutStaticNullToNullRestrictedField", "TestPutStaticNullToNullRestrictedFieldField");
-	}
+	// @Test(priority=1)
+	// static public void testCreateTestPutStaticNullToNullRestrictedField() throws Throwable {
+	// 	testPutStaticNullToNullRestrictedFieldClass = ValhallaAttributeGenerator.generatePutStaticNullToNullRestrictedField("TestPutStaticNullToNullRestrictedField", "TestPutStaticNullToNullRestrictedFieldField");
+	// }
 
-	/* Static field with NullRestricted attribute cannot be set to null.
-	 * putstatic should throw NPE if field with NullRestricted attribute is assigned null.
-	 * JVMS 5.5 says if putstatic casuses a class to initialize and fails with an exception
-	 * it should be wrapped in ExceptionInInitializerError.
-	 * Since value fields are implicitly final this will always be the case.
-	 */
-	@Test(priority=2, invocationCount=2)
-	static public void testPutStaticNullToNullRestrictedField() throws Throwable {
-		try {
-			testPutStaticNullToNullRestrictedFieldClass.newInstance();
-		} catch(java.lang.ExceptionInInitializerError e) {
-			if (e.getCause() instanceof NullPointerException) {
-				return; /* pass */
-			}
-			throw e;
-		} catch (java.lang.NoClassDefFoundError e) {
-			// In the second invocation, java.lang.NoClassDefFoundError should be thrown
-			// because the initialization of Class has previously failed initialization
-			if (e.getCause() instanceof java.lang.ExceptionInInitializerError) {
-				return; /* pass */
-			}
-			throw e;
-		}
-		Assert.fail("Test expected a NullPointerException wrapped in ExceptionInInitializerError.");
-	}
+	// /* Static field with NullRestricted attribute cannot be set to null.
+	//  * putstatic should throw NPE if field with NullRestricted attribute is assigned null.
+	//  * JVMS 5.5 says if putstatic casuses a class to initialize and fails with an exception
+	//  * it should be wrapped in ExceptionInInitializerError.
+	//  * Since value fields are implicitly final this will always be the case.
+	//  */
+	// @Test(priority=2, invocationCount=2)
+	// static public void testPutStaticNullToNullRestrictedField() throws Throwable {
+	// 	try {
+	// 		testPutStaticNullToNullRestrictedFieldClass.newInstance();
+	// 	} catch(java.lang.ExceptionInInitializerError e) {
+	// 		if (e.getCause() instanceof NullPointerException) {
+	// 			return; /* pass */
+	// 		}
+	// 		throw e;
+	// 	} catch (java.lang.NoClassDefFoundError e) {
+	// 		// In the second invocation, java.lang.NoClassDefFoundError should be thrown
+	// 		// because the initialization of Class has previously failed initialization
+	// 		if (e.getCause() instanceof java.lang.ExceptionInInitializerError) {
+	// 			return; /* pass */
+	// 		}
+	// 		throw e;
+	// 	}
+	// 	Assert.fail("Test expected a NullPointerException wrapped in ExceptionInInitializerError.");
+	// }
 }

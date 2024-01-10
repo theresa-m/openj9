@@ -6966,18 +6966,22 @@ TR_J9ByteCodeIlGenerator::storeInstance(int32_t cpIndex)
 
    if (owningMethod->isFieldNullRestricted(comp(), cpIndex, false /* isStatic */, true /* isStore */))
       {
+         printf("MER:field is nullrestricted\n");
       if (!isFieldResolved(comp(), owningMethod, cpIndex, true))
          {
+            printf("MER:abort\n");
          abortForUnresolvedValueTypeOp("putfield", "field");
          }
       else if (owningMethod->isFieldFlattened(comp(), cpIndex, false /* isStatic */))
          {
+            printf("MER:isflattened\n");
          return comp()->getOption(TR_UseFlattenedFieldRuntimeHelpers) ?
                   storeFlattenableInstanceWithHelper(cpIndex) :
                   storeFlattenableInstance(cpIndex);
          }
       else
          {
+            printf("MER:else\n");
          TR::Node *value = pop();
          if (comp()->getOption(TR_TraceILGen))
             {
