@@ -7220,9 +7220,11 @@ TR_J9ByteCodeIlGenerator::storeFlattenableInstance(int32_t cpIndex)
 
    for (size_t idx = 0; idx < fieldCount; idx++)
       {
+         printf("MER:infor\n");
       const TR::TypeLayoutEntry &fieldEntry = containingClassLayout->entry(idx);
       if (!strncmp(fieldNamePrefix, fieldEntry._fieldname, prefixLen))
          {
+            printf("MER:instrncmp\n");
          auto * fieldSymRef = comp()->getSymRefTab()->findOrFabricateShadowSymbol(containingClass,
                                                                      fieldEntry._datatype,
                                                                      fieldEntry._offset,
