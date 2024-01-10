@@ -2361,8 +2361,8 @@ nativeOOM:
 			classFlags |= J9ClassIsValueType;
 #if defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES)
 			if (J9ROMCLASS_IS_PRIMITIVE_VALUE_TYPE(romClass)
-				|| (J9_ARE_ALL_BITS_SET(romClass->optionalFlags, J9_ROMCLASS_OPTINFO_IMPLICITCREATION_ATTRIBUTE)
-				&& J9_ARE_ALL_BITS_SET(getImplicitCreationFlags(romClass), J9AccImplicitCreateHasDefaultValue))
+				// || (J9_ARE_ALL_BITS_SET(romClass->optionalFlags, J9_ROMCLASS_OPTINFO_IMPLICITCREATION_ATTRIBUTE)
+				// && J9_ARE_ALL_BITS_SET(getImplicitCreationFlags(romClass), J9AccImplicitCreateHasDefaultValue))
 			) {
 				UDATA instanceSize = state->ramClass->totalInstanceSize;
 				/* This ram class flag is not correct for the nullrestricted value class case
