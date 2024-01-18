@@ -372,7 +372,7 @@ public:
 #if defined(J9VM_OPT_METHOD_HANDLE)
 		if (J9_EXTENDED_RUNTIME_I2J_MH_TRANSITION_ENABLED == (vm->extendedRuntimeFlags & J9_EXTENDED_RUNTIME_I2J_MH_TRANSITION_ENABLED)) {
 			if (methodHandle == NULL) {
-				printf("TEST methodHandle is null\n");
+				printf("TEST methodHandle is null\n"); // true
 			} else if (currentThread == NULL) {
 				printf("TEST currentThread is null\n");
 			}

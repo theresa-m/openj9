@@ -1661,7 +1661,7 @@ obj:
 			rc = REPORT_METHOD_ENTER;
 #endif
 		} else {
-			rc = GOTO_JAVA_STACK_OVERFLOW;
+			rc = GOTO_JAVA_STACK_OVERFLOW; // here
 		}
 done:
 		return rc;
@@ -1743,7 +1743,7 @@ done:
 
 	/* A method has just been entered (stack frame built, no monitor entered or method enter hook called) and the SP is below the stackOverflowMark */
 	VMINLINE VM_BytecodeAction
-	stackOverflow(REGISTER_ARGS_LIST)
+	stackOverflow(REGISTER_ARGS_LIST) // here
 	{
 		VM_BytecodeAction rc = EXECUTE_BYTECODE;
 		J9ROMMethod *romMethod = J9_ROM_METHOD_FROM_RAM_METHOD(_literals);
@@ -1782,7 +1782,7 @@ throwStackOverflow:
 					// vmStruct already up-to-date in all paths to here
 					fatalRecursiveStackOverflow(_currentThread);
 				}
-				setCurrentExceptionUTF(_currentThread, J9VMCONSTANTPOOL_JAVALANGSTACKOVERFLOWERROR, NULL);
+				setCurrentExceptionUTF(_currentThread, J9VMCONSTANTPOOL_JAVALANGSTACKOVERFLOWERROR, NULL); // here
 				VMStructHasBeenUpdated(REGISTER_ARGS);
 				rc = GOTO_THROW_CURRENT_EXCEPTION;
 				if (immediateAsyncPending()) {
@@ -9011,6 +9011,7 @@ retry:
 	VMINLINE VM_BytecodeAction
 	invokehandlegeneric(REGISTER_ARGS_LIST)
 	{
+		printf("TEST got to here\n");
 #if defined(J9VM_OPT_METHOD_HANDLE)
 		/* MH.invoke is translated to invokehandlegeneric. */
 retry:
