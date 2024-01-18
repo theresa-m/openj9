@@ -372,7 +372,11 @@ public:
 #if defined(J9VM_OPT_METHOD_HANDLE)
 		if (J9_EXTENDED_RUNTIME_I2J_MH_TRANSITION_ENABLED == (vm->extendedRuntimeFlags & J9_EXTENDED_RUNTIME_I2J_MH_TRANSITION_ENABLED)) {
 			if (methodHandle == NULL) {
-				printf("methodHandle is null");
+				printf("TEST methodHandle is null\n");
+			} else if (currentThread == NULL) {
+				printf("TEST currentThread is null\n");
+			} else {
+				printf("TEST no null\n");
 			}
 			j9object_t thunks = J9VMJAVALANGINVOKEMETHODHANDLE_THUNKS(currentThread, methodHandle);
 			I_64 i2jEntry = J9VMJAVALANGINVOKETHUNKTUPLE_I2JINVOKEEXACTTHUNK(currentThread, thunks);
