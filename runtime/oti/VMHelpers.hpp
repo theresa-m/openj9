@@ -371,6 +371,9 @@ public:
 		void *compiledEntryPoint = NULL;
 #if defined(J9VM_OPT_METHOD_HANDLE)
 		if (J9_EXTENDED_RUNTIME_I2J_MH_TRANSITION_ENABLED == (vm->extendedRuntimeFlags & J9_EXTENDED_RUNTIME_I2J_MH_TRANSITION_ENABLED)) {
+			if (methodHandle == null) {
+				printf("methodHandle is null");
+			}
 			j9object_t thunks = J9VMJAVALANGINVOKEMETHODHANDLE_THUNKS(currentThread, methodHandle);
 			I_64 i2jEntry = J9VMJAVALANGINVOKETHUNKTUPLE_I2JINVOKEEXACTTHUNK(currentThread, thunks);
 			compiledEntryPoint = (void *)(UDATA)i2jEntry;
