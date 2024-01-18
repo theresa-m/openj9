@@ -375,8 +375,6 @@ public:
 				printf("TEST methodHandle is null\n");
 			} else if (currentThread == NULL) {
 				printf("TEST currentThread is null\n");
-			} else {
-				printf("TEST no null\n");
 			}
 			j9object_t thunks = J9VMJAVALANGINVOKEMETHODHANDLE_THUNKS(currentThread, methodHandle);
 			I_64 i2jEntry = J9VMJAVALANGINVOKETHUNKTUPLE_I2JINVOKEEXACTTHUNK(currentThread, thunks);
