@@ -1382,6 +1382,7 @@ obj:
 				break;
 			case JBinvokehandle:
 			case JBinvokehandlegeneric: {
+				printf("TEST case\n");
 				/* The MH object gets eaten during invokehandle calls. Upon restart, unwindSP (savedMethod) is the
 				 * 'would be' slot of MH. We must decrement sp and clear all the slots above unwindSP so that we throw a NPE
 				 * instead of trying to run using the saved method slot. All the slots must be cleared because when the sp is
@@ -8912,6 +8913,7 @@ retry:
 	invokehandle(REGISTER_ARGS_LIST)
 	{
 retry:
+		printf("TEST invokehandlej9\n");
 		/* An invokevirtual MethodHandle.invokeExact() becomes invokehandle.
 		 * The resolved MethodType and MethodHandle.type() must be equal or
 		 * an exception will be thrown.
@@ -8961,6 +8963,7 @@ done:
 	invokehandle(REGISTER_ARGS_LIST)
 	{
 retry:
+printf("TEST invokehandleojdk\n");
 		VM_BytecodeAction rc = GOTO_RUN_METHOD;
 		U_16 index = *(U_16 *)(_pc + 1);
 
@@ -9003,6 +9006,7 @@ retry:
 	VMINLINE VM_BytecodeAction
 	invokehandle(REGISTER_ARGS_LIST)
 	{
+		printf("TEST invokehandle unreachable\n");
 		Assert_VM_unreachable();
 		return EXECUTE_BYTECODE;
 	}
@@ -9011,7 +9015,7 @@ retry:
 	VMINLINE VM_BytecodeAction
 	invokehandlegeneric(REGISTER_ARGS_LIST)
 	{
-		printf("TEST got to here\n");
+		printf("TEST invokehandlegeneric\n");
 #if defined(J9VM_OPT_METHOD_HANDLE)
 		/* MH.invoke is translated to invokehandlegeneric. */
 retry:
