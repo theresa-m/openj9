@@ -79,6 +79,11 @@
 #define J9ClassLargestAlignmentConstraintReference 0x800
 #define J9ClassLargestAlignmentConstraintDouble 0x1000
 #define J9ClassIsExemptFromValidation 0x2000
+/* This flag is used to show that default values should be set for this class
+ * and is replaced by J9ClassAllowsInitialDefaultValue in lw5.
+ * They both indicate that default values should be set however J9ClassAllowsInitialDefaultValue
+ * can coexist with J9ClassIsFlattened.
+ */
 #define J9ClassContainsUnflattenedFlattenables 0x4000
 #define J9ClassCanSupportFastSubstitutability 0x8000
 #define J9ClassHasReferences 0x10000

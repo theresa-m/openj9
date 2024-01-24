@@ -519,7 +519,8 @@ doVerify:
 				}
 				clazz = VM_VMHelpers::currentClass(clazz);
 #if defined(J9VM_OPT_VALHALLA_VALUE_TYPES)
-				if (J9_IS_J9CLASS_VALUETYPE(clazz)) {
+				/* TODO value type check should be removed with qtypes */
+				if (J9_IS_J9CLASS_VALUETYPE(clazz) || J9_IS_J9CLASS_ALLOW_DEFAULT_VALUE(clazz)) {
 					PUSH_OBJECT_IN_SPECIAL_FRAME(currentThread, initializationLock);
 					/* Preparation is the earliest point where the defaultValue would needed. 
 					* I.e pre-filling static fields. Therefore, the defaultValue must be allocated at 

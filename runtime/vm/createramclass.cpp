@@ -1975,12 +1975,7 @@ loadFlattenableFieldValueClasses(J9VMThread *currentThread, J9ClassLoader *class
 					goto done;
 				} else {
 					J9ROMClass *valueROMClass = valueClass->romClass;
-					/* This restriction has been relaxed from J9ROMCLASS_IS_PRIMITIVE_VALUE_TYPE
-					 * to prevent errors while using the J9ClassIsPrimitiveValueType flag to indicate
-					 * flattening eligibility for nullrestricted fields. Eventually this case will be
-					 * removed with Q types.
-					 */
-					if (!J9ROMCLASS_IS_VALUE(valueROMClass)) {
+					if (!J9ROMCLASS_IS_PRIMITIVE_VALUE_TYPE(valueROMClass)) {
 						J9UTF8 *badClass = NNSRP_GET(valueROMClass->className, J9UTF8*);
 						setCurrentExceptionNLSWithArgs(currentThread, J9NLS_VM_ERROR_QTYPE_NOT_VALUE_TYPE, J9VMCONSTANTPOOL_JAVALANGINCOMPATIBLECLASSCHANGEERROR, J9UTF8_LENGTH(badClass), J9UTF8_DATA(badClass));
 						result = FALSE;
@@ -2032,7 +2027,7 @@ loadFlattenableFieldValueClasses(J9VMThread *currentThread, J9ClassLoader *class
 						}
 
 						if (!J9_IS_NULL_RESTRICTED_FIELD_FLATTENED(valueClass, field)) {
-							*valueTypeFlags |= (J9ClassContainsUnflattenedFlattenables | J9ClassHasReferences);
+							*valueTypeFlags |= J9ClassHasReferences;
 							eligibleForFastSubstitutability = false;
 						} else if (J9_ARE_NO_BITS_SET(valueClass->classFlags, J9ClassCanSupportFastSubstitutability)) {
 							eligibleForFastSubstitutability = false;
@@ -2351,8 +2346,8 @@ nativeOOM:
 			classFlags |= J9ClassAllowsNonAtomicCreation;
 		}
 		if (J9_ARE_ALL_BITS_SET(implicitCreationFlags, J9AccImplicitCreateHasDefaultValue)) {
-			/* J9ClassIsValueType is being reused here intentionally */
-			classFlags |= J9ClassIsValueType;
+			// TODO rename this to something more descriptive
+			classFlags |= J9ClassContainsUnflattenedFlattenables;
 		}
 	}
 #endif /* defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES) */
@@ -2361,15 +2356,12 @@ nativeOOM:
 			classFlags |= J9ClassIsValueType;
 #if defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES)
 			if (J9ROMCLASS_IS_PRIMITIVE_VALUE_TYPE(romClass)
-				|| (J9_ARE_ALL_BITS_SET(romClass->optionalFlags, J9_ROMCLASS_OPTINFO_IMPLICITCREATION_ATTRIBUTE)
-				&& J9_ARE_ALL_BITS_SET(getImplicitCreationFlags(romClass), J9AccImplicitCreateHasDefaultValue))
+				|| J9_ARE_ALL_BITS_SET(classFlags, J9ClassContainsUnflattenedFlattenables)
 			) {
 				UDATA instanceSize = state->ramClass->totalInstanceSize;
-				/* This ram class flag is not correct for the nullrestricted value class case
-				 * since the meaning of primitive and nullrestricted don't fully overlap.
-				 * Using it for now to enable flattening of nullrestricted fields.
-				 */
-				classFlags |= J9ClassIsPrimitiveValueType;
+				if (J9ROMCLASS_IS_PRIMITIVE_VALUE_TYPE(romClass)) {
+					classFlags |= J9ClassIsPrimitiveValueType;
+				}
 				if ((instanceSize <= javaVM->valueFlatteningThreshold)
 					&& !J9ROMCLASS_IS_CONTENDED(romClass)
 				) {
@@ -3516,7 +3508,8 @@ fail:
 						J9ARRAYCLASS_SET_STRIDE(ramClass, J9_VALUETYPE_FLATTENED_SIZE(elementClass));
 					}
 				} else {
-					if (J9_IS_J9CLASS_PRIMITIVE_VALUETYPE(elementClass)) {
+					// TODO adding this causes a seg fault
+					if (J9_IS_J9CLASS_PRIMITIVE_VALUETYPE(elementClass) || J9_IS_J9CLASS_ALLOW_DEFAULT_VALUE(elementClass)) {
 						ramArrayClass->classFlags |= J9ClassContainsUnflattenedFlattenables;
 					}
 					J9ARRAYCLASS_SET_STRIDE(ramClass, (((UDATA) 1) << (((J9ROMArrayClass*)romClass)->arrayShape & 0x0000FFFF)));
