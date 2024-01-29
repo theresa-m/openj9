@@ -48,6 +48,8 @@ getMethodForSpecialSend(J9VMThread *vmStruct, J9Class *currentClass, J9Class *re
 		UDATA superDepth = J9CLASS_DEPTH(methodClass);
 		BOOLEAN isInterfaceMethod = J9AccInterface == (methodClass->romClass->modifiers & J9AccInterface);
 
+		// is superclass and super/resolved are not interface classes
+		// result is an interface method but current/super are not interface classes
 		if ((isInterfaceMethod || ((currentDepth > superDepth) && (currentClass->superclasses[superDepth] == methodClass)))
 				&& (J9_ARE_NO_BITS_SET(resolvedClass->romClass->modifiers, J9AccInterface) && J9_ARE_NO_BITS_SET(currentClass->romClass->modifiers, J9AccInterface))
 		) {
@@ -55,10 +57,16 @@ getMethodForSpecialSend(J9VMThread *vmStruct, J9Class *currentClass, J9Class *re
 			 * is not in the vTable cannot be overridden, so we can just run it.
 			 */
 			J9InternalVMFunctions *vmFuncs = vmStruct->javaVM->internalVMFunctions;
+			// TODO what does the result end up being?
 			UDATA vTableOffset = vmFuncs->getVTableOffsetForMethod(method, resolvedClass, vmStruct);
 
 			if (vTableOffset != 0) {
 				J9Class *superclass = currentClass->superclasses[currentDepth - 1];
+
+				J9UTF8* name = J9ROMNAMEANDSIGNATURE_NAME(J9ROMMETHOD_NAMEANDSIGNATURE(J9_ROM_METHOD_FROM_RAM_METHOD(method)));
+				if (J9UTF8_LENGTH(name) == 1 && J9UTF8_DATA(name)[0] == 'm') {
+					printf("superclass is: %s\n", J9UTF_DATA(J9ROMCLASS_CLASSNAME(superclass->romClass)));
+				}
 
 				if (isInterfaceMethod) {
 					/* CMVC 170457: Algorithm for invokespecial lookup is wrong.

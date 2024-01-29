@@ -1394,7 +1394,7 @@ getVTableOffsetForMethod(J9Method * method, J9Class *clazz, J9VMThread *vmThread
 	UDATA modifiers = methodClass->romClass->modifiers;
 
 	/* If this method came from an interface class, handle it specially. */
-	if ((modifiers & J9AccInterface) == J9AccInterface) {
+	if ((modifiers & J9AccInterface) == J9AccInterface) { // my case
 		J9VTableHeader *vTable = J9VTABLE_HEADER_FROM_RAM_CLASS(clazz);
 		UDATA vTableSize = vTable->size;
 		J9ROMMethod *romMethod = J9_ROM_METHOD_FROM_RAM_METHOD(method);
