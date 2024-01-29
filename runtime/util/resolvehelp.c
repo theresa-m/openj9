@@ -61,12 +61,13 @@ getMethodForSpecialSend(J9VMThread *vmStruct, J9Class *currentClass, J9Class *re
 			UDATA vTableOffset = vmFuncs->getVTableOffsetForMethod(method, resolvedClass, vmStruct);
 
 			if (vTableOffset != 0) {
-				J9Class *superclass = currentClass->superclasses[currentDepth - 1];
 
-				J9UTF8* name = J9ROMNAMEANDSIGNATURE_NAME(J9ROMMETHOD_NAMEANDSIGNATURE(J9_ROM_METHOD_FROM_RAM_METHOD(method)));
-				if (J9UTF8_LENGTH(name) == 1 && J9UTF8_DATA(name)[0] == 'm') {
-					printf("superclass is: %s\n", J9UTF_DATA(J9ROMCLASS_CLASSNAME(superclass->romClass)));
-				}
+				// J9UTF8* name = J9ROMNAMEANDSIGNATURE_NAME(J9ROMMETHOD_NAMEANDSIGNATURE(J9_ROM_METHOD_FROM_RAM_METHOD(method)));
+				// if (J9UTF8_LENGTH(name) == 1 && J9UTF8_DATA(name)[0] == 'm') {
+				// 	printf("superclass is: %s\n", J9UTF8_DATA(J9ROMCLASS_CLASSNAME(superclass->romClass)));
+				// 	printf("currentclass is: %s\n", J9UTF8_DATA(J9ROMCLASS_CLASSNAME(currentClass->romClass)));
+				// 	superclass = currentClass;
+				// }
 
 				if (isInterfaceMethod) {
 					/* CMVC 170457: Algorithm for invokespecial lookup is wrong.
@@ -76,7 +77,7 @@ getMethodForSpecialSend(J9VMThread *vmStruct, J9Class *currentClass, J9Class *re
 					 * 3) Walk the current class vtable backwards to find the most "recent" override of that method
 					 * 4) Lookup the method at vTableOffset in currentClass's super class
 					 */
-					J9VTableHeader * superVTable = J9VTABLE_HEADER_FROM_RAM_CLASS(superclass);
+					J9VTableHeader * superVTable = J9VTABLE_HEADER_FROM_RAM_CLASS(currentClass);
 					UDATA superVTableEnd = J9VTABLE_OFFSET_FROM_INDEX(superVTable->size);
 					method = *(J9Method **)(((UDATA)currentClass) + vTableOffset);
 					vTableOffset = vmFuncs->getVTableOffsetForMethod(method, currentClass, vmStruct);
@@ -85,9 +86,10 @@ getMethodForSpecialSend(J9VMThread *vmStruct, J9Class *currentClass, J9Class *re
 					 * to ensure we don't read a non-existent vtable slot.  The found method is the correct one
 					 */
 					if ((vTableOffset > 0) && (vTableOffset < superVTableEnd)) {
-						method = *(J9Method **)(((UDATA)superclass) + vTableOffset);
+						method = *(J9Method **)(((UDATA)currentClass) + vTableOffset);
 					}
 				} else {
+					J9Class *superclass = currentClass->superclasses[currentDepth - 1];
 					/* In order to support non-vTable methods in a super invoke, perform the lookup rather than
 					 * looking in the vTable.
 					 */
