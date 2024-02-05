@@ -89,6 +89,7 @@
 #define J9ClassHasOffloadAllowSubtasksNatives 0x200000
 #define J9ClassIsPrimitiveValueType 0x400000
 #define J9ClassAllowsNonAtomicCreation 0x800000
+#define J9ClassAllowsInitialDefaultValue 0x1000000
 
 /* @ddr_namespace: map_to_type=J9FieldFlags */
 

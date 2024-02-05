@@ -4216,10 +4216,10 @@ done:
 		j9object_t cls = *(j9object_t*)_sp;
 		j9object_t result = NULL;
 
-		/* TODO (#14073): update this function to have the same behavior as OpenJDK when cls is null or not a vlauetype (currently OpenJDK segfaults in both those scenarios) */
+		/* TODO (#14073): update this function to have the same behavior as OpenJDK when cls is null or not a valuetype (currently OpenJDK segfaults in both those scenarios) */
 		if (NULL != cls) {
 			J9Class *j9clazz = J9VM_J9CLASS_FROM_HEAPCLASS(_currentThread, cls);
-			if (J9_IS_J9CLASS_PRIMITIVE_VALUETYPE(j9clazz)) {
+			if (J9_IS_J9CLASS_PRIMITIVE_VALUETYPE(j9clazz) || J9_IS_J9CLASS_ALLOW_DEFAULT_VALUE(j9clazz)) {
 				/* It is defaultValue for primitive value type, NULL for value class. */
 				result = j9clazz->flattenedClassCache->defaultValue;
 			}
@@ -4288,7 +4288,7 @@ done:
 		if (NULL != obj && NULL != clz) {
 			J9Class *clzJ9Class = J9VM_J9CLASS_FROM_HEAPCLASS(_currentThread, clz);
 
-			if (J9_IS_J9CLASS_PRIMITIVE_VALUETYPE(clzJ9Class)) {
+			if (J9_IS_J9CLASS_PRIMITIVE_VALUETYPE(clzJ9Class) || J9_IS_J9CLASS_ALLOW_DEFAULT_VALUE(clzJ9Class)) {
 				result = VM_ValueTypeHelpers::getFlattenedFieldAtOffset(
 					_currentThread,
 					_objectAccessBarrier,
@@ -4336,7 +4336,7 @@ done:
 		if ((NULL != obj) && (NULL != clz) && (NULL != value)) {
 			J9Class *clzJ9Class = J9VM_J9CLASS_FROM_HEAPCLASS(_currentThread, clz);
 
-			if (J9_IS_J9CLASS_PRIMITIVE_VALUETYPE(clzJ9Class)) {
+			if (J9_IS_J9CLASS_PRIMITIVE_VALUETYPE(clzJ9Class) || J9_IS_J9CLASS_ALLOW_DEFAULT_VALUE(clzJ9Class)) {
 				VM_ValueTypeHelpers::putFlattenedFieldAtOffset(_currentThread,
 					_objectAccessBarrier,
 					clzJ9Class,

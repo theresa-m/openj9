@@ -335,6 +335,7 @@ static const struct { \
 #define J9_IS_J9CLASS_FLATTENED(clazz) J9_ARE_ALL_BITS_SET((clazz)->classFlags, J9ClassIsFlattened)
 
 #define J9ROMFIELD_IS_NULL_RESTRICTED(romField)	J9_ARE_ALL_BITS_SET((romField)->modifiers, J9FieldFlagIsNullRestricted)
+#define J9_IS_J9CLASS_ALLOW_DEFAULT_VALUE(clazz) J9_ARE_ALL_BITS_SET((clazz)->classFlags, J9ClassAllowsInitialDefaultValue)
 /**
  * Disable flattening of volatile field that is > 8 bytes for now, as the current implementation of copyObjectFields() will tear this field.
  */
@@ -354,6 +355,7 @@ static const struct { \
 #define J9_IS_J9CLASS_PRIMITIVE_VALUETYPE(clazz) FALSE
 #define J9_IS_J9CLASS_FLATTENED(clazz) FALSE
 #define J9ROMFIELD_IS_NULL_RESTRICTED(romField) FALSE
+#define J9_IS_J9CLASS_ALLOW_DEFAULT_VALUE(clazz) FALSE
 #define J9_IS_FIELD_FLATTENED(fieldClazz, romFieldShape) FALSE
 #define J9_IS_NULL_RESTRICTED_FIELD_FLATTENED(fieldClazz, romFieldShape) FALSE
 #define J9_VALUETYPE_FLATTENED_SIZE(clazz)((UDATA) 0) /* It is not possible for this macro to be used since we always check J9_IS_J9CLASS_FLATTENED before ever using it. */

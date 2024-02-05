@@ -211,7 +211,7 @@ internalCreateArrayClass(J9VMThread* vmThread, J9ROMArrayClass* romClass, J9Clas
 	 * instance of the array. Element class init must be done before the arrayClass is created so that in the case
 	 * of an init failure the arrayClass is not temporarily exposed.
 	 */
-	if (J9_IS_J9CLASS_PRIMITIVE_VALUETYPE(elementClass)) {
+	if (J9_IS_J9CLASS_PRIMITIVE_VALUETYPE(elementClass) || J9_IS_J9CLASS_ALLOW_DEFAULT_VALUE(elementClass)) {
 		UDATA initStatus = elementClass->initializeStatus;
 		if ((J9ClassInitSucceeded != initStatus) && ((UDATA)vmThread != initStatus)) {
 			initializeClass(vmThread, elementClass);
