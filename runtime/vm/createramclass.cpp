@@ -1975,7 +1975,7 @@ loadFlattenableFieldValueClasses(J9VMThread *currentThread, J9ClassLoader *class
 					goto done;
 				} else {
 					J9ROMClass *valueROMClass = valueClass->romClass;
-					if (!J9ROMCLASS_IS_PRIMITIVE_VALUE_TYPE(valueROMClass)) {
+					if (!J9ROMCLASS_IS_VALUE_TYPE(valueROMClass)) {
 						J9UTF8 *badClass = NNSRP_GET(valueROMClass->className, J9UTF8*);
 						setCurrentExceptionNLSWithArgs(currentThread, J9NLS_VM_ERROR_QTYPE_NOT_VALUE_TYPE, J9VMCONSTANTPOOL_JAVALANGINCOMPATIBLECLASSCHANGEERROR, J9UTF8_LENGTH(badClass), J9UTF8_DATA(badClass));
 						result = FALSE;
