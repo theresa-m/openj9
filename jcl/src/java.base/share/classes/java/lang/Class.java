@@ -5626,10 +5626,10 @@ SecurityException {
 		if (this.isArray()) {
 		}
 /*[IF INLINE-TYPES]*/
-		else if (this.isPrimitiveClass()) {
-			name = new StringBuilder(name.length() + 2).
-				append('Q').append(name).append(';').toString();
-		}
+		// else if (this.isPrimitiveClass()) {
+		// 	name = new StringBuilder(name.length() + 2).
+		// 		append('Q').append(name).append(';').toString();
+		// }
 /*[ENDIF] INLINE-TYPES */
 		else {
 			name = new StringBuilder(name.length() + 2).
