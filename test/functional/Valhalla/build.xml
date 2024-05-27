@@ -61,7 +61,9 @@
 			<src path="${src_qtypes}"/>
 			<!-- <src path="${src_lw5}"/> -->
 			<src path="${transformerListener}" />
-			<compilerarg line='--add-exports java.base/jdk.internal.misc=ALL-UNNAMED --add-exports java.base/jdk.internal.value=ALL-UNNAMED' />
+			<compilerarg line='--add-exports java.base/jdk.internal.misc=ALL-UNNAMED' />
+			<compilerarg line='--add-exports java.base/jdk.internal.value=ALL-UNNAMED' />
+			<compilerarg line='--add-exports java.base/jdk.internal.vm.annotation=ALL-UNNAMED' />
 			<compilerarg line='--enable-preview -source 23'/>
 			<!-- uncomment when running with lw5 -->
 			<!--<compilerarg line='-XDenableNullRestrictedTypes' />-->

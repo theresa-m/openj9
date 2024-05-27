@@ -26,12 +26,16 @@ import static org.testng.Assert.*;
 import org.testng.annotations.Test;
 import org.testng.annotations.BeforeClass;
 
+import jdk.internal.vm.annotation.ImplicitlyConstructible;
+import jdk.internal.vm.annotation.NullRestricted;
+
 
 @Test(groups = { "level.sanity" })
 public class NullRestrictedTypeOptTests {
 
 	// A primitive (null-restricted) value class
-	public primitive static class PrimPair {
+	@ImplicitlyConstructible
+	public value static class PrimPair {
 		public final int x, y;
 
 		public PrimPair(int x, int y) {
@@ -52,6 +56,7 @@ public class NullRestrictedTypeOptTests {
 	}
 
 	public static int result = 0;
+	@NullRestricted
 	public static PrimPair[] parr = new PrimPair[] { new PrimPair(3, 4), new PrimPair(0, 0), new PrimPair(0, 0) };
 
 	@Test(priority=1)
@@ -69,46 +74,60 @@ public class NullRestrictedTypeOptTests {
 		}
 	}
 
+	@NullRestricted
+	static PrimPair evalTestEA1a_p1;
+	@NullRestricted
+	static PrimPair evalTestEA1a_p2;
+	@NullRestricted
+	static PrimPair evalTestEA1a_p3;
+	@NullRestricted
+	static PrimPair evalTestEA1a_p4;
+
 	static private void evalTestEA1a(int iter) {
 		// Test situation where EA could apply to value p1,
 		// but might have to allocate contiguously
-		PrimPair p1 = new PrimPair(1, 2);
-		PrimPair p2 = parr[0];
-
-		PrimPair p3;
-		PrimPair p4;
+		evalTestEA1a_p1 = new PrimPair(1, 2);
+		evalTestEA1a_p2 = parr[0];
 
 		if (iter % 2 == 0) {
-			p3 = p2;
-			p4 = p1;
+			evalTestEA1a_p3 = evalTestEA1a_p2;
+			evalTestEA1a_p4 = evalTestEA1a_p1;
 		} else {
-			p3 = p1;
-			p4 = p2;
+			evalTestEA1a_p3 = evalTestEA1a_p1;
+			evalTestEA1a_p4 = evalTestEA1a_p2;
 		}
-		result += p3.x + p4.y;
+		result += evalTestEA1a_p3.x + evalTestEA1a_p4.y;
 	}
+
+	@NullRestricted
+	static PrimPair evalTestEA1b_p1;
+	@NullRestricted
+	static PrimPair evalTestEA1b_p2;
+
+	@NullRestricted
+	static PrimPair evalTestEA1b_p3;
+	@NullRestricted
+	static PrimPair evalTestEA1b_p4;
 
 	static private void evalTestEA1b() {
 		for (int j = 0; j < 100; j++) {
 			// Test situation where EA could apply to value p1,
 			// but might have to allocate contiguously
-			PrimPair p1 = new PrimPair(1, 2);
-			PrimPair p2 = parr[0];
-
-			PrimPair p3;
-			PrimPair p4;
+			evalTestEA1b_p1 = new PrimPair(1, 2);
+			evalTestEA1b_p2 = parr[0];
 
 			if (j % 2 == 0) {
-				p3 = p2;
-				p4 = p1;
+				evalTestEA1b_p3 = evalTestEA1b_p2;
+				evalTestEA1b_p4 = evalTestEA1b_p1;
 			} else {
-				p3 = p1;
-				p4 = p2;
+				evalTestEA1b_p3 = evalTestEA1b_p1;
+				evalTestEA1b_p4 = evalTestEA1b_p2;
 			}
-			result += p3.x + p4.y;
+			result += evalTestEA1b_p3.x + evalTestEA1b_p4.y;
 		}
 	}
 
+	@NullRestricted
 	public static PrimPair testEA2Field = new PrimPair(0,0);
 
 	@Test(priority=1)
@@ -125,17 +144,20 @@ public class NullRestrictedTypeOptTests {
 		assertEquals(testEA2Field, new PrimPair(1,2));
 	}
 
+	@NullRestricted
+	static PrimPair evalTestEA2_p1;
+
 	static private void evalTestEA2(int escapePoint) {
 		int x = 1; int y = 2;
 		int[] nextVal = {0, 2, 1};
 
 		for (int i = 0; i < 100; i++) {
-			PrimPair p1 = new PrimPair(x, y);
+			evalTestEA2_p1 = new PrimPair(x, y);
 			int updatex = nextVal[x];
 			int updatey = nextVal[y];
 			x = updatex;
 			y = updatey;
-			if (p1.x*p1.y != 2 || escapePoint == i) testEA2Field = p1;  // Value might escape
+			if (evalTestEA2_p1.x*evalTestEA2_p1.y != 2 || escapePoint == i) testEA2Field = evalTestEA2_p1;  // Value might escape
 
 			result += x*y;
 		}
@@ -150,20 +172,28 @@ public class NullRestrictedTypeOptTests {
 		}
 	}
 
+	@NullRestricted
+	static PrimPair[] evalTestEA3_arr;
+	@NullRestricted
+	static PrimPair evalTestEA3_val;
+
 	static private void evalTestEA3() {
 		for (int i = 0; i < 100; i++) {
 			// Test potential stack allocation of array of value type
-			PrimPair[] arr = new PrimPair[] {new PrimPair(1, 2), new PrimPair(3, 4)};
-			for (int j = 0; j < arr.length; j++) {
-				PrimPair val = arr[j%arr.length];
-				result += val.x + val.y;
+			evalTestEA3_arr = new PrimPair[] {new PrimPair(1, 2), new PrimPair(3, 4)};
+			for (int j = 0; j < evalTestEA3_arr.length; j++) {
+				evalTestEA3_val = evalTestEA3_arr[j%evalTestEA3_arr.length];
+				result += evalTestEA3_val.x + evalTestEA3_val.y;
 			}
 		}
 	}
 
 	// A primitive (null-restricted) value class with primitive value class fields
-	public primitive static class NestedPrimPair {
+	@ImplicitlyConstructible
+	public value static class NestedPrimPair {
+		@NullRestricted
 		public final PrimPair p1;
+		@NullRestricted
 		public final PrimPair p2;
 
 		public NestedPrimPair(int i, int j, int m, int n) {
@@ -178,6 +208,7 @@ public class NullRestrictedTypeOptTests {
 	}
 
 	// An array whose component type is a primitive (null-restricted) value class
+	@NullRestricted
 	public static NestedPrimPair[] nestedprimarr = new NestedPrimPair[] { new NestedPrimPair(11, 12, 13, 14) };
 
 	@Test(priority=1)
@@ -195,48 +226,63 @@ public class NullRestrictedTypeOptTests {
 		}
 	}
 
+	@NullRestricted
+	static NestedPrimPair evalTestEA4a_p1;
+	@NullRestricted
+	static NestedPrimPair evalTestEA4a_p2;
+
+	@NullRestricted
+	static NestedPrimPair evalTestEA4a_p3;
+	@NullRestricted
+	static NestedPrimPair evalTestEA4a_p4;
+
 	static private void evalTestEA4a(int iter) {
 		// Test situation where EA could apply to value p1,
 		// but might have to allocate contiguously
-		NestedPrimPair p1 = new NestedPrimPair(1, 2, 3, 4);
-		NestedPrimPair p2 = nestedprimarr[0];
-
-		NestedPrimPair p3;
-		NestedPrimPair p4;
+		evalTestEA4a_p1 = new NestedPrimPair(1, 2, 3, 4);
+		evalTestEA4a_p2 = nestedprimarr[0];
 
 		if (iter % 2 == 0) {
-			p3 = p2;
-			p4 = p1;
+			evalTestEA4a_p3 = evalTestEA4a_p2;
+			evalTestEA4a_p4 = evalTestEA4a_p1;
 		} else {
-			p3 = p1;
-			p4 = p2;
+			evalTestEA4a_p3 = evalTestEA4a_p1;
+			evalTestEA4a_p4 = evalTestEA4a_p2;
 		}
-		result += p3.p1.x + p4.p2.y;
+		result += evalTestEA4a_p3.p1.x + evalTestEA4a_p4.p2.y;
 	}
+
+	@NullRestricted
+	static NestedPrimPair evalTestEA4b_p1;
+	@NullRestricted
+	static NestedPrimPair evalTestEA4b_p2;
+
+	@NullRestricted
+	static NestedPrimPair evalTestEA4b_p3;
+	@NullRestricted
+	static NestedPrimPair evalTestEA4b_p4;
 
 	static private void evalTestEA4b() {
 		for (int j = 0; j < 100; j++) {
 			// Test situation where EA could apply to value p1,
 			// but might have to allocate contiguously.  Also,
 			// extra challenges for stack allocation in a loop
-			NestedPrimPair p1 = new NestedPrimPair(1, 2, 3, 4);
-			NestedPrimPair p2 = nestedprimarr[0];
-
-			NestedPrimPair p3;
-			NestedPrimPair p4;
+			evalTestEA4b_p1 = new NestedPrimPair(1, 2, 3, 4);
+			evalTestEA4b_p2 = nestedprimarr[0];
 
 			if (j % 2 == 0) {
-				p3 = p1;
-				p4 = p2;
+				evalTestEA4b_p3 = evalTestEA4b_p1;
+				evalTestEA4b_p4 = evalTestEA4b_p2;
 			} else {
-				p3 = p2;
-				p4 = p1;
+				evalTestEA4b_p3 = evalTestEA4b_p2;
+				evalTestEA4b_p4 = evalTestEA4b_p1;
 			}
 
-			result += p3.p1.x + p4.p2.y;
+			result += evalTestEA4b_p3.p1.x + evalTestEA4b_p4.p2.y;
 		}
 	}
 
+	@NullRestricted
 	public static NestedPrimPair testEA5Field = new NestedPrimPair(0,0,0,0);
 
 	@Test(priority=1)
@@ -249,11 +295,14 @@ public class NullRestrictedTypeOptTests {
 		}
 	}
 
+	@NullRestricted
+	static NestedPrimPair evalTestEA5_p;
+
 	static private void evalTestEA5() {
 		int x = 1; int y = 2; int z = 3; int w = 4;
 
 		for (int i = 0; i < 100; i++) {
-			NestedPrimPair p = new NestedPrimPair(x, y, z, w);
+			evalTestEA5_p = new NestedPrimPair(x, y, z, w);
 			int updatex = (x-y)*(x-y);
 			int updatey = y*(y-x);
 			int updatez = (z-w)*(z-w)*z;
@@ -262,7 +311,9 @@ public class NullRestrictedTypeOptTests {
 			y = updatey;
 			z = updatez;
 			w = updatew;
-			if (p.p1.x*p.p1.y+p.p2.x*p.p2.y != 14) testEA5Field = p;  // Looks like value might escape (but never actually does)
+			if (evalTestEA5_p.p1.x*evalTestEA5_p.p1.y+evalTestEA5_p.p2.x*evalTestEA5_p.p2.y != 14) {
+				testEA5Field = evalTestEA5_p;  // Looks like value might escape (but never actually does)
+			}
 
 			result += x*y*z*w;
 		}
@@ -277,18 +328,24 @@ public class NullRestrictedTypeOptTests {
 		}
 	}
 
+	@NullRestricted
+	static NestedPrimPair[] evalTestEA6_arr;
+	@NullRestricted
+	static NestedPrimPair evalTestEA6_val;
+			
 	static private void evalTestEA6() {
 		for (int i = 0; i < 100; i++) {
 			// Test potential stack allocation of array of value type
-			NestedPrimPair[] arr = new NestedPrimPair[] {new NestedPrimPair(1, 2, 3, 4), new NestedPrimPair(5, 6, 7, 8)};
-			for (int j = 0; j < arr.length; j++) {
-				NestedPrimPair val = arr[j%arr.length];
-				result += val.p1.x + val.p2.y;
+			evalTestEA6_arr = new NestedPrimPair[] {new NestedPrimPair(1, 2, 3, 4), new NestedPrimPair(5, 6, 7, 8)};
+			for (int j = 0; j < evalTestEA6_arr.length; j++) {
+				evalTestEA6_val = evalTestEA6_arr[j%evalTestEA6_arr.length];
+				result += evalTestEA6_val.p1.x + evalTestEA6_val.p2.y;
 			}
 		}
 	}
 
 	public static int sval7 = 0;
+	@NullRestricted
 	public static PrimPair escape7 = new PrimPair(0,0);
 
 	@Test(priority=1)
@@ -305,18 +362,22 @@ public class NullRestrictedTypeOptTests {
 		assertEquals(escape7, new PrimPair(1,2));
 	}
 
+	@NullRestricted
+	static PrimPair evalTestEA7_p;
+
 	static private void evalTestEA7(int i) {
 		// Test cold block escape for nested value object
-		PrimPair p = new PrimPair(1, 2);
+		evalTestEA7_p = new PrimPair(1, 2);
 
 		try {
-			result += p.x + parr[i].y;
+			result += evalTestEA7_p.x + parr[i].y;
 		} catch (ArrayIndexOutOfBoundsException aioobe) {
-			escape7 = p;
+			escape7 = evalTestEA7_p;
 		}
 	}
 
 	public static int sval8 = 0;
+	@NullRestricted
 	public static NestedPrimPair escape8 = new NestedPrimPair(0,0,0,0);
 
 	@Test(priority=1)
@@ -333,19 +394,24 @@ public class NullRestrictedTypeOptTests {
 		assertEquals(escape8, new NestedPrimPair(1,2,3,4));
 	}
 
+	@NullRestricted
+	static NestedPrimPair evalTestEA8_p;
+
 	static private void evalTestEA8(int i) {
 		// Test cold block escape for nested primitive value objects
-		NestedPrimPair p = new NestedPrimPair(1, 2, 3, 4);
+		evalTestEA8_p = new NestedPrimPair(1, 2, 3, 4);
 
 		try {
-			result += p.p1.x + nestedprimarr[i].p2.y;
+			result += evalTestEA8_p.p1.x + nestedprimarr[i].p2.y;
 		} catch (ArrayIndexOutOfBoundsException aioobe) {
-			escape8 = p;
+			escape8 = evalTestEA8_p;
 		}
 	}
 
 	public static class TestStoreToNullRestrictedField {
+		@NullRestricted
 		public PrimPair nullRestrictedInstanceField;
+		@NullRestricted
 		public static PrimPair nullRestrictedStaticField;
 
 		public void replaceInstanceField(Object val) {
@@ -357,7 +423,9 @@ public class NullRestrictedTypeOptTests {
 		}
 	}
 
-	public static primitive class TestWithFieldStoreToNullRestrictedField {
+	@ImplicitlyConstructible
+	public static value class TestWithFieldStoreToNullRestrictedField {
+		@NullRestricted
 		public PrimPair nullRestrictedInstanceField;
 
 		public TestWithFieldStoreToNullRestrictedField(Object val) {
