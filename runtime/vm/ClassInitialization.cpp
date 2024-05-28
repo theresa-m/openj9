@@ -612,6 +612,11 @@ doVerify:
 									|| J9_ARE_NO_BITS_SET(getImplicitCreationFlags(entryRomClass), J9AccImplicitCreateHasDefaultValue)
 								) {
 									J9UTF8 *romClassName = J9ROMCLASS_CLASSNAME(entryRomClass);
+									printf("class is: %s value %d ic %d default %d\n", J9UTF8_DATA(romClassName),
+										J9_ARE_NO_BITS_SET(entryRomClass->modifiers, J9AccValueType),
+										J9_ARE_NO_BITS_SET(entryRomClass->optionalFlags, J9_ROMCLASS_OPTINFO_IMPLICITCREATION_ATTRIBUTE),
+										J9_ARE_NO_BITS_SET(getImplicitCreationFlags(entryRomClass), J9AccImplicitCreateHasDefaultValue)
+									);
 									setCurrentExceptionNLSWithArgs(currentThread, J9NLS_VM_STATIC_NULLRESTRICTED_MUST_BE_IN_DEFAULT_IMPLICITCREATION_VALUE_CLASS, J9VMCONSTANTPOOL_JAVALANGINCOMPATIBLECLASSCHANGEERROR, J9UTF8_LENGTH(romClassName), J9UTF8_DATA(romClassName));
 									goto done;
 								}

@@ -1467,6 +1467,8 @@ printMethodExtendedModifiers(J9PortLibrary *portLib, U_32 modifiers)
 		}
 	}
 #endif /* defined(J9VM_OPT_CRIU_SUPPORT) */
+
+	// TODO annotations
 }
 
 
