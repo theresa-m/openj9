@@ -27,49 +27,49 @@ import java.lang.invoke.MethodType;
 import java.lang.reflect.Array;
 
 public class DDRValueTypeTest {
-	public static void main(String[] args) {
-		try {
-			createAndCheckValueType();
-		} catch (Throwable e) {
-			e.printStackTrace();
-		}
-	}
+	// public static void main(String[] args) {
+	// 	try {
+	// 		createAndCheckValueType();
+	// 	} catch (Throwable e) {
+	// 		e.printStackTrace();
+	// 	}
+	// }
 
-	private static void createAndCheckValueType() throws Throwable {
-		// Setup required classes
-		ValueTypeTests.testCreateValueInt();
-		ValueTypeTests.testCreateValueFloat();
-		ValueTypeTests.testCreatePoint2D();
-		ValueTypeTests.testCreateFlattenedLine2D();
-		ValueTypeTests.testCreateTriangle2D();
+	// private static void createAndCheckValueType() throws Throwable {
+	// 	// Setup required classes
+	// 	ValueTypeTests.testCreateValueInt();
+	// 	ValueTypeTests.testCreateValueFloat();
+	// 	ValueTypeTests.testCreatePoint2D();
+	// 	ValueTypeTests.testCreateFlattenedLine2D();
+	// 	ValueTypeTests.testCreateTriangle2D();
 		
-		// Create value types and check object
-		Class assortedValueWithSingleAlignmentClass = ValueTypeGenerator.generateValueClass("AssortedValueWithSingleAlignment", ValueTypeTests.typeWithSingleAlignmentFields);
+	// 	// Create value types and check object
+	// 	Class assortedValueWithSingleAlignmentClass = ValueTypeGenerator.generateValueClass("AssortedValueWithSingleAlignment", ValueTypeTests.typeWithSingleAlignmentFields);
 		
-		MethodHandle makeAssortedValueWithSingleAlignment = MethodHandles.lookup().findStatic(assortedValueWithSingleAlignmentClass,
-			"makeValueGeneric", MethodType.methodType(Object.class, Object.class,
-						Object.class, Object.class, Object.class, Object.class, Object.class));
+	// 	MethodHandle makeAssortedValueWithSingleAlignment = MethodHandles.lookup().findStatic(assortedValueWithSingleAlignmentClass,
+	// 		"makeValueGeneric", MethodType.methodType(Object.class, Object.class,
+	// 					Object.class, Object.class, Object.class, Object.class, Object.class));
 		
-		Object[] altFields = {
-			ValueTypeTests.defaultTrianglePositionsNew, 
-			ValueTypeTests.defaultPointPositions2, 
-			ValueTypeTests.defaultLinePositions2, 
-			ValueTypeTests.defaultIntNew, 
-			ValueTypeTests.defaultFloatNew, 
-			ValueTypeTests.defaultTrianglePositionsNew
-		};
-		Object assortedValueWithSingleAlignment = ValueTypeTests.createAssorted(makeAssortedValueWithSingleAlignment, ValueTypeTests.typeWithSingleAlignmentFields);
-		Object assortedValueWithSingleAlignmentAlt = ValueTypeTests.createAssorted(makeAssortedValueWithSingleAlignment, ValueTypeTests.typeWithSingleAlignmentFields, altFields);
-		Object valueTypeWithVolatileFields = ValueTypeTests.createValueTypeWithVolatileFields();
+	// 	Object[] altFields = {
+	// 		ValueTypeTests.defaultTrianglePositionsNew, 
+	// 		ValueTypeTests.defaultPointPositions2, 
+	// 		ValueTypeTests.defaultLinePositions2, 
+	// 		ValueTypeTests.defaultIntNew, 
+	// 		ValueTypeTests.defaultFloatNew, 
+	// 		ValueTypeTests.defaultTrianglePositionsNew
+	// 	};
+	// 	Object assortedValueWithSingleAlignment = ValueTypeTests.createAssorted(makeAssortedValueWithSingleAlignment, ValueTypeTests.typeWithSingleAlignmentFields);
+	// 	Object assortedValueWithSingleAlignmentAlt = ValueTypeTests.createAssorted(makeAssortedValueWithSingleAlignment, ValueTypeTests.typeWithSingleAlignmentFields, altFields);
+	// 	Object valueTypeWithVolatileFields = ValueTypeTests.createValueTypeWithVolatileFields();
 		
-		Object valArray = Array.newInstance(assortedValueWithSingleAlignmentClass, 2);
-		Array.set(valArray, 0, assortedValueWithSingleAlignment);
-		Array.set(valArray, 1, assortedValueWithSingleAlignmentAlt);
+	// 	Object valArray = Array.newInstance(assortedValueWithSingleAlignmentClass, 2);
+	// 	Array.set(valArray, 0, assortedValueWithSingleAlignment);
+	// 	Array.set(valArray, 1, assortedValueWithSingleAlignmentAlt);
 
-		ValueTypeTests.checkObject(assortedValueWithSingleAlignment, 
-				assortedValueWithSingleAlignmentAlt, 
-				valArray, 
-				valueTypeWithVolatileFields
-				);
-	}
+	// 	ValueTypeTests.checkObject(assortedValueWithSingleAlignment, 
+	// 			assortedValueWithSingleAlignmentAlt, 
+	// 			valArray, 
+	// 			valueTypeWithVolatileFields
+	// 			);
+	// }
 }

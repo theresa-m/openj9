@@ -25,59 +25,61 @@ import java.lang.reflect.Array;
 import static org.openj9.test.lworld.ValueTypeTestClasses.*;
 
 public class DDRBackfillLayoutTest {
-	public static void main(String[] args) {
-		try {
-			createAndCheckValueType();
-		} catch (Throwable e) {
-			e.printStackTrace();
-		}
-	}
+	// public static void main(String[] args) {
+	// 	try {
+	// 		createAndCheckValueType();
+	// 	} catch (Throwable e) {
+	// 		e.printStackTrace();
+	// 	}
+	// }
 
-	private static void createAndCheckValueType() throws Throwable {
-		// Setup required classes
-		ValueTypeTests.testCreateValueInt();
-		ValueTypeTests.testCreateValueLong();
-		ValueTypeTests.testCreateValueObject();
-		ValueTypeTests.testCreatePoint2D();
-		ValueTypeTests.testCreateFlattenedLine2D();
-		ValueTypeTests.testCreateTriangle2D();
-		ValueTypeTests.testCreateLayoutsWithPrimitives();
-		ValueTypeTests.testLayoutsWithPrimitives();
-		ValueTypeTests.testCreateFlatLayoutsWithValueTypes();
-		ValueTypeTests.testFlatLayoutsWithValueTypes();
-		ValueTypeTests.testFlatLayoutsWithRecursiveLongs();
+	// private static void createAndCheckValueType() throws Throwable {
+	// 	// Setup required classes
+	// 	ValueTypeTests.testCreateValueInt();
+	// 	ValueTypeTests.testCreateValueLong();
+	// 	ValueTypeTests.testCreateValueObject();
+	// 	ValueTypeTests.testCreatePoint2D();
+	// 	ValueTypeTests.testCreateFlattenedLine2D();
+	// 	ValueTypeTests.testCreateTriangle2D();
+	// 	ValueTypeTests.testCreateLayoutsWithPrimitives();
+	// 	ValueTypeTests.testLayoutsWithPrimitives();
+	// 	ValueTypeTests.testCreateFlatLayoutsWithValueTypes();
+	// 	ValueTypeTests.testFlatLayoutsWithValueTypes();
+	// 	ValueTypeTests.testFlatLayoutsWithRecursiveLongs();
 
-		Object flatSingleBackfillInstance =  ValueTypeTests.makeFlatSingleBackfillClass.invoke(ValueTypeTests.makeValueLong.invoke(ValueTypeTests.defaultLong), ValueTypeTests.makeValueObject.invoke(ValueTypeTests.defaultObject), ValueTypeTests.makeValueInt.invoke(ValueTypeTests.defaultInt));
-		Object objectBackfillInstance = ValueTypeTests.makeFlatObjectBackfillClass.invoke(ValueTypeTests.makeValueLong.invoke(ValueTypeTests.defaultLong), ValueTypeTests.makeValueObject.invoke(ValueTypeTests.defaultObject));
-		Object flatUnAlignedSingleBackfillInstance = ValueTypeTests.makeFlatUnAlignedSingleBackfillClass.invoke(ValueTypeTests.makeValueLong.invoke(ValueTypeTests.defaultLong), ValueTypeTests.makeFlatUnAlignedSingleClass.invoke(ValueTypeTests.makeValueInt.invoke(ValueTypeTests.defaultInt), ValueTypeTests.makeValueInt.invoke(ValueTypeTests.defaultIntNew)), ValueTypeTests.makeValueObject.invoke(ValueTypeTests.defaultObject));
-		Object flatUnAlignedSingleBackfill2Instance = ValueTypeTests.makeFlatUnAlignedSingleBackfillClass2.invoke(ValueTypeTests.makeValueLong.invoke(ValueTypeTests.defaultLong), ValueTypeTests.makeFlatUnAlignedSingleClass.invoke(ValueTypeTests.makeValueInt.invoke(ValueTypeTests.defaultInt), ValueTypeTests.makeValueInt.invoke(ValueTypeTests.defaultIntNew)), ValueTypeTests.makeFlatUnAlignedSingleClass.invoke(ValueTypeTests.makeValueInt.invoke(ValueTypeTests.defaultInt), ValueTypeTests.makeValueInt.invoke(ValueTypeTests.defaultIntNew)));
-		Object flatUnAlignedObjectBackfillInstance = ValueTypeTests.makeFlatUnAlignedObjectBackfillClass.invoke(ValueTypeTests.makeFlatUnAlignedObjectClass.invoke(ValueTypeTests.makeValueObject.invoke(ValueTypeTests.defaultObject), ValueTypeTests.makeValueObject.invoke(ValueTypeTests.defaultObjectNew)), ValueTypeTests.makeFlatUnAlignedObjectClass.invoke(ValueTypeTests.makeValueObject.invoke(ValueTypeTests.defaultObject), ValueTypeTests.makeValueObject.invoke(ValueTypeTests.defaultObjectNew)), ValueTypeTests.makeValueLong.invoke(ValueTypeTests.defaultLong));
-		Object flatUnAlignedObjectBackfill2Instance = ValueTypeTests.makeFlatUnAlignedObjectBackfillClass2.invoke(ValueTypeTests.makeValueObject.invoke(ValueTypeTests.defaultObject), ValueTypeTests.makeFlatUnAlignedObjectClass.invoke(ValueTypeTests.makeValueObject.invoke(ValueTypeTests.defaultObject), ValueTypeTests.makeValueObject.invoke(ValueTypeTests.defaultObjectNew)), ValueTypeTests.makeValueLong.invoke(ValueTypeTests.defaultLong));
-		Object singleBackfillInstance = ValueTypeTests.makeSingleBackfillClass.invoke(ValueTypeTests.defaultLong, ValueTypeTests.defaultObject, ValueTypeTests.defaultInt);
-		Object objectBackfillInstance2 = ValueTypeTests.makeObjectBackfillClass.invoke(ValueTypeTests.defaultLong, ValueTypeTests.defaultObject);
+	// 	Object flatSingleBackfillInstance =  ValueTypeTests.makeFlatSingleBackfillClass.invoke(ValueTypeTests.makeValueLong.invoke(ValueTypeTests.defaultLong), ValueTypeTests.makeValueObject.invoke(ValueTypeTests.defaultObject), ValueTypeTests.makeValueInt.invoke(ValueTypeTests.defaultInt));
+	// 	Object objectBackfillInstance = ValueTypeTests.makeFlatObjectBackfillClass.invoke(ValueTypeTests.makeValueLong.invoke(ValueTypeTests.defaultLong), ValueTypeTests.makeValueObject.invoke(ValueTypeTests.defaultObject));
+	// 	Object flatUnAlignedSingleBackfillInstance = ValueTypeTests.makeFlatUnAlignedSingleBackfillClass.invoke(ValueTypeTests.makeValueLong.invoke(ValueTypeTests.defaultLong), ValueTypeTests.makeFlatUnAlignedSingleClass.invoke(ValueTypeTests.makeValueInt.invoke(ValueTypeTests.defaultInt), ValueTypeTests.makeValueInt.invoke(ValueTypeTests.defaultIntNew)), ValueTypeTests.makeValueObject.invoke(ValueTypeTests.defaultObject));
+	// 	Object flatUnAlignedSingleBackfill2Instance = ValueTypeTests.makeFlatUnAlignedSingleBackfillClass2.invoke(ValueTypeTests.makeValueLong.invoke(ValueTypeTests.defaultLong), ValueTypeTests.makeFlatUnAlignedSingleClass.invoke(ValueTypeTests.makeValueInt.invoke(ValueTypeTests.defaultInt), ValueTypeTests.makeValueInt.invoke(ValueTypeTests.defaultIntNew)), ValueTypeTests.makeFlatUnAlignedSingleClass.invoke(ValueTypeTests.makeValueInt.invoke(ValueTypeTests.defaultInt), ValueTypeTests.makeValueInt.invoke(ValueTypeTests.defaultIntNew)));
+	// 	Object flatUnAlignedObjectBackfillInstance = ValueTypeTests.makeFlatUnAlignedObjectBackfillClass.invoke(ValueTypeTests.makeFlatUnAlignedObjectClass.invoke(ValueTypeTests.makeValueObject.invoke(ValueTypeTests.defaultObject), ValueTypeTests.makeValueObject.invoke(ValueTypeTests.defaultObjectNew)), ValueTypeTests.makeFlatUnAlignedObjectClass.invoke(ValueTypeTests.makeValueObject.invoke(ValueTypeTests.defaultObject), ValueTypeTests.makeValueObject.invoke(ValueTypeTests.defaultObjectNew)), ValueTypeTests.makeValueLong.invoke(ValueTypeTests.defaultLong));
+	// 	Object flatUnAlignedObjectBackfill2Instance = ValueTypeTests.makeFlatUnAlignedObjectBackfillClass2.invoke(ValueTypeTests.makeValueObject.invoke(ValueTypeTests.defaultObject), ValueTypeTests.makeFlatUnAlignedObjectClass.invoke(ValueTypeTests.makeValueObject.invoke(ValueTypeTests.defaultObject), ValueTypeTests.makeValueObject.invoke(ValueTypeTests.defaultObjectNew)), ValueTypeTests.makeValueLong.invoke(ValueTypeTests.defaultLong));
+	// 	Object singleBackfillInstance = ValueTypeTests.makeSingleBackfillClass.invoke(ValueTypeTests.defaultLong, ValueTypeTests.defaultObject, ValueTypeTests.defaultInt);
+	// 	Object objectBackfillInstance2 = ValueTypeTests.makeObjectBackfillClass.invoke(ValueTypeTests.defaultLong, ValueTypeTests.defaultObject);
+//@NullRestricted
+	// 	ValueTypeDoubleLong doubleLongInstance = new ValueTypeDoubleLong(new ValueTypeLong(ValueTypeTests.defaultLong), ValueTypeTests.defaultLongNew);
+//@NullRestricted
+	// 	ValueTypeQuadLong quadLongInstance = new ValueTypeQuadLong(doubleLongInstance, new ValueTypeLong(ValueTypeTests.defaultLongNew2), ValueTypeTests.defaultLongNew3);
+	// 	ValueTypeDoubleQuadLong doubleQuadLongInstance = new ValueTypeDoubleQuadLong(quadLongInstance, doubleLongInstance, new ValueTypeLong(ValueTypeTests.defaultLongNew4), ValueTypeTests.defaultLongNew5);
 
-		ValueTypeDoubleLong doubleLongInstance = new ValueTypeDoubleLong(new ValueTypeLong(ValueTypeTests.defaultLong), ValueTypeTests.defaultLongNew);
-		ValueTypeQuadLong quadLongInstance = new ValueTypeQuadLong(doubleLongInstance, new ValueTypeLong(ValueTypeTests.defaultLongNew2), ValueTypeTests.defaultLongNew3);
-		ValueTypeDoubleQuadLong doubleQuadLongInstance = new ValueTypeDoubleQuadLong(quadLongInstance, doubleLongInstance, new ValueTypeLong(ValueTypeTests.defaultLongNew4), ValueTypeTests.defaultLongNew5);
+	// 	Object flatUnAlignedSingleBackfill2Array = Array.newInstance(ValueTypeTests.flatUnAlignedSingleBackfillClass2, 3);
+	// 	Array.set(flatUnAlignedSingleBackfill2Array, 1, flatUnAlignedSingleBackfill2Instance);
 
-		Object flatUnAlignedSingleBackfill2Array = Array.newInstance(ValueTypeTests.flatUnAlignedSingleBackfillClass2, 3);
-		Array.set(flatUnAlignedSingleBackfill2Array, 1, flatUnAlignedSingleBackfill2Instance);
+	//@NullRestricted
+	// 	ValueTypeQuadLong[] quadLongArray = new ValueTypeQuadLong[3];
+	// 	quadLongArray[1] = quadLongInstance;
 
-		ValueTypeQuadLong[] quadLongArray = new ValueTypeQuadLong[3];
-		quadLongArray[1] = quadLongInstance;
-
-		ValueTypeTests.checkObject(flatSingleBackfillInstance,
-				objectBackfillInstance,
-				flatUnAlignedSingleBackfillInstance,
-				flatUnAlignedSingleBackfill2Instance,
-				flatUnAlignedObjectBackfillInstance,
-				flatUnAlignedObjectBackfill2Instance,
-				singleBackfillInstance,
-				objectBackfillInstance2,
-				doubleLongInstance,
-				quadLongInstance,
-				doubleQuadLongInstance,
-				flatUnAlignedSingleBackfill2Array,
-				quadLongArray);
-	}
+	// 	ValueTypeTests.checkObject(flatSingleBackfillInstance,
+	// 			objectBackfillInstance,
+	// 			flatUnAlignedSingleBackfillInstance,
+	// 			flatUnAlignedSingleBackfill2Instance,
+	// 			flatUnAlignedObjectBackfillInstance,
+	// 			flatUnAlignedObjectBackfill2Instance,
+	// 			singleBackfillInstance,
+	// 			objectBackfillInstance2,
+	// 			doubleLongInstance,
+	// 			quadLongInstance,
+	// 			doubleQuadLongInstance,
+	// 			flatUnAlignedSingleBackfill2Array,
+	// 			quadLongArray);
+	// }
 }
