@@ -607,13 +607,13 @@ doVerify:
 								/* A NullRestricted field must be in a value class with an
 								* ImplicitCreation attribute. The attribute must have the ACC_DEFAULT flag set.
 								*/
-								if (J9_ARE_NO_BITS_SET(entryRomClass->modifiers, J9AccValueType)
+								if (!J9ROMCLASS_IS_VALUE(entryRomClass)
 									|| J9_ARE_NO_BITS_SET(entryRomClass->optionalFlags, J9_ROMCLASS_OPTINFO_IMPLICITCREATION_ATTRIBUTE)
 									|| J9_ARE_NO_BITS_SET(getImplicitCreationFlags(entryRomClass), J9AccImplicitCreateHasDefaultValue)
 								) {
 									J9UTF8 *romClassName = J9ROMCLASS_CLASSNAME(entryRomClass);
 									printf("class is: %s value %d ic %d default %d\n", J9UTF8_DATA(romClassName),
-										J9_ARE_NO_BITS_SET(entryRomClass->modifiers, J9AccValueType),
+										!J9ROMCLASS_IS_VALUE(entryRomClass),
 										J9_ARE_NO_BITS_SET(entryRomClass->optionalFlags, J9_ROMCLASS_OPTINFO_IMPLICITCREATION_ATTRIBUTE),
 										J9_ARE_NO_BITS_SET(getImplicitCreationFlags(entryRomClass), J9AccImplicitCreateHasDefaultValue)
 									);

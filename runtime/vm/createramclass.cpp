@@ -2011,7 +2011,7 @@ loadFlattenableFieldValueClasses(J9VMThread *currentThread, J9ClassLoader *class
 						* ImplicitCreation attribute. The attribute must have the ACC_DEFAULT flag set.
 						* Static fields will be checked during class preparation.
 						*/
-						if (J9_ARE_NO_BITS_SET(valueROMClass->modifiers, J9AccValueType)
+						if (!J9ROMCLASS_IS_VALUE(valueROMClass)
 							|| J9_ARE_NO_BITS_SET(valueROMClass->optionalFlags, J9_ROMCLASS_OPTINFO_IMPLICITCREATION_ATTRIBUTE)
 							|| J9_ARE_NO_BITS_SET(getImplicitCreationFlags(valueROMClass), J9AccImplicitCreateHasDefaultValue)
 						) {
