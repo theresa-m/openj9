@@ -286,16 +286,16 @@ ClassFileOracle::ClassFileOracle(BufferManager *bufferManager, J9CfrClassFile *c
 		_hasNonEmptyConstructor = true;
 	}
 
-	if (J9_ARE_ALL_BITS_SET(_classFile->accessFlags, CFR_ACC_VALUE_TYPE | CFR_ACC_IDENTITY)) {
-		_buildResult = InvalidValueType;
-	} else {
-		if (J9_ARE_ALL_BITS_SET(_classFile->accessFlags, CFR_ACC_VALUE_TYPE)) {
+	// if (J9_ARE_ALL_BITS_SET(_classFile->accessFlags, CFR_ACC_VALUE_TYPE | CFR_ACC_IDENTITY)) {
+	// 	_buildResult = InvalidValueType;
+	// } else {
+		if (J9_ARE_NO_BITS_SET(_classFile->accessFlags, CFR_ACC_IDENTITY)) {
 			_isValueType = true;
 		}
 		if (J9_ARE_ALL_BITS_SET(_classFile->accessFlags, CFR_ACC_IDENTITY)) {
 			_hasIdentityFlagSet = true;
 		}
-	}
+	//}
 #endif /* defined(J9VM_OPT_VALHALLA_VALUE_TYPES) */
 
 	/* analyze class file */
