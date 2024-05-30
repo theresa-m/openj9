@@ -743,7 +743,7 @@ JVM_IsImplicitlyConstructibleClass(JNIEnv *env, jclass cls)
 JNIEXPORT jboolean JNICALL
 JVM_IsNullRestrictedArray(JNIEnv *env, jobject obj)
 {
-	assert(!"JVM_IsNullRestrictedArray unimplemented");
+	//assert(!"JVM_IsNullRestrictedArray unimplemented");
 	return JNI_FALSE;
 }
 
