@@ -2332,13 +2332,13 @@ nativeOOM:
 
 #if defined(J9VM_OPT_VALHALLA_VALUE_TYPES)
 		if (J9_ARE_ALL_BITS_SET(classFlags, J9ClassHasIdentity)) {
-			if (J9ROMCLASS_IS_VALUE(romClass)) {
-				J9UTF8* className = J9ROMCLASS_CLASSNAME(romClass);
-				J9UTF8 *superclassName = J9ROMCLASS_SUPERCLASSNAME(romClass);
-				setCurrentExceptionNLSWithArgs(vmThread, J9NLS_VM_VALUETYPE_HAS_WRONG_SUPERCLASS,
-						J9VMCONSTANTPOOL_JAVALANGINCOMPATIBLECLASSCHANGEERROR, J9UTF8_LENGTH(className),
-						J9UTF8_DATA(className), J9UTF8_LENGTH(superclassName), J9UTF8_DATA(superclassName));
-			}
+			// if (J9ROMCLASS_IS_VALUE(romClass)) {
+			// 	J9UTF8* className = J9ROMCLASS_CLASSNAME(romClass);
+			// 	J9UTF8 *superclassName = J9ROMCLASS_SUPERCLASSNAME(romClass);
+			// 	setCurrentExceptionNLSWithArgs(vmThread, J9NLS_VM_VALUETYPE_HAS_WRONG_SUPERCLASS,
+			// 			J9VMCONSTANTPOOL_JAVALANGINCOMPATIBLECLASSCHANGEERROR, J9UTF8_LENGTH(className),
+			// 			J9UTF8_DATA(className), J9UTF8_LENGTH(superclassName), J9UTF8_DATA(superclassName));
+			// }
 		} else {
 			if (J9ROMCLASS_HAS_IDENTITY(romClass)) {
 				classFlags |= J9ClassHasIdentity;
