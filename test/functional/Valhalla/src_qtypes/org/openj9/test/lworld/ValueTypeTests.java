@@ -1411,8 +1411,8 @@ public class ValueTypeTests {
 	 */
 	@Test(priority=3)
 	static public Object createValueTypeWithVolatileFields() throws Throwable {
-		String fields[] = {"i:LValueInt;:value", "i2:LValueInt;:value", "point:LPoint2D;:value", "vpoint:LPoint2D;:volatile:value",
-				"line:LFlattenedLine2D;:value", "vline:LFlattenedLine2D;:volatile:value"};
+		String fields[] = {"i:LValueInt;:value", "i2:LValueInt;:value", "point:LPoint2D;:value", "vpoint:LPoint2D;:value:volatile",
+				"line:LFlattenedLine2D;:value", "vline:LFlattenedLine2D;:value:volatile"};
 		Class ValueTypeWithVolatileFieldsClass = ValueTypeGenerator.generateValueClass("ValueTypeWithVolatileFields", fields);
 		MethodHandle valueWithVolatile = lookup.findStatic(ValueTypeWithVolatileFieldsClass, "makeValueGeneric", MethodType.methodType(Object.class, Object.class, Object.class, Object.class,
 				Object.class, Object.class, Object.class));
@@ -1521,7 +1521,7 @@ public class ValueTypeTests {
 	
 	@Test(priority=4)
 	static public void testCreateFlatLayoutsWithValueTypes() throws Throwable {
-		String flatSingleBackfill[] = {"l:LValueLong;", "o:LValueObject;", "i:LValueInt;"};
+		String flatSingleBackfill[] = {"l:LValueLong;:value", "o:LValueObject;:value", "i:LValueInt;:value"};
 		flatSingleBackfillClass = ValueTypeGenerator.generateValueClass("FlatSingleBackfill", flatSingleBackfill);
 		makeFlatSingleBackfillClass = lookup.findStatic(flatSingleBackfillClass, "makeValueGeneric", MethodType.methodType(Object.class, Object.class, Object.class, Object.class));
 		getVTSingleI = generateGenericGetter(flatSingleBackfillClass, "i");

@@ -239,16 +239,14 @@ public class ValueTypeGenerator extends ClassLoader {
 			} else {
 				if ((nameAndSigValue.length > 2) && nameAndSigValue[2].equals("static")) {
 					fieldModifiers = ACC_PUBLIC + ACC_STATIC;
-				} else if ((nameAndSigValue.length > 2) && nameAndSigValue[2].equals("volatile")) {
+				} else if ((nameAndSigValue.length > 3) && nameAndSigValue[3].equals("volatile")) {
 					fieldModifiers = ACC_PUBLIC + ACC_FINAL + ACC_VOLATILE;
 				} else {
 					fieldModifiers = ACC_PUBLIC + ACC_FINAL;
 				}
 			}
 			fv = cw.visitField(fieldModifiers, nameAndSigValue[0], nameAndSigValue[1], null, null);
-			if (((nameAndSigValue.length > 2) && nameAndSigValue[2].equals("value"))
-				|| ((nameAndSigValue.length > 3) && nameAndSigValue[3].equals("value"))
-			) {
+			if ((nameAndSigValue.length > 2) && nameAndSigValue[2].equals("value")) {
 				fv.visitAttribute(new ValhallaUtils.NullRestrictedAttribute());
 			}
 			fv.visitEnd();
