@@ -246,7 +246,9 @@ public class ValueTypeGenerator extends ClassLoader {
 				}
 			}
 			fv = cw.visitField(fieldModifiers, nameAndSigValue[0], nameAndSigValue[1], null, null);
-			if ((nameAndSigValue.length > 2) && nameAndSigValue[2].equals("value")) {
+			if (((nameAndSigValue.length > 2) && nameAndSigValue[2].equals("value"))
+				|| ((nameAndSigValue.length > 3) && nameAndSigValue[3].equals("value"))
+			) {
 				fv.visitAttribute(new ValhallaUtils.NullRestrictedAttribute());
 			}
 			fv.visitEnd();

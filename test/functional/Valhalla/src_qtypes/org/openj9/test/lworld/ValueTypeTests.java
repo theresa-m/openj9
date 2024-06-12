@@ -1411,8 +1411,8 @@ public class ValueTypeTests {
 	 */
 	@Test(priority=3)
 	static public Object createValueTypeWithVolatileFields() throws Throwable {
-		String fields[] = {"i:LValueInt;:value", "i2:LValueInt;:value", "point:LPoint2D;:value", "vpoint:LPoint2D;:volatile",
-				"line:LFlattenedLine2D;:value", "vline:LFlattenedLine2D;:volatile"};
+		String fields[] = {"i:LValueInt;:value", "i2:LValueInt;:value", "point:LPoint2D;:value", "vpoint:LPoint2D;:volatile:value",
+				"line:LFlattenedLine2D;:value", "vline:LFlattenedLine2D;:volatile:value"};
 		Class ValueTypeWithVolatileFieldsClass = ValueTypeGenerator.generateValueClass("ValueTypeWithVolatileFields", fields);
 		MethodHandle valueWithVolatile = lookup.findStatic(ValueTypeWithVolatileFieldsClass, "makeValueGeneric", MethodType.methodType(Object.class, Object.class, Object.class, Object.class,
 				Object.class, Object.class, Object.class));
