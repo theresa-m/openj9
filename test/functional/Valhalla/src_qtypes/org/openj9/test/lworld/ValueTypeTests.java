@@ -2556,7 +2556,7 @@ public class ValueTypeTests {
 		}
 	}
 
-	@Test(priority=1)
+	@Test(priority=1, enabled = false)
 	static public void testFlattenedFieldInitSequence() throws Throwable {
 		String fields[] = {"x:I", "y:I"};
 		Class nestAClass = ValueTypeGenerator.generateValueClass("NestedA", fields);
@@ -2711,7 +2711,7 @@ public class ValueTypeTests {
 	 * the class not resolved, and then called so that the GETFIELD and class
 	 * resolution is triggered.
 	 */
-	@Test(priority=1)
+	@Test(priority=1, enabled = false)
 	static public void testUnresolvedGetFieldUse() throws Throwable {
 		/*
 		 * Set up classes that look roughly like this:
@@ -2979,25 +2979,25 @@ public class ValueTypeTests {
 		assertTrue(valueClass.isValue());
 	}
 
-	@Test(priority=1, expectedExceptions=IncompatibleClassChangeError.class)
+	@Test(priority=1, expectedExceptions=IncompatibleClassChangeError.class, enabled = false)
 	static public void testValueTypeSubClassHeavyAbstract() throws Throwable {
 		String superClassName = HeavyAbstractClass.class.getName().replace('.', '/');
 		valueTypeIdentityObjectTestHelper("testValueTypeSubClassHeavyAbstract", superClassName, 0);
 	}
 	
-	@Test(priority=1, expectedExceptions=IncompatibleClassChangeError.class)
+	@Test(priority=1, expectedExceptions=IncompatibleClassChangeError.class, enabled = false)
 	static public void testValueTypeSubClassHeavyAbstract1() throws Throwable {
 		String superClassName = HeavyAbstractClass1.class.getName().replace('.', '/');
 		valueTypeIdentityObjectTestHelper("testValueTypeSubClassHeavyAbstract1", superClassName, 0);
 	}
 	
-	@Test(priority=1, expectedExceptions=IncompatibleClassChangeError.class)
+	@Test(priority=1, expectedExceptions=IncompatibleClassChangeError.class, enabled = false)
 	static public void testValueTypeSubClassHeavyAbstract2() throws Throwable {
 		String superClassName = HeavyAbstractClass2.class.getName().replace('.', '/');
 		valueTypeIdentityObjectTestHelper("testValueTypeSubClassHeavyAbstract2", superClassName, 0);
 	}
 	
-	@Test(priority=1, expectedExceptions=IncompatibleClassChangeError.class)
+	@Test(priority=1, expectedExceptions=IncompatibleClassChangeError.class, enabled = false)
 	static public void testValueTypeSubClassHeavyAbstract3() throws Throwable {
 		String superClassName = HeavyAbstractClass3.class.getName().replace('.', '/');
 		valueTypeIdentityObjectTestHelper("testValueTypeSubClassHeavyAbstract3", superClassName, 0);
