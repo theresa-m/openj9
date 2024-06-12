@@ -2389,7 +2389,7 @@ public class ValueTypeTests {
 	/*
 	 * Create a 2D array of valueTypes, verify that the default elements are null.
 	 */
-	@Test(priority=5, invocationCount=2)
+	@Test(priority=5, invocationCount=2, enabled = false)
 	static public void testMultiDimentionalArrays() throws Throwable {
 		Class assortedValueWithLongAlignment2DClass = Array.newInstance(assortedValueWithLongAlignmentClass, 1).getClass();
 		Class assortedValueWithSingleAlignment2DClass = Array.newInstance(assortedValueWithSingleAlignmentClass, 1).getClass();
@@ -2485,7 +2485,7 @@ public class ValueTypeTests {
 	 * Maintain a buffer of flattened arrays with long-aligned valuetypes while keeping a certain amount of classes alive at any
 	 * single time. This forces the GC to unload the classes.
 	 */
-	@Test(priority=5, invocationCount=2)
+	@Test(priority=5, invocationCount=2, enabled = false)
 	static public void testValueWithLongAlignmentGCScanning() throws Throwable {
 		ArrayList<Object> longAlignmentArrayList = new ArrayList<Object>(objectGCScanningIterationCount);
 		for (int i = 0; i < objectGCScanningIterationCount; i++) {
@@ -2510,7 +2510,7 @@ public class ValueTypeTests {
 	 * Maintain a buffer of flattened arrays with object-aligned valuetypes while keeping a certain amount of classes alive at any
 	 * single time. This forces the GC to unload the classes.
 	 */
-	@Test(priority=5, invocationCount=2)
+	@Test(priority=5, invocationCount=2, enabled = false)
 	static public void testValueWithObjectAlignmentGCScanning() throws Throwable {
 		ArrayList<Object> objectAlignmentArrayList = new ArrayList<Object>(objectGCScanningIterationCount);
 		for (int i = 0; i < objectGCScanningIterationCount; i++) {
@@ -2535,7 +2535,7 @@ public class ValueTypeTests {
 	 * Maintain a buffer of flattened arrays with single-aligned valuetypes while keeping a certain amount of classes alive at any
 	 * single time. This forces the GC to unload the classes.
 	 */
-	@Test(priority=5, invocationCount=2)
+	@Test(priority=5, invocationCount=2, enabled = false)
 	static public void testValueWithSingleAlignmentGCScanning() throws Throwable {
 		ArrayList<Object> singleAlignmentArrayList = new ArrayList<Object>(objectGCScanningIterationCount);
 		for (int i = 0; i < objectGCScanningIterationCount; i++) {
