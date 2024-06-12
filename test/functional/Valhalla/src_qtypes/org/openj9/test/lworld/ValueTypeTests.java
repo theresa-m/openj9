@@ -1375,7 +1375,7 @@ public class ValueTypeTests {
 	 */
 	@Test(priority=1)
 	static public void testCreateValueObject() throws Throwable {
-		String fields[] = {"val:Ljava/lang/Object;:value"};
+		String fields[] = {"val:Ljava/lang/Object;"};
 
 		valueObjectClass = ValueTypeGenerator.generateValueClass("ValueObject", fields);
 
