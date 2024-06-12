@@ -1528,46 +1528,46 @@ public class ValueTypeTests {
 		getVTSingleO = generateGenericGetter(flatSingleBackfillClass, "o");
 		getVTSingleL = generateGenericGetter(flatSingleBackfillClass, "l");
 		
-		String flatObjectBackfill[] = {"l:LValueLong;", "o:LValueObject;"};
+		String flatObjectBackfill[] = {"l:LValueLong;:value", "o:LValueObject;:value"};
 		flatObjectBackfillClass = ValueTypeGenerator.generateValueClass("FlatObjectBackfill", flatObjectBackfill);
 		makeFlatObjectBackfillClass = lookup.findStatic(flatObjectBackfillClass, "makeValueGeneric", MethodType.methodType(Object.class, Object.class, Object.class));
 		getVTObjectO = generateGenericGetter(flatObjectBackfillClass, "o");
 		getVTObjectL = generateGenericGetter(flatObjectBackfillClass, "l");
 		
-		String flatUnAlignedSingle[] = {"i:LValueInt;", "i2:LValueInt;"};
+		String flatUnAlignedSingle[] = {"i:LValueInt;:value", "i2:LValueInt;:value"};
 		flatUnAlignedSingleClass = ValueTypeGenerator.generateValueClass("FlatUnAlignedSingle", flatUnAlignedSingle);
 		makeFlatUnAlignedSingleClass = lookup.findStatic(flatUnAlignedSingleClass, "makeValueGeneric", MethodType.methodType(Object.class, Object.class, Object.class));
 		getUnAlignedSingleI = generateGenericGetter(flatUnAlignedSingleClass, "i");
 		getUnAlignedSingleI2 = generateGenericGetter(flatUnAlignedSingleClass, "i2");
 		
-		String flatUnAlignedSingleBackfill[] = {"l:LValueLong;","singles:LFlatUnAlignedSingle;", "o:LValueObject;"};
+		String flatUnAlignedSingleBackfill[] = {"l:LValueLong;:value","singles:LFlatUnAlignedSingle;:value", "o:LValueObject;:value"};
 		flatUnAlignedSingleBackfillClass = ValueTypeGenerator.generateValueClass("FlatUnAlignedSingleBackfill", flatUnAlignedSingleBackfill);
 		makeFlatUnAlignedSingleBackfillClass = lookup.findStatic(flatUnAlignedSingleBackfillClass, "makeValueGeneric", MethodType.methodType(Object.class, Object.class, Object.class, Object.class));
 		getUnAlignedSingleflatSingleBackfillInstanceO = generateGenericGetter(flatUnAlignedSingleBackfillClass, "o");
 		getUnAlignedSingleflatSingleBackfillInstanceSingles = generateGenericGetter(flatUnAlignedSingleBackfillClass, "singles");
 		getUnAlignedSingleflatSingleBackfillInstanceL = generateGenericGetter(flatUnAlignedSingleBackfillClass, "l");
 		
-		String flatUnAlignedSingleBackfill2[] = {"l:LValueLong;","singles:LFlatUnAlignedSingle;", "singles2:LFlatUnAlignedSingle;"};
+		String flatUnAlignedSingleBackfill2[] = {"l:LValueLong;:value","singles:LFlatUnAlignedSingle;:value", "singles2:LFlatUnAlignedSingle;:value"};
 		flatUnAlignedSingleBackfillClass2 = ValueTypeGenerator.generateValueClass("FlatUnAlignedSingleBackfill2", flatUnAlignedSingleBackfill2);
 		makeFlatUnAlignedSingleBackfillClass2 = lookup.findStatic(flatUnAlignedSingleBackfillClass2, "makeValueGeneric", MethodType.methodType(Object.class, Object.class, Object.class, Object.class));
 		getUnAlignedSingleflatSingleBackfill2InstanceSingles = generateGenericGetter(flatUnAlignedSingleBackfillClass2, "singles");
 		getUnAlignedSingleflatSingleBackfill2InstanceSingles2 = generateGenericGetter(flatUnAlignedSingleBackfillClass2, "singles2");
 		getUnAlignedSingleflatSingleBackfill2InstanceL = generateGenericGetter(flatUnAlignedSingleBackfillClass2, "l");
 		
-		String flatUnAlignedObject[] = {"o:LValueObject;", "o2:LValueObject;"};
+		String flatUnAlignedObject[] = {"o:LValueObject;:value", "o2:LValueObject;:value"};
 		flatUnAlignedObjectClass = ValueTypeGenerator.generateValueClass("FlatUnAlignedObject", flatUnAlignedObject);
 		makeFlatUnAlignedObjectClass = lookup.findStatic(flatUnAlignedObjectClass, "makeValueGeneric", MethodType.methodType(Object.class, Object.class, Object.class));
 		getUnAlignedObjectO = generateGenericGetter(flatUnAlignedObjectClass, "o");
 		getUnAlignedObjectO2 = generateGenericGetter(flatUnAlignedObjectClass, "o2");
 		
-		String flatUnAlignedObjectBackfill[] = {"objects:LFlatUnAlignedObject;", "objects2:LFlatUnAlignedObject;", "l:LValueLong;"};
+		String flatUnAlignedObjectBackfill[] = {"objects:LFlatUnAlignedObject;:value", "objects2:LFlatUnAlignedObject;:value", "l:LValueLong;:value"};
 		flatUnAlignedObjectBackfillClass = ValueTypeGenerator.generateValueClass("FlatUnAlignedObjectBackfill", flatUnAlignedObjectBackfill);
 		makeFlatUnAlignedObjectBackfillClass = lookup.findStatic(flatUnAlignedObjectBackfillClass, "makeValueGeneric", MethodType.methodType(Object.class, Object.class, Object.class, Object.class));
 		getUnAlignedObjectflatObjectBackfillInstanceObjects = generateGenericGetter(flatUnAlignedObjectBackfillClass, "objects");
 		getUnAlignedObjectflatObjectBackfillInstanceObjects2 = generateGenericGetter(flatUnAlignedObjectBackfillClass, "objects2");
 		getUnAlignedObjectflatObjectBackfillInstanceL = generateGenericGetter(flatUnAlignedObjectBackfillClass, "l");
 		
-		String flatUnAlignedObjectBackfill2[] = {"o:LValueObject;", "objects:LFlatUnAlignedObject;", "l:LValueLong;"};
+		String flatUnAlignedObjectBackfill2[] = {"o:LValueObject;:value", "objects:LFlatUnAlignedObject;:value", "l:LValueLong;:value"};
 		flatUnAlignedObjectBackfillClass2 = ValueTypeGenerator.generateValueClass("FlatUnAlignedObjectBackfill2", flatUnAlignedObjectBackfill2);
 		makeFlatUnAlignedObjectBackfillClass2 = lookup.findStatic(flatUnAlignedObjectBackfillClass2, "makeValueGeneric", MethodType.methodType(Object.class, Object.class, Object.class, Object.class));
 		getUnAlignedObjectflatObjectBackfill2InstanceO = generateGenericGetter(flatUnAlignedObjectBackfillClass2, "o");
