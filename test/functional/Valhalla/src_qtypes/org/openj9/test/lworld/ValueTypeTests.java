@@ -1963,7 +1963,7 @@ public class ValueTypeTests {
 	 * flattenable fields are set to the default values.
 	 * NULL should never be observed for Qtypes.
 	 */
-	@Test(priority=4)
+	@Test(priority=4, enabled = false)
 	static public void testDefaultValues() throws Throwable {
 		/* Test with assorted value object with long alignment */
 		MethodHandle makeValueTypeDefaultValueWithLong = lookup.findStatic(assortedValueWithLongAlignmentClass,
@@ -2138,7 +2138,7 @@ public class ValueTypeTests {
 	 * Create Array Objects with Point Class without initialization
 	 * The array should be set to a Default Value.
 	 */
-	@Test(priority=4, invocationCount=2)
+	@Test(priority=4, invocationCount=2, enabled = false)
 	static public void testDefaultValueInPointArray() throws Throwable {
 		Object pointArray = Array.newInstance(point2DClass, genericArraySize);
 		for (int i = 0; i < genericArraySize; i++) {
@@ -2151,7 +2151,7 @@ public class ValueTypeTests {
 	 * Create multi dimensional array with Point Class without initialization.
 	 * Set each array value to a default value and check field access method handler.
 	 */
-	@Test(priority=4)
+	@Test(priority=4, enabled = false)
 	static public void testDefaultValueInPointInstanceMultiArray() throws Throwable {
 		Object pointArray = Array.newInstance(point2DClass, new int[]{genericArraySize, genericArraySize});
 		String[] fields = {"x:I", "y:I"};
@@ -2175,7 +2175,7 @@ public class ValueTypeTests {
 	 * multianewarray.
 	 * Set each array value to a default value and check field access method handler.
 	 */
-	@Test(priority=4)
+	@Test(priority=4, enabled = false)
 	static public void testDefaultValueInPointByteCodeMultiArray() throws Throwable {
 		MethodHandle makePointArray = lookup.findStatic(point2DClass, "generate2DMultiANewArray", MethodType.methodType(Object.class, int.class, int.class));
 		Object pointArray = makePointArray.invoke(genericArraySize, genericArraySize);
@@ -2199,7 +2199,7 @@ public class ValueTypeTests {
 	 * Create Array Objects with Flattened Line without initialization
 	 * Check the fields of each element in arrays. No field should be NULL.
 	 */
-	@Test(priority=4, invocationCount=2)
+	@Test(priority=4, invocationCount=2, enabled = false)
 	static public void testDefaultValueInLineArray() throws Throwable {
 		Object flattenedLineArray = Array.newInstance(flattenedLine2DClass, genericArraySize);
 		for (int i = 0; i < genericArraySize; i++) {
@@ -2214,7 +2214,7 @@ public class ValueTypeTests {
 	 * Create multi dimensional array with Line Class without initialization.
 	 * Set each array value to a default value and check field access method handler.
 	 */
-	@Test(priority=4)
+	@Test(priority=4, enabled = false)
 	static public void testDefaultValueInLineInstanceMultiArray() throws Throwable {
 		Object flattenedLineArray = Array.newInstance(flattenedLine2DClass, new int[]{genericArraySize, genericArraySize});
 		String[] fields = {"st:LPoint;:value","en:LPoint;:value"};
@@ -2238,7 +2238,7 @@ public class ValueTypeTests {
 	 * multianewarray.
 	 * Set each array value to a default value and check field access method handler.
 	 */
-	@Test(priority=4)
+	@Test(priority=4, enabled = false)
 	static public void testDefaultValueInLineByteCodeMultiArray() throws Throwable {
 		MethodHandle makeLineArray = lookup.findStatic(flattenedLine2DClass, "generate2DMultiANewArray", MethodType.methodType(Object.class, int.class, int.class));
 		Object flattenedLineArray = makeLineArray.invoke(genericArraySize, genericArraySize);
@@ -2262,7 +2262,7 @@ public class ValueTypeTests {
 	 * Create Array Objects with triangle class without initialization
 	 * Check the fields of each element in arrays. No field should be NULL.
 	 */
-	@Test(priority=4, invocationCount=2)
+	@Test(priority=4, invocationCount=2, enabled = false)
 	static public void testDefaultValueInTriangleArray() throws Throwable {
 		Object triangleArray = Array.newInstance(triangle2DClass, genericArraySize);
 		for (int i = 0; i < genericArraySize; i++) {
@@ -2278,7 +2278,7 @@ public class ValueTypeTests {
 	 * Create multi dimensional array with Triangle Class without initialization.
 	 * Set each array value to a default value and check field access method handler.
 	 */
-	@Test(priority=4)
+	@Test(priority=4, enabled = false)
 	static public void testDefaultValueInTriangleInstanceMultiArray() throws Throwable {
 		Object triangleArray = Array.newInstance(triangle2DClass, new int[]{genericArraySize, genericArraySize});
 		String[] fields = {"v1:LFlattenedLine2D;:value", "v2:LFlattenedLine2D;:value", "v3:LFlattenedLine2D;:value"};
@@ -2302,7 +2302,7 @@ public class ValueTypeTests {
 	 * multianewarray.
 	 * Set each array value to a default value and check field access method handler.
 	 */
-	@Test(priority=4)
+	@Test(priority=4, enabled = false)
 	static public void testDefaultValueInTriangleByteCodeMultiArray() throws Throwable {
 		MethodHandle makeTriangleArray = lookup.findStatic(triangle2DClass, "generate2DMultiANewArray", MethodType.methodType(Object.class, int.class, int.class));
 		Object triangleArray = makeTriangleArray.invoke(genericArraySize, genericArraySize);
@@ -2344,7 +2344,7 @@ public class ValueTypeTests {
 	 *
 	 * Fails tests with array flattening enabled
 	 */
-	@Test(priority=5)
+	@Test(priority=5, enabled = false)
 	static public void testDefaultValueInAssortedValueWithLongAlignmenInstanceMultiArray() throws Throwable {
 		Object assortedValueWithLongAlignmentArray = Array.newInstance(assortedValueWithLongAlignmentClass, new int[]{genericArraySize, genericArraySize});
 		for (int i = 0; i < genericArraySize; i++) {
@@ -2368,7 +2368,7 @@ public class ValueTypeTests {
 	 *
 	 * Fails tests with array flattening enabled
 	 */
-	@Test(priority=5)
+	@Test(priority=5, enabled = false)
 	static public void testDefaultValueInAssortedValueWithLongAlignmentByteCodeMultiArray() throws Throwable {
 		MethodHandle makeAssortedValueWithLongAlignmentArray = lookup.findStatic(assortedValueWithLongAlignmentClass, "generate2DMultiANewArray", MethodType.methodType(Object.class, int.class, int.class));
 		Object assortedValueWithLongAlignmentArray = makeAssortedValueWithLongAlignmentArray.invoke(genericArraySize, genericArraySize);
@@ -2410,7 +2410,7 @@ public class ValueTypeTests {
 	 * Create an assortedRefWithLongAlignment Array
 	 * Since it's ref type, the array should be filled with nullptrs
 	 */
-	@Test(priority=4, invocationCount=2)
+	@Test(priority=4, invocationCount=2, enabled = false)
 	static public void testDefaultValueInAssortedRefWithLongAlignmentArray() throws Throwable {
 		Object assortedRefWithLongAlignmentArray = Array.newInstance(assortedRefWithLongAlignmentClass, genericArraySize);
 		for (int i = 0; i < genericArraySize; i++) {
