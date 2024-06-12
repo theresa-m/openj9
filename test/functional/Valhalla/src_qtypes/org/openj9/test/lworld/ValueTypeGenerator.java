@@ -216,6 +216,10 @@ public class ValueTypeGenerator extends ClassLoader {
 
 		cw.visitSource(className + ".java", null);
 
+		if (!isRef) {
+			cw.visitAttribute(new ValhallaUtils.ImplicitCreationAttribute());
+		}
+
 		if (nestHost != null) {
 			cw.visitNestHost(nestHost);
 		}
@@ -242,6 +246,9 @@ public class ValueTypeGenerator extends ClassLoader {
 				}
 			}
 			fv = cw.visitField(fieldModifiers, nameAndSigValue[0], nameAndSigValue[1], null, null);
+			if ((nameAndSigValue.length > 2) && nameAndSigValue[2].equals("value")) {
+				fv.visitAttribute(new ValhallaUtils.NullRestrictedAttribute());
+			}
 			fv.visitEnd();
 			if ((nameAndSigValue.length <= 2) || !nameAndSigValue[2].equals("static")) {
 				makeValueSig += nameAndSigValue[1];
