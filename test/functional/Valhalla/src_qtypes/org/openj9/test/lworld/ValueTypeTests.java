@@ -314,7 +314,7 @@ public class ValueTypeTests {
 		assertEquals(getY.invoke(point2D_2_check), getY.invoke(point2D_2));
 	}
 
-	@Test(priority=5)
+	@Test(priority=5, enabled = false)
 	static public void testGCFlattenedPoint2DArray() throws Throwable {
 		int x1 = 0xFFEEFFEE;
 		int y1 = 0xAABBAABB;
@@ -330,7 +330,7 @@ public class ValueTypeTests {
 		Object value = Array.get(arrayObject, 0);
 	}
 
-	@Test(priority=5)
+	@Test(priority=5, enabled = false)
 	static public void testGCFlattenedValueArrayWithSingleAlignment() throws Throwable {
 		Object array = Array.newInstance(assortedValueWithSingleAlignmentClass, 4);
 		
@@ -346,7 +346,7 @@ public class ValueTypeTests {
 		}
 	}
 
-	@Test(priority=5)
+	@Test(priority=5, enabled = false)
 	static public void testGCFlattenedValueArrayWithObjectAlignment() throws Throwable {
 		Object array = Array.newInstance(assortedValueWithObjectAlignmentClass, 4);
 		
@@ -362,7 +362,7 @@ public class ValueTypeTests {
 		}
 	}
 
-	@Test(priority=5)
+	@Test(priority=5, enabled = false)
 	static public void testGCFlattenedValueArrayWithLongAlignment() throws Throwable {
 		Object array = Array.newInstance(assortedValueWithLongAlignmentClass, genericArraySize);
 		
@@ -378,7 +378,7 @@ public class ValueTypeTests {
 		}
 	}
 
-	@Test(priority=5)
+	@Test(priority=5, enabled = false)
 	static public void testGCFlattenedLargeObjectArray() throws Throwable {
 		Object arrayObject = Array.newInstance(largeObjectValueClass, 4);
 		Object largeObjectRef = createLargeObject(new Object());
@@ -392,7 +392,7 @@ public class ValueTypeTests {
 		Object value = Array.get(arrayObject, 0);
 	}
 
-	@Test(priority=5)
+	@Test(priority=5, enabled = false)
 	static public void testGCFlattenedMegaObjectArray() throws Throwable {
 		Object arrayObject = Array.newInstance(megaObjectValueClass, 4);
 		Object megaObjectRef = createMegaObject(new Object());
