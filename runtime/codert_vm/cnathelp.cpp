@@ -2553,7 +2553,7 @@ old_slow_jitResolveFlattenableField(J9VMThread *currentThread)
 		UDATA resolveFlags = J9_RESOLVE_FLAG_RUNTIME_RESOLVE;
 		switch(resolveType) {
 		case J9TR_FLAT_RESOLVE_WITHFIELD:
-			resolveFlags |= J9_RESOLVE_FLAG_WITH_FIELD;
+			resolveFlags |= J9_RESOLVE_FLAG_WITH_FIELD; // remove? is this old method still used?
 			break;
 		case J9TR_FLAT_RESOLVE_GETFIELD:
 			break;
