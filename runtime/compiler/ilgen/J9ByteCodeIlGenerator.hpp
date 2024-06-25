@@ -256,8 +256,6 @@ private:
    void         genMonitorEnter();
    void         genMonitorExit(bool);
    TR_OpaqueClassBlock *loadValueClass(int32_t classCpIndex);
-   void         genFlattenableWithField(int32_t, TR_OpaqueClassBlock *);
-   void         genFlattenableWithFieldWithHelper(int32_t fieldCpIndex);
    void         genFlush(int32_t nargs);
    void         genFullFence(TR::Node *node);
    void         handlePendingPushSaveSideEffects(TR::Node *, int32_t stackSize = -1);

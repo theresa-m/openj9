@@ -937,7 +937,6 @@ extern "C" {
 
 /* Constants for JIT flattened field resolution */
 
-#define J9TR_FLAT_RESOLVE_WITHFIELD 0
 #define J9TR_FLAT_RESOLVE_GETFIELD 1
 #define J9TR_FLAT_RESOLVE_PUTFIELD 2
 
