@@ -132,10 +132,10 @@ isInitOrClinitImpl (J9CfrConstantPoolInfo * info)
 }
 
 /**
- * Determine if this name is "<init>", "<clinit>", or "<vnew>".
+ * Determine if this name is "<init>" or "<clinit>"
  *
  * @returns 0 if name is a normal name, CFR_METHOD_NAME_INIT if '<init>', CFR_METHOD_NAME_CLINIT if '<clinit>', and -1 if it starts with '<' but is not a valid class name.
- * @note result is positive if the name is "<init>", "<clinit>", or "<vnew>", result is negative if the name is illegal
+ * @note result is positive if the name is "<init>" or "<clinit>", result is negative if the name is illegal
  */
 I_32
 bcvIsInitOrClinit (J9CfrConstantPoolInfo * info)

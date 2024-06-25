@@ -356,7 +356,7 @@ prepareVerificationTypeBuffer(StackMapFrame* stackMapFrame, MethodContextInfo* m
 		cpInfo.bytes = (U_8*)methodInfo->signature.bytes;
 		cpInfo.slot1 = (U_32)methodInfo->signature.length;
 
-		/* Calls isInitOrClinitImpl() to determine whether the method is "<init>", "<clinit>", or "<vnew>".
+		/* Calls isInitOrClinitImpl() to determine whether the method is "<init>" or "<clinit>"
 		 * It returns 0 if name is a normal name, CFR_METHOD_NAME_INIT if '<init>' or CFR_METHOD_NAME_CLINIT if '<clinit>'
 		 */
 		if (CFR_METHOD_NAME_INIT == bcvIsInitOrClinit(&cpInfo)) {
