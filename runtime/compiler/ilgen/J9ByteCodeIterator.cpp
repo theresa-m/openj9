@@ -283,10 +283,6 @@ TR_J9ByteCodeIterator::printByteCode()
       case J9BCgetstatic: case J9BCgetfield: case J9BCputstatic: case J9BCputfield:
       case J9BCcheckcast: case J9BCinstanceof:
       case J9BCnew: case J9BCanewarray:
-      case J9BCaconst_init: case J9BCwithfield:
-         printCPIndex(next2Bytes());
-         break;
-
       case J9BCnewarray:
          printCPIndex(nextByte());
          break;
