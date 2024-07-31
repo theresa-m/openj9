@@ -512,7 +512,6 @@ done:
 		I_32 srcEndIndex = srcIndex + lengthInSlots;
 		J9Class *srcClazz = J9OBJECT_CLAZZ(currentThread, srcObject);
 		J9Class *destClazz = J9OBJECT_CLAZZ(currentThread, destObject);
-		J9Class *destComponentClass = ((J9ArrayClass *)destClazz)->componentType;
 
 		/* Array elements must be copied backwards if source and destination overlap in memory and source is before destination */
 		if ((srcObject == destObject) && (srcIndex < destIndex) && ((srcIndex + lengthInSlots) > destIndex)) {
@@ -566,8 +565,8 @@ done:
 				}
 
 				if (typeChecksRequired) {
-					if (J9_IS_J9CLASS_PRIMITIVE_VALUETYPE(destComponentClass) && (NULL == copyObject)) {
-						/* Null objects cannot be stored in an array of primitive value types */
+					if (J9_IS_J9ARRAYCLASS_NULL_RESTRICTED(destClazz) && (NULL == copyObject)) {
+						/* Null objects cannot be stored in an array of null-restricted value types */
 						return -2;
 					}
 					if (!VM_VMHelpers::objectArrayStoreAllowed(currentThread, destObject, copyObject)) {

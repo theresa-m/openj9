@@ -6890,8 +6890,8 @@ done:
 				} else {
 #if defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES)
 					J9ArrayClass *arrayrefClass = (J9ArrayClass *) J9OBJECT_CLAZZ(_currentThread, arrayref);
-					if (J9_IS_J9CLASS_PRIMITIVE_VALUETYPE(arrayrefClass->componentType) && (NULL == value)) {
-						rc = THROW_NPE;
+					if (J9_IS_J9ARRAYCLASS_NULL_RESTRICTED(arrayrefClass) && (NULL == value)) {
+						rc = THROW_ARRAY_STORE;
 						goto done;
 					}
 #endif /* if defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES) */
