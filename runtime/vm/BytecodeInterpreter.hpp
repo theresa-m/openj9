@@ -4344,21 +4344,20 @@ done:
 		VM_BytecodeAction rc = EXECUTE_BYTECODE;
 
 		/* TODO (#14073): update this function to have the same behavior as OpenJDK when obj is null, clz is null, or when clz is not a VT class (currently OpenJDK segfaults in all of these scenarios) */
-		if ((NULL != obj) && (NULL != clz) && (NULL != value)) {
+		// TODO if field is flattened does new value also need to be flattened?
+		// TODO make sure that value isn't null if field is null restricted
+
+		if ((NULL != obj) && (NULL != clz)) {
 			J9Class *clzJ9Class = J9VM_J9CLASS_FROM_HEAPCLASS(_currentThread, clz);
-
-			if (J9_IS_J9CLASS_PRIMITIVE_VALUETYPE(clzJ9Class)) {
-				VM_ValueTypeHelpers::putFlattenedFieldAtOffset(_currentThread,
-					_objectAccessBarrier,
-					clzJ9Class,
-					value,
-					obj,
-					offset);
-			}
+			VM_ValueTypeHelpers::putFlattenedFieldAtOffset(_currentThread,
+				_objectAccessBarrier,
+				clzJ9Class,
+				value,
+				obj,
+				offset);
 		} else {
-			rc = THROW_NPE;
+			rc = THROW_NPE; // TODO according to RI no defined errors are thrown..?
 		}
-
 		returnVoidFromINL(REGISTER_ARGS, 6);
 		return rc;
 	}

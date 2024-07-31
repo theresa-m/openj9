@@ -295,7 +295,7 @@ public:
 		return returnObjectRef;
 	}
 
-	/**
+	/** TODO rename and update comments, not only for flattened cases
 	 * Stores a valuetype at a specified offset in a specified object. Only Handles flattened cases.
 	 *
 	 * @param currentThread thread token
