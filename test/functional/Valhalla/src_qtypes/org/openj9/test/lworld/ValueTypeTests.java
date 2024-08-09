@@ -32,6 +32,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
+import jdk.internal.value.NullRestrictedCheckedType;
+import jdk.internal.value.ValueClass;
 import org.testng.Assert;
 import static org.testng.Assert.*;
 import org.testng.annotations.Test;
@@ -534,13 +536,6 @@ public class ValueTypeTests {
 		Object st2 = makePoint2D.invoke(x3, y3);
 		Object en2 = makePoint2D.invoke(x4, y4);
 		Object line2D_2 = makeFlattenedLine2D.invoke(st2, en2);
-
-		//Object arrayObject = Array.newInstance(flattenedLine2DClass, 3);
-		//Array.set(arrayObject, 1, line2D_1);
-		//Array.set(arrayObject, 2, line2D_2);
-
-		// Object line2D_1_check = Array.get(arrayObject, 1);
-		// Object line2D_2_check = Array.get(arrayObject, 2);
 
 		Object[] arrayObject = ValueClass.newArrayInstance(
 			NullRestrictedCheckedType.of(flattenedLine2DClass), 2);
