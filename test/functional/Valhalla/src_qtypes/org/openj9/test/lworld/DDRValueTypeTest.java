@@ -69,10 +69,17 @@ public class DDRValueTypeTest {
 		valArray[0] = assortedValueWithSingleAlignment;
 		valArray[1] = assortedValueWithSingleAlignmentAlt;
 
+		Object exp1 = Array.newInstance(assortedValueWithSingleAlignmentClass, 2);
+		Array.set(valArray, 0, assortedValueWithSingleAlignment);
+		Array.set(valArray, 1, assortedValueWithSingleAlignmentAlt);
+
+		Object[] exp2 = new Object[]{new Integer(3), new Integer(4)};
+
 		ValueTypeTests.checkObject(assortedValueWithSingleAlignment, 
 				assortedValueWithSingleAlignmentAlt, 
 				valArray, 
-				valueTypeWithVolatileFields
+				valueTypeWithVolatileFields,
+				exp1, exp2
 				);
 	}
 }
