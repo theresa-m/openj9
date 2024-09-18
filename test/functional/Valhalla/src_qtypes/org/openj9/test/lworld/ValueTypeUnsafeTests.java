@@ -23,7 +23,10 @@ package org.openj9.test.lworld;
 
 
 import jdk.internal.misc.Unsafe;
+import jdk.internal.value.NullRestrictedCheckedType;
+import jdk.internal.value.ValueClass;
 import jdk.internal.vm.annotation.ImplicitlyConstructible;
+import jdk.internal.vm.annotation.NullRestricted;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
@@ -47,8 +50,11 @@ public class ValueTypeUnsafeTests {
 	static boolean isFlatteningEnabled = false;
 	static boolean isArrayFlatteningEnabled = false;
 
+	@NullRestricted
 	static ValueTypePoint2D vtPoint;
+	@NullRestricted
 	static ValueTypePoint2D[] vtPointAry;
+	@NullRestricted
 	static ValueTypeInt[] vtIntAry;
 	static long vtPointOffsetX;
 	static long vtPointOffsetY;
@@ -93,12 +99,17 @@ public class ValueTypeUnsafeTests {
 	@BeforeMethod
 	static public void setUp() {
 		vtPoint = new ValueTypePoint2D(new ValueTypeInt(7), new ValueTypeInt(8));
-		vtPointAry = new ValueTypePoint2D[] {
-			new ValueTypePoint2D(new ValueTypeInt(5), new ValueTypeInt(10)),
-			new ValueTypePoint2D(new ValueTypeInt(10), new ValueTypeInt(20))
-		};
+		vtPointAry = (ValueTypePoint2D[])ValueClass.newArrayInstance(
+			NullRestrictedCheckedType.of(ValueTypePoint2D.class), 2
+		);
+		vtPointAry[0] = new ValueTypePoint2D(new ValueTypeInt(5), new ValueTypeInt(10));
+		vtPointAry[1] = new ValueTypePoint2D(new ValueTypeInt(10), new ValueTypeInt(20));
 		vtPointAryOffset1 = vtPointAryOffset0 + arrayElementSize(vtPointAry);
-		vtIntAry = new ValueTypeInt[] { new ValueTypeInt(1), new ValueTypeInt(2) };
+		vtIntAry = (ValueTypeInt[])ValueClass.newArrayInstance(
+			NullRestrictedCheckedType.of(ValueTypeInt.class), 2	
+		);
+		vtIntAry[0] = new ValueTypeInt(1);
+		vtIntAry[1] = new ValueTypeInt(2);
 		vtIntAryOffset1 = vtIntAryOffset0 + arrayElementSize(vtIntAry);
 	}
 
@@ -311,14 +322,12 @@ public class ValueTypeUnsafeTests {
 
 	@Test
 	static public void testGetValuesOfArray() throws Throwable {
-		if (isFlatteningEnabled) {
-			ValueTypePoint2D p = myUnsafe.getValue(vtPointAry, vtPointAryOffset0, ValueTypePoint2D.class);
-			assertEquals(p.x.i, vtPointAry[0].x.i);
-			assertEquals(p.y.i, vtPointAry[0].y.i);
-			p = myUnsafe.getValue(vtPointAry, vtPointAryOffset1, ValueTypePoint2D.class);
-			assertEquals(p.x.i, vtPointAry[1].x.i);
-			assertEquals(p.y.i, vtPointAry[1].y.i);
-		}
+		ValueTypePoint2D p = myUnsafe.getValue(vtPointAry, vtPointAryOffset0, ValueTypePoint2D.class);
+		assertEquals(p.x.i, vtPointAry[0].x.i);
+		assertEquals(p.y.i, vtPointAry[0].y.i);
+		p = myUnsafe.getValue(vtPointAry, vtPointAryOffset1, ValueTypePoint2D.class);
+		assertEquals(p.x.i, vtPointAry[1].x.i);
+		assertEquals(p.y.i, vtPointAry[1].y.i);
 	}
 
 	@Test
@@ -342,10 +351,8 @@ public class ValueTypeUnsafeTests {
 	static public void testGetValuesOfObject() throws Throwable {
 		ValueTypeInt x = myUnsafe.getValue(vtPoint, vtPointOffsetX, ValueTypeInt.class);
 		ValueTypeInt y = myUnsafe.getValue(vtPoint, vtPointOffsetY, ValueTypeInt.class);
-		if (isFlatteningEnabled) {
-			assertEquals(x.i, vtPoint.x.i);
-			assertEquals(y.i, vtPoint.y.i);
-		}
+		assertEquals(x.i, vtPoint.x.i);
+		assertEquals(y.i, vtPoint.y.i);
 	}
 
 	@Test
@@ -354,10 +361,8 @@ public class ValueTypeUnsafeTests {
 		ValueTypeLong x = myUnsafe.getValue(vtLongPoint, vtLongPointOffsetX, ValueTypeLong.class);
 		ValueTypeLong y = myUnsafe.getValue(vtLongPoint, vtLongPointOffsetY, ValueTypeLong.class);
 
-		if (isFlatteningEnabled) {
-			assertEquals(x.l, vtLongPoint.x.l);
-			assertEquals(y.l, vtLongPoint.y.l);
-		}
+		assertEquals(x.l, vtLongPoint.x.l);
+		assertEquals(y.l, vtLongPoint.y.l);
 
 		assertEquals(vtLongPoint.x.l, 123);
 		assertEquals(vtLongPoint.y.l, 456);
@@ -365,12 +370,10 @@ public class ValueTypeUnsafeTests {
 
 	@Test
 	static public void testGetValueOnNonVTObj() throws Throwable {
-		if (isFlatteningEnabled) {
-			IntWrapper iw = new IntWrapper(7);
-			ValueTypeInt vti = myUnsafe.getValue(iw, intWrapperOffsetVti, ValueTypeInt.class);
-			assertEquals(vti.i, iw.vti.i);
-			assertEquals(iw.vti.i, 7);
-		}
+		IntWrapper iw = new IntWrapper(7);
+		ValueTypeInt vti = myUnsafe.getValue(iw, intWrapperOffsetVti, ValueTypeInt.class);
+		assertEquals(vti.i, iw.vti.i);
+		assertEquals(iw.vti.i, 7);
 	}
 
 	@Test
@@ -388,10 +391,18 @@ public class ValueTypeUnsafeTests {
 	}
 
 	@Test
-	static public void testNullValuePutValue() throws Throwable {
+	static public void testNullValueNullRestrictedPutValue() throws Throwable {
 		assertThrows(NullPointerException.class, () -> {
 			myUnsafe.putValue(vtPoint, vtPointOffsetX, ValueTypeInt.class, null);
 		});
+	}
+
+	@Test
+	static public void testNullValueNullablePutValue() throws Throwable {
+		ValueClassPoint2D p = new ValueClassPoint2D(new ValueClassInt(1), new ValueClassInt(2));
+		ValueClassInt xOffset = myUnsafe.objectFieldOffset(ValueTypePoint2D.class.getDeclaredField("x"));
+		myUnsafe.putValue(p, xOffset, ValueClassInt.class, null);
+		assertNull(p.x);
 	}
 
 	@Test
@@ -412,28 +423,24 @@ public class ValueTypeUnsafeTests {
 
 	@Test
 	static public void testPutValueWithNonVTObj() throws Throwable {
-		if (isFlatteningEnabled) {
-			IntWrapper iw = new IntWrapper(7);
-			ValueTypeInt newVal = new ValueTypeInt(5892);
-			myUnsafe.putValue(iw, intWrapperOffsetVti, ValueTypeInt.class, newVal);
-			assertEquals(iw.vti.i, newVal.i);
-			assertEquals(newVal.i, 5892);
-		}
+		IntWrapper iw = new IntWrapper(7);
+		ValueTypeInt newVal = new ValueTypeInt(5892);
+		myUnsafe.putValue(iw, intWrapperOffsetVti, ValueTypeInt.class, newVal);
+		assertEquals(iw.vti.i, newVal.i);
+		assertEquals(newVal.i, 5892);
 	}
 
 	@Test
 	static public void testPutValuesOfArray() throws Throwable {
-		if (isFlatteningEnabled) {
-			ValueTypePoint2D p = new ValueTypePoint2D(new ValueTypeInt(34857), new ValueTypeInt(784382));
-			myUnsafe.putValue(vtPointAry, vtPointAryOffset0, ValueTypePoint2D.class, p);
-			assertEquals(vtPointAry[0].x.i, p.x.i);
-			assertEquals(vtPointAry[0].y.i, p.y.i);
-			myUnsafe.putValue(vtPointAry, vtPointAryOffset1, ValueTypePoint2D.class, p);
-			assertEquals(vtPointAry[1].x.i, p.x.i);
-			assertEquals(vtPointAry[1].y.i, p.y.i);
-			assertEquals(p.x.i, 34857);
-			assertEquals(p.y.i, 784382);
-		}
+		ValueTypePoint2D p = new ValueTypePoint2D(new ValueTypeInt(34857), new ValueTypeInt(784382));
+		myUnsafe.putValue(vtPointAry, vtPointAryOffset0, ValueTypePoint2D.class, p);
+		assertEquals(vtPointAry[0].x.i, p.x.i);
+		assertEquals(vtPointAry[0].y.i, p.y.i);
+		myUnsafe.putValue(vtPointAry, vtPointAryOffset1, ValueTypePoint2D.class, p);
+		assertEquals(vtPointAry[1].x.i, p.x.i);
+		assertEquals(vtPointAry[1].y.i, p.y.i);
+		assertEquals(p.x.i, 34857);
+		assertEquals(p.y.i, 784382);
 	}
 
 	@Test
@@ -448,33 +455,29 @@ public class ValueTypeUnsafeTests {
 
 	@Test
 	static public void testPutValueOfZeroSizeVTObjectDoesNotCauseError() throws Throwable {
-		ZeroSizeValueTypeWrapper zsvtw = new ZeroSizeValueTypeWrapper();
+		ZeroSizeValueTypeWrapper! zsvtw = new ZeroSizeValueTypeWrapper();
 		long zsvtwOffset0 = myUnsafe.objectFieldOffset(ZeroSizeValueTypeWrapper.class.getDeclaredField("z"));
 		myUnsafe.putValue(zsvtw, zsvtwOffset0, ZeroSizeValueType.class, new ZeroSizeValueType());
 	}
 
 	@Test
 	static public void testPutValuesOfObject() throws Throwable {
-		ValueTypeInt newI = new ValueTypeInt(47538);
+		ValueTypeInt! newI = new ValueTypeInt(47538);
 		myUnsafe.putValue(vtPoint, vtPointOffsetX, ValueTypeInt.class, newI);
 		myUnsafe.putValue(vtPoint, vtPointOffsetY, ValueTypeInt.class, newI);
-		if (isFlatteningEnabled) {
-			assertEquals(vtPoint.x.i, newI.i);
-			assertEquals(vtPoint.y.i, newI.i);
-		}
+		assertEquals(vtPoint.x.i, newI.i);
+		assertEquals(vtPoint.y.i, newI.i);
 		assertEquals(newI.i, 47538);
 	}
 
 	@Test
 	static public void testPutValueOnVTWithLongFields() throws Throwable {
-		ValueTypeLongPoint2D vtLongPoint = new ValueTypeLongPoint2D(123, 456);
-		ValueTypeLong newVal = new ValueTypeLong(23427);
+		ValueTypeLongPoint2D! vtLongPoint = new ValueTypeLongPoint2D(123, 456);
+		ValueTypeLong! newVal = new ValueTypeLong(23427);
 		myUnsafe.putValue(vtLongPoint, vtLongPointOffsetX, ValueTypeLong.class, newVal);
 		myUnsafe.putValue(vtLongPoint, vtLongPointOffsetY, ValueTypeLong.class, newVal);
-		if (isFlatteningEnabled) {
-			assertEquals(vtLongPoint.y.l, newVal.l);
-			assertEquals(vtLongPoint.x.l, newVal.l);
-		}
+		assertEquals(vtLongPoint.y.l, newVal.l);
+		assertEquals(vtLongPoint.x.l, newVal.l);
 		assertEquals(newVal.l, 23427);
 	}
 
@@ -579,7 +582,7 @@ public class ValueTypeUnsafeTests {
 	@Test(dataProvider = "compareAndDoSomethingFuncs")
 	static public void testCompareAndSetPointXSuccess(CompareAndDoSomethingFunction compareAndSwapValue) throws Throwable {
 		int original = vtPoint.x.i;
-		ValueTypeInt newVti = new ValueTypeInt(328);
+		ValueTypeInt! newVti = new ValueTypeInt(328);
 		boolean success = compareAndSwapValue.execute(vtPoint, vtPointOffsetX, ValueTypeInt.class, vtPoint.x, newVti);
 		assertEquals(newVti.i, 328);
 		assertTrue(success);
@@ -589,7 +592,7 @@ public class ValueTypeUnsafeTests {
 	@Test(dataProvider = "compareAndDoSomethingFuncs")
 	static public void testCompareAndSetPointYSuccess(CompareAndDoSomethingFunction compareAndSwapValue) throws Throwable {
 		int original = vtPoint.y.i;
-		ValueTypeInt newVti = new ValueTypeInt(328);
+		ValueTypeInt! newVti = new ValueTypeInt(328);
 		boolean success = compareAndSwapValue.execute(vtPoint, vtPointOffsetY, ValueTypeInt.class, vtPoint.y, newVti);
 		assertEquals(newVti.i, 328);
 		assertTrue(success);
@@ -599,7 +602,7 @@ public class ValueTypeUnsafeTests {
 	@Test(dataProvider = "compareAndDoSomethingFuncs")
 	static public void testCompareAndSetPointXFailure(CompareAndDoSomethingFunction compareAndSwapValue) throws Throwable {
 		int original = vtPoint.x.i;
-		ValueTypeInt newVti = new ValueTypeInt(328);
+		ValueTypeInt! newVti = new ValueTypeInt(328);
 		boolean success = compareAndSwapValue.execute(vtPoint, vtPointOffsetX, ValueTypeInt.class, new ValueTypeInt(original + 1), newVti);
 		assertEquals(newVti.i, 328);
 		assertFalse(success);
@@ -609,7 +612,7 @@ public class ValueTypeUnsafeTests {
 	@Test(dataProvider = "compareAndDoSomethingFuncs")
 	static public void testCompareAndSetPointYFailure(CompareAndDoSomethingFunction compareAndSwapValue) throws Throwable {
 		int original = vtPoint.y.i;
-		ValueTypeInt newVti = new ValueTypeInt(328);
+		ValueTypeInt! newVti = new ValueTypeInt(328);
 		boolean success = compareAndSwapValue.execute(vtPoint, vtPointOffsetY, ValueTypeInt.class, new ValueTypeInt(original + 1), newVti);
 		assertEquals(newVti.i, 328);
 		assertFalse(success);
@@ -619,7 +622,7 @@ public class ValueTypeUnsafeTests {
 	@Test(dataProvider = "compareAndDoSomethingFuncs")
 	static public void testCompareAndSetArray0Success(CompareAndDoSomethingFunction compareAndSwapValue) throws Throwable {
 		int original = vtIntAry[0].i;
-		ValueTypeInt newVti = new ValueTypeInt(456);
+		ValueTypeInt! newVti = new ValueTypeInt(456);
 		boolean success = compareAndSwapValue.execute(vtIntAry, vtIntAryOffset0, ValueTypeInt.class, vtIntAry[0], newVti);
 		assertEquals(newVti.i, 456);
 		assertTrue(success);
@@ -629,7 +632,7 @@ public class ValueTypeUnsafeTests {
 	@Test(dataProvider = "compareAndDoSomethingFuncs")
 	static public void testCompareAndSetArray1Success(CompareAndDoSomethingFunction compareAndSwapValue) throws Throwable {
 		int original = vtIntAry[1].i;
-		ValueTypeInt newVti = new ValueTypeInt(456);
+		ValueTypeInt! newVti = new ValueTypeInt(456);
 		boolean success = compareAndSwapValue.execute(vtIntAry, vtIntAryOffset1, ValueTypeInt.class, vtIntAry[1], newVti);
 		assertEquals(newVti.i, 456);
 		assertTrue(success);
@@ -639,7 +642,7 @@ public class ValueTypeUnsafeTests {
 	@Test(dataProvider = "compareAndDoSomethingFuncs")
 	static public void testCompareAndSetArray0Failure(CompareAndDoSomethingFunction compareAndSwapValue) throws Throwable {
 		int original = vtIntAry[0].i;
-		ValueTypeInt newVti = new ValueTypeInt(328);
+		ValueTypeInt! newVti = new ValueTypeInt(328);
 		boolean success = compareAndSwapValue.execute(vtIntAry, vtIntAryOffset0, ValueTypeInt.class, new ValueTypeInt(original + 1), newVti);
 		assertEquals(newVti.i, 328);
 		assertFalse(success);
@@ -649,7 +652,7 @@ public class ValueTypeUnsafeTests {
 	@Test(dataProvider = "compareAndDoSomethingFuncs")
 	static public void testCompareAndSetArray1Failure(CompareAndDoSomethingFunction compareAndSwapValue) throws Throwable {
 		int original = vtIntAry[1].i;
-		ValueTypeInt newVti = new ValueTypeInt(328);
+		ValueTypeInt! newVti = new ValueTypeInt(328);
 		boolean success = compareAndSwapValue.execute(vtIntAry, vtIntAryOffset1, ValueTypeInt.class, new ValueTypeInt(original + 1), newVti);
 		assertEquals(newVti.i, 328);
 		assertFalse(success);
@@ -658,12 +661,12 @@ public class ValueTypeUnsafeTests {
 
 	@Test(dataProvider = "compareAndDoSomethingFuncs")
 	static public void testCompareAndSetOnVTWithLongFields(CompareAndDoSomethingFunction compareAndSwapValue) throws Throwable {
-		ValueTypeLongPoint2D vtLongPoint = new ValueTypeLongPoint2D(123, 456);
+		ValueTypeLongPoint2D! vtLongPoint = new ValueTypeLongPoint2D(123, 456);
 		assertEquals(vtLongPoint.x.l, 123);
 		assertEquals(vtLongPoint.y.l, 456);
 
 		long original = vtLongPoint.x.l;
-		ValueTypeLong newVtl = new ValueTypeLong(372);
+		ValueTypeLong! newVtl = new ValueTypeLong(372);
 		boolean success = compareAndSwapValue.execute(vtLongPoint, vtLongPointOffsetX, ValueTypeLong.class, vtLongPoint.x, newVtl);
 		assertEquals(newVtl.l, 372);
 		assertTrue(success);
@@ -673,7 +676,7 @@ public class ValueTypeUnsafeTests {
 	@Test(dataProvider = "compareAndDoSomethingFuncs")
 	static public void testCompareAndSetWrongClz(CompareAndDoSomethingFunction compareAndSwapValue) throws Throwable {
 		int original = vtPoint.x.i;
-		ValueTypeInt newVti = new ValueTypeInt(328);
+		ValueTypeInt! newVti = new ValueTypeInt(328);
 		boolean success = compareAndSwapValue.execute(vtPoint, vtPointOffsetX, ValueTypeInt2.class, vtPoint.x, newVti);
 		assertEquals(newVti.i, 328);
 		if (isFlatteningEnabled) {
@@ -701,7 +704,7 @@ public class ValueTypeUnsafeTests {
 		} else {
 			int original = vtPoint.x.i;
 			Object result = myUnsafe.getAndSetValue(vtPoint, vtPointOffsetX, null, new ValueTypeInt(1));
-			assertEquals(((ValueTypeInt)result).i, original);
+			assertEquals(((ValueTypeInt!)result).i, original);
 			assertEquals(vtPoint.x.i, 1);
 		}
 	}
@@ -716,7 +719,7 @@ public class ValueTypeUnsafeTests {
 			});
 		} else {
 			Object result = myUnsafe.getAndSetValue(vtPoint, vtPointOffsetX, ValueTypeInt.class, null);
-			assertEquals(((ValueTypeInt)result).i, original);
+			assertEquals(((ValueTypeInt!)result).i, original);
 			assertEquals(vtPoint.x, null);
 		}
 	}
@@ -724,54 +727,54 @@ public class ValueTypeUnsafeTests {
 	@Test
 	static public void testGetAndSetPointX() throws Throwable {
 		int original = vtPoint.x.i;
-		ValueTypeInt newVti = new ValueTypeInt(328);
+		ValueTypeInt! newVti = new ValueTypeInt(328);
 		Object result = myUnsafe.getAndSetValue(vtPoint, vtPointOffsetX, ValueTypeInt.class, newVti);
 		assertEquals(newVti.i, 328);
-		assertEquals(((ValueTypeInt)result).i, original);
+		assertEquals(((ValueTypeInt!)result).i, original);
 		assertEquals(vtPoint.x.i, newVti.i);
 	}
 
 	@Test
 	static public void testGetAndSetPointY() throws Throwable {
 		int original = vtPoint.y.i;
-		ValueTypeInt newVti = new ValueTypeInt(328);
+		ValueTypeInt! newVti = new ValueTypeInt(328);
 		Object result = myUnsafe.getAndSetValue(vtPoint, vtPointOffsetY, ValueTypeInt.class, newVti);
 		assertEquals(newVti.i, 328);
-		assertEquals(((ValueTypeInt)result).i, original);
+		assertEquals(((ValueTypeInt!)result).i, original);
 		assertEquals(vtPoint.y.i, newVti.i);
 	}
 
 	@Test
 	static public void testGetAndSetArray0() throws Throwable {
 		int original = vtIntAry[0].i;
-		ValueTypeInt newVti = new ValueTypeInt(456);
+		ValueTypeInt! newVti = new ValueTypeInt(456);
 		Object result = myUnsafe.getAndSetValue(vtIntAry, vtIntAryOffset0, ValueTypeInt.class, newVti);
 		assertEquals(newVti.i, 456);
-		assertEquals(((ValueTypeInt)result).i, original);
+		assertEquals(((ValueTypeInt!)result).i, original);
 		assertEquals(vtIntAry[0].i, newVti.i);
 	}
 
 	@Test
 	static public void testGetAndSetArray1() throws Throwable {
 		int original = vtIntAry[1].i;
-		ValueTypeInt newVti = new ValueTypeInt(456);
+		ValueTypeInt! newVti = new ValueTypeInt(456);
 		Object result = myUnsafe.getAndSetValue(vtIntAry, vtIntAryOffset1, ValueTypeInt.class, newVti);
 		assertEquals(newVti.i, 456);
-		assertEquals(((ValueTypeInt)result).i, original);
+		assertEquals(((ValueTypeInt!)result).i, original);
 		assertEquals(vtIntAry[1].i, newVti.i);
 	}
 
 	@Test
 	static public void testGetAndSetOnVTWithLongFields() throws Throwable {
-		ValueTypeLongPoint2D vtLongPoint = new ValueTypeLongPoint2D(123, 456);
+		ValueTypeLongPoint2D! vtLongPoint = new ValueTypeLongPoint2D(123, 456);
 		assertEquals(vtLongPoint.x.l, 123);
 		assertEquals(vtLongPoint.y.l, 456);
 
 		long original = vtLongPoint.x.l;
-		ValueTypeLong newVtl = new ValueTypeLong(372);
+		ValueTypeLong! newVtl = new ValueTypeLong(372);
 		Object result = myUnsafe.getAndSetValue(vtLongPoint, vtLongPointOffsetX, ValueTypeLong.class, newVtl);
 		assertEquals(newVtl.l, 372);
-		assertEquals(((ValueTypeLong)result).l, original);
+		assertEquals(((ValueTypeLong!)result).l, original);
 		assertEquals(vtLongPoint.x.l, newVtl.l);
 	}
 }

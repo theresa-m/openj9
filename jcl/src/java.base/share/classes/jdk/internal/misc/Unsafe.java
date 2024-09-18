@@ -6559,7 +6559,6 @@ public final class Unsafe {
 	/*[IF INLINE-TYPES]*/
 	/**
 	 * Retrieves the value of the value type in the obj parameter referenced by offset.
-	 * The value type in obj at the given offset must be flattened.
 	 * This is a non-volatile operation.
 	 *
 	 * @param obj object from which to retrieve the value type
@@ -6571,7 +6570,6 @@ public final class Unsafe {
 
 	/**
 	 * Sets the value of the value type in the obj parameter at memory offset.
-	 * Both the new value and the value type in obj at the given offset must be flattened.
 	 * This is a non-volatile operation.
 	 *
 	 * @param obj object into which to store the value type

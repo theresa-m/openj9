@@ -4232,8 +4232,8 @@ done:
 		/* TODO (#14073): update this function to have the same behavior as OpenJDK when cls is null or not a valuetype (currently OpenJDK segfaults in both those scenarios) */
 		if (NULL != cls) {
 			J9Class *j9clazz = J9VM_J9CLASS_FROM_HEAPCLASS(_currentThread, cls);
-			if (J9_IS_J9CLASS_PRIMITIVE_VALUETYPE(j9clazz)) {
-				/* It is defaultValue for primitive value type, NULL for value class. */
+			if (J9_IS_J9CLASS_ALLOW_DEFAULT_VALUE(j9clazz)) {
+				/* default value for implicitly constructible value type, otherwise NULL/ */
 				result = j9clazz->flattenedClassCache->defaultValue;
 			}
 		}
@@ -4297,11 +4297,12 @@ done:
 		j9object_t result = NULL;
 		VM_BytecodeAction rc = EXECUTE_BYTECODE;
 
+		// TODO look at this issue 14073
 		/* TODO (#14073): update this function to have the same behavior as OpenJDK when obj is null, clz is null, or when clz is not a VT class (currently OpenJDK segfaults in all of these scenarios) */
 		if (NULL != obj && NULL != clz) {
 			J9Class *clzJ9Class = J9VM_J9CLASS_FROM_HEAPCLASS(_currentThread, clz);
 
-			if (J9_IS_J9CLASS_PRIMITIVE_VALUETYPE(clzJ9Class)) {
+			if (J9_IS_J9CLASS_VALUETYPE(clzJ9Class)) {
 				result = VM_ValueTypeHelpers::getFlattenedFieldAtOffset(
 					_currentThread,
 					_objectAccessBarrier,
@@ -4345,11 +4346,14 @@ done:
 
 		VM_BytecodeAction rc = EXECUTE_BYTECODE;
 
+		// TODO nevermind 14073, EA build has seg faults..?
 		/* TODO (#14073): update this function to have the same behavior as OpenJDK when obj is null, clz is null, or when clz is not a VT class (currently OpenJDK segfaults in all of these scenarios) */
-		if ((NULL != obj) && (NULL != clz) && (NULL != value)) {
-			J9Class *clzJ9Class = J9VM_J9CLASS_FROM_HEAPCLASS(_currentThread, clz);
+		// TODO if field is flattened does new value also need to be flattened?
+		// TODO make sure that value isn't null if field is null restricted
 
-			if (J9_IS_J9CLASS_PRIMITIVE_VALUETYPE(clzJ9Class)) {
+		if ((NULL != obj) && (NULL != clz) && (value != NULL)) { // value can be null
+			J9Class *clzJ9Class = J9VM_J9CLASS_FROM_HEAPCLASS(_currentThread, clz);
+			if (J9_IS_J9CLASS_VALUETYPE(clzJ9Class)) {
 				VM_ValueTypeHelpers::putFlattenedFieldAtOffset(_currentThread,
 					_objectAccessBarrier,
 					clzJ9Class,
@@ -4358,9 +4362,8 @@ done:
 					offset);
 			}
 		} else {
-			rc = THROW_NPE;
+			rc = THROW_NPE; // TODO according to RI no defined errors are thrown..?
 		}
-
 		returnVoidFromINL(REGISTER_ARGS, 6);
 		return rc;
 	}

@@ -248,7 +248,7 @@ public:
 	}
 
 #if defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES)
-	/**
+	/** TODO update comments and rename function
 	 * Performs a getfield operation on an object given an offset in bytes. Only Handles flattened cases.
 	 *
 	 * @param currentThread thread token
@@ -266,7 +266,7 @@ public:
 	getFlattenedFieldAtOffset(J9VMThread *currentThread, MM_ObjectAccessBarrierAPI objectAccessBarrier, MM_ObjectAllocationAPI objectAllocate, J9Class *returnObjectClass, j9object_t srcObject, UDATA srcOffset, bool fastPath)
 	{
 		j9object_t returnObjectRef = NULL;
-
+		// TODO if not flattened allocate differently?
 		if (fastPath) {
 			returnObjectRef = objectAllocate.inlineAllocateObject(currentThread, returnObjectClass, false, false);
 		} else {
@@ -295,7 +295,7 @@ public:
 		return returnObjectRef;
 	}
 
-	/**
+	/** TODO rename and update comments, not only for flattened cases
 	 * Stores a valuetype at a specified offset in a specified object. Only Handles flattened cases.
 	 *
 	 * @param currentThread thread token
