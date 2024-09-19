@@ -4329,16 +4329,17 @@ j9shr_shutdown(J9JavaVM *vm)
 		if (utfHashTable) {
 			hashTableFree(utfHashTable);
 		}
+
+		omrthread_rwmutex_enter_write(romToRamHashTableMutex);
 		if (NULL != romToRamHashTable) {
-			omrthread_rwmutex_enter_write(romToRamHashTableMutex);
 			config->romToRamHashTable = NULL;
 			config->romToRamHashTableMutex = NULL;
 			if (romToRamHashTable) {
 				hashTableFree(romToRamHashTable);
 			}
-			omrthread_rwmutex_exit_write(romToRamHashTableMutex);
-			omrthread_rwmutex_destroy(romToRamHashTableMutex);
 		}
+		omrthread_rwmutex_exit_write(romToRamHashTableMutex);
+		omrthread_rwmutex_destroy(romToRamHashTableMutex);
 
 		/* Kill the string farm */
 
