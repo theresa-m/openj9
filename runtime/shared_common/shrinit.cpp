@@ -4246,6 +4246,8 @@ j9shr_shutdown(J9JavaVM *vm)
 {
 	PORT_ACCESS_FROM_JAVAVM(vm);
 
+	printf("j9shr_shutdown\n");
+
 	if (vm->sharedCacheAPI != NULL)
 	{
 		if (vm->sharedCacheAPI->cacheName != NULL) {
