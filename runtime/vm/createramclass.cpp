@@ -3451,10 +3451,9 @@ fail:
 					 * elements may be flattened arrays.
 					 */
 					U_32 arrayFlags = J9ClassLargestAlignmentConstraintReference | J9ClassLargestAlignmentConstraintDouble;
-					if (J9_ARE_ALL_BITS_SET(javaVM->extendedRuntimeFlags2, J9_EXTENDED_RUNTIME2_ENABLE_VT_ARRAY_FLATTENING)) {
-						/* TODO restrict this flag to be set only for null-restricted
-						 * arrays once value type command line tests are updated.
-						 */
+					if (J9_ARE_ALL_BITS_SET(options, J9_FINDCLASS_FLAG_CLASS_OPTION_NULL_RESTRICTED_ARRAY)
+						&& J9_ARE_ALL_BITS_SET(javaVM->extendedRuntimeFlags2, J9_EXTENDED_RUNTIME2_ENABLE_VT_ARRAY_FLATTENING)
+					) {
 						arrayFlags |= J9ClassIsFlattened;
 					}
 					ramArrayClass->classFlags |= (elementClass->classFlags & arrayFlags);
