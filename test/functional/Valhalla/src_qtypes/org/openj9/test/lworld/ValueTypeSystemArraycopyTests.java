@@ -201,6 +201,13 @@ public class ValueTypeSystemArraycopyTests {
 		}
 	}
 
+	static private void initArraysToCopyNullToNullRestrictedArray() {
+		for (int i=0; i < ARRAY_SIZE; i++) {
+			vtArraySrc[i] = null;
+			nullRestrictedVtArrayDst[i] = new SomeValueClass(i);
+		}
+	}
+
 	static private void checkResults(Object[] arr1, Object[] arr2) {
 		for (int i=0; i < arr1.length; ++i) {
 			assertEquals(arr1[i], arr2[i]);
@@ -836,5 +843,11 @@ public class ValueTypeSystemArraycopyTests {
 	static public void testSystemArrayCopy28() throws Throwable {
 		initArrays();
 		testVTVT(nullRestrictedVtArraySrc, vtArrayDst);
+	}
+
+	@Test(priority=1, expectedExceptions=ArrayStoreException.class)
+	static public void testSystemArrayCopy29() throws Throwable {
+		initArraysToCopyNullToNullRestrictedArray();
+		testVTVT(vtArraySrc, nullRestrictedVtArrayDst);
 	}
 }
