@@ -1225,10 +1225,7 @@ obj:
 					J9Class *destComponentClass = ((J9ArrayClass *)destClazz)->componentType;
 
 					if (J9_IS_J9CLASS_FLATTENED(srcClazz) && J9_IS_J9CLASS_FLATTENED(destClazz) && J9_ARE_NO_BITS_SET(srcComponentClass->classFlags, J9ClassHasReferences) && J9_ARE_NO_BITS_SET(destComponentClass->classFlags, J9ClassHasReferences)) {
-						if (srcClazz == destClazz
-							|| (J9_IS_J9ARRAYCLASS_NULL_RESTRICTED(srcClazz) && (((J9ArrayClass *)srcClazz)->companionArray == destClazz))
-							|| (J9_IS_J9ARRAYCLASS_NULL_RESTRICTED(destClazz) && (srcClazz == ((J9ArrayClass *)destClazz)->companionArray))
-						) {
+						if (srcClazz == destClazz) {
 							UDATA elementSize = J9ARRAYCLASS_GET_STRIDE(srcClazz);
 							/* This only works for contiguous flattened arrays, since discontiguous flattened arrays are not supported by GC */
 							VM_ArrayCopyHelpers::primitiveArrayCopy(_currentThread, srcObject, srcStart * elementSize, destObject, destStart * elementSize, elementSize * elementCount, 0);
