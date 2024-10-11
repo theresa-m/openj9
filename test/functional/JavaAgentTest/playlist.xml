@@ -169,12 +169,6 @@
 			<impl>openj9</impl>
 			<impl>ibm</impl>
 		</impls>
-		<disables>
-			<disable>
-				<comment>https://github.com/eclipse-openj9/openj9/issues/12878</comment>
-				<testflag>VTSTANDARD</testflag>
-			</disable>
-		</disables>
 	</test>
 	<test>
 		<testCaseName>TestGCClassWithStaticRetransformInGencon</testCaseName>
@@ -205,12 +199,6 @@
 			<impl>openj9</impl>
 			<impl>ibm</impl>
 		</impls>
-		<disables>
-			<disable>
-				<comment>https://github.com/eclipse-openj9/openj9/issues/12878</comment>
-				<testflag>VTSTANDARD</testflag>
-			</disable>
-		</disables>
 	</test>
 	<test>
 		<testCaseName>TestGCClassWithStaticRetransformInBalanced</testCaseName>
@@ -240,12 +228,6 @@
 			<impl>openj9</impl>
 			<impl>ibm</impl>
 		</impls>
-		<disables>
-			<disable>
-				<comment>https://github.com/eclipse-openj9/openj9/issues/12878</comment>
-				<testflag>VTSTANDARD</testflag>
-			</disable>
-		</disables>
 	</test>
 	<test>
 		<testCaseName>TestFlushReflectionCache_SE80</testCaseName>
