@@ -66,20 +66,6 @@ typedef struct J9BCVAlloc {
 	verifyData->errorModule = module; \
 	verifyData->errorCode = code; 
 
-#define RESET_VERIFY_ERROR(verifyData)	\
-		(verifyData)->errorPC = (UDATA)-1;	\
-		(verifyData)->errorModule = (UDATA)-1; \
-		(verifyData)->errorCode = (UDATA)-1; \
-		(verifyData)->errorTargetType = (UDATA)-1; \
-		(verifyData)->errorTempData = (UDATA)-1; \
-		(verifyData)->errorDetailCode = 0; \
-		(verifyData)->errorArgumentIndex = (U_16)-1; \
-	    (verifyData)->errorTargetFrameIndex = -1; \
-	    (verifyData)->errorCurrentFramePosition = 0; \
-		(verifyData)->errorClassString = NULL; \
-		(verifyData)->errorMethodString = NULL; \
-		(verifyData)->errorSignatureString = NULL;
-
 #define CHECK_STACK_UNDERFLOW \
 	if( stackTop < stackBase ) { \
 		errorType = J9NLS_BCV_ERR_STACK_UNDERFLOW__ID;	\

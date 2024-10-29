@@ -3847,6 +3847,7 @@ verifyNewClasses(J9VMThread * currentThread, jint class_count, J9JVMTIClassPair 
 	verifyData->redefinedClasses = NULL;
 	verifyData->redefinedClassesCount = 0;
 	verifyData->vmStruct = NULL;
+	RESET_VERIFY_ERROR(verifyData);
 
 #ifdef J9VM_THR_PREEMPTIVE
 	omrthread_monitor_exit(verifyData->verifierMutex);

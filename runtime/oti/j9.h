@@ -439,4 +439,18 @@ static_assert((LITERAL_STRLEN(J9_UNMODIFIABLE_CLASS_ANNOTATION) < (size_t)'/'), 
 
 #endif /* defined(J9VM_OPT_JFR) */
 
+#define RESET_VERIFY_ERROR(verifyData)	\
+		(verifyData)->errorPC = (UDATA)-1;	\
+		(verifyData)->errorModule = (UDATA)-1; \
+		(verifyData)->errorCode = (UDATA)-1; \
+		(verifyData)->errorTargetType = (UDATA)-1; \
+		(verifyData)->errorTempData = (UDATA)-1; \
+		(verifyData)->errorDetailCode = 0; \
+		(verifyData)->errorArgumentIndex = (U_16)-1; \
+		(verifyData)->errorTargetFrameIndex = -1; \
+		(verifyData)->errorCurrentFramePosition = 0; \
+		(verifyData)->errorClassString = NULL; \
+		(verifyData)->errorMethodString = NULL; \
+		(verifyData)->errorSignatureString = NULL;
+
 #endif /* J9_H */
