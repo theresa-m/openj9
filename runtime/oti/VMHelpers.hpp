@@ -560,7 +560,8 @@ public:
 	isSameOrSuperclass(J9Class *superClass, J9Class *subClass)
 	{
 		bool isSubclass = true;
-		if (subClass != superClass) {
+		if ((NULL != superClass) && (subClass != superClass)) {
+			// crash here because superclass is null (java/lang/object?)
 			UDATA superClassDepth = getClassDepth(superClass);
 			UDATA subClassDepth = getClassDepth(subClass);
 			if ((subClassDepth <= superClassDepth) || (subClass->superclasses[superClassDepth] != superClass)) {
