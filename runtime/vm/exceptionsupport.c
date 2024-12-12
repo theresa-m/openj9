@@ -567,6 +567,7 @@ internalSetCurrentExceptionWithCause(J9VMThread *currentThread, UDATA exceptionN
 	PUSH_OBJECT_IN_SPECIAL_FRAME(currentThread, (j9object_t) preservedMessage);
 
 	if (J9VMCONSTANTPOOL_JAVALANGUNSUPPORTEDCLASSVERSIONERROR == index) {
+		print("here3\n");
 		J9JavaVM *vm = currentThread->javaVM;
 		if (J9_ARE_NO_BITS_SET(vm->extendedRuntimeFlags, J9_EXTENDED_RUNTIME_CLASS_OBJECT_ASSIGNED)) {
 			/* This is JVM startup stage, exit with message now. */

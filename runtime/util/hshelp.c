@@ -3768,6 +3768,7 @@ reloadROMClasses(J9VMThread * currentThread, jint class_count, const jvmtiClassD
 						case CFR_ThrowVerifyError:
 							return JVMTI_ERROR_FAILS_VERIFICATION;
 						case CFR_ThrowUnsupportedClassVersionError:
+							print("here2\n");
 							return JVMTI_ERROR_UNSUPPORTED_VERSION;
 						case CFR_ThrowNoClassDefFoundError:
 							return JVMTI_ERROR_NAMES_DONT_MATCH;

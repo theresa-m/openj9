@@ -2719,6 +2719,7 @@ checkClassVersion(J9CfrClassFile* classfile, U_8* segment, U_32 vmVersionShifted
 		}
 	}
 
+	printf("here\n");
 	buildError((J9CfrError *) segment, errorCode, CFR_ThrowUnsupportedClassVersionError, offset);
 	((J9CfrError *) segment)->errorMaxMajorVersion = maxMajorVersion;
 	((J9CfrError *) segment)->errorMajorVersion = majorVersion;
