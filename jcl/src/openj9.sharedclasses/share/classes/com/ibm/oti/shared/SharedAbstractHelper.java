@@ -73,6 +73,7 @@ public abstract class SharedAbstractHelper implements SharedHelper {
 
 	private native boolean getIsVerboseImpl();
 
+	/*[IF JAVA_SPEC_VERSION < 24]*/
 	/* Do not cache the permission objects, else classloader references will prevent class GC */
 	@SuppressWarnings("removal")
 	private static boolean checkPermission(SecurityManager sm, ClassLoader loader, String type) {
@@ -103,6 +104,7 @@ public abstract class SharedAbstractHelper implements SharedHelper {
 		}
 		return true; // no security manager means the check is successful
 	}
+	/*[ENDIF] JAVA_SPEC_VERSION < 24 */
 
 	private boolean isVerbose() {
 		if (verbose == null) {

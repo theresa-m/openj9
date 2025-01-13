@@ -27,7 +27,7 @@ import java.security.Permission;
 import java.security.PermissionCollection;
 import java.util.StringTokenizer;
 
-/**
+/** TODO get rid of this?
  * SharedClassPermission provides security permission to govern ClassLoader access to the shared class cache.
  *
  * <p><b>Usage:</b>

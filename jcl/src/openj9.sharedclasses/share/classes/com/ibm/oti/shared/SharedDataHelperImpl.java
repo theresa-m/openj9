@@ -54,11 +54,13 @@ final class SharedDataHelperImpl extends SharedAbstractHelper implements SharedD
 		if (!canFind) {
 			return null;
 		}
+		/*[IF JAVA_SPEC_VERSION < 24]*/
 		if (!checkReadPermission(loader)) {
 			/*[MSG "K05b5", "Read permission denied. Returning null."]*/
 			printVerboseError(Msg.getString("K05b5")); //$NON-NLS-1$
 			return null;
 		}
+		/*[ENDIF] JAVA_SPEC_VERSION < 24 */
 		if (token==null) {
 			/*[MSG "K05b6", "Cannot call findSharedData with null token. Returning null."]*/
 			printVerboseError(Msg.getString("K05b6")); //$NON-NLS-1$
@@ -78,11 +80,13 @@ final class SharedDataHelperImpl extends SharedAbstractHelper implements SharedD
 		if (!canStore) {
 			return null;
 		}
+		/*[IF JAVA_SPEC_VERSION < 24]*/
 		if (!checkWritePermission(loader)) {
 			/*[MSG "K05b7", "Write permission denied. Returning null."]*/
 			printVerboseError(Msg.getString("K05b7")); //$NON-NLS-1$
 			return null;
 		}
+		/*[ENDIF] JAVA_SPEC_VERSION < 24 */
 		if (token==null) {
 			/*[MSG "K05b8", "Cannot call storeSharedData with null token. Returning null."]*/
 			printVerboseError(Msg.getString("K05b8")); //$NON-NLS-1$
