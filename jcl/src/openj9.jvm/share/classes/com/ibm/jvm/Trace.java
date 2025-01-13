@@ -69,9 +69,11 @@ public final class Trace {
 	public static final String EXIT = "4 "; //$NON-NLS-1$
 	public static final String EXCEPTION_EXIT = "5 "; //$NON-NLS-1$
 
+	/*[IF JAVA_SPEC_VERSION < 24]*/
 	private static final String LEGACY_TRACE_PERMISSION_PROPERTY = "com.ibm.jvm.enableLegacyTraceSecurity"; //$NON-NLS-1$
 
 	private static final TracePermission TRACE_PERMISSION = new TracePermission();
+	/*[ENDIF] JAVA_SPEC_VERSION < 24 */
 
 	/**
 	 * Initialize the class.
@@ -274,6 +276,7 @@ public final class Trace {
 	private static native int registerApplicationImpl(String name,
 			String[] templates); /* ibm@94077 */
 
+	// TODO this should be excluded but it will be some work
 	/**
 	 * Check the caller has permission to use the Trace API for calls that existed pre-Java 8
 	 * when security was added. Public API added after Java 8 should call checkTraceSecurityPermssion()
@@ -288,6 +291,7 @@ public final class Trace {
 		}
 	}
 
+	/*[IF JAVA_SPEC_VERSION < 24]*/
 	private static void checkTraceSecurityPermssion() throws SecurityException {
 		/* Check the caller has TracePermission. */
 		@SuppressWarnings("removal")
@@ -296,6 +300,7 @@ public final class Trace {
 			manager.checkPermission(TRACE_PERMISSION);
 		}
 	}
+	/*[ENDIF] JAVA_SPEC_VERSION < 24 */
 
 	// Application trace tracing methods
 	public static void trace(int handle, int traceId) {
