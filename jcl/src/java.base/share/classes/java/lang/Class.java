@@ -5547,9 +5547,11 @@ private native Class<?>[] getNestMembersImpl();
 /**
  * Answers the host class of the receiver's nest.
  *
+/*[IF JAVA_SPEC_VERSION < 24]
  * @throws SecurityException if nestHost is not same as the current class, a security manager
  *	is present, the classloader of the caller is not the same or an ancestor of nestHost
  * 	class, and checkPackageAccess() denies access
+/*[ENDIF] JAVA_SPEC_VERSION < 24
  * @return the host class of the receiver.
  */
 @CallerSensitive
@@ -5561,6 +5563,7 @@ public Class<?> getNestHost()
 	if (nestHost == null) {
 		nestHost = getNestHostImpl();
 	}
+	/*[IF JAVA_SPEC_VERSION < 24]*/
 	/* The specification requires that if:
 	 *    - the returned class is not the current class
 	 *    - a security manager is present
@@ -5582,6 +5585,7 @@ public Class<?> getNestHost()
 			}
 		}
 	}
+	/*[ENDIF] JAVA_SPEC_VERSION < 24 */
 	return nestHost;
 }
 
