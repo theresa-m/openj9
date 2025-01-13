@@ -307,16 +307,19 @@ public final class InternalCRIUSupport {
 	 * @param imageDir the directory that will hold the dump files as a
 	 *                 java.nio.file.Path
 	 * @throws NullPointerException     if imageDir is null
+	/*[IF JAVA_SPEC_VERSION < 24]
 	 * @throws SecurityException        if no permission to access imageDir or no
 	 *                                  CRIU_DUMP_PERMISSION
+	/*[ENDIF] JAVA_SPEC_VERSION < 24
 	 * @throws IllegalArgumentException if imageDir is not a valid directory
 	 */
 	public InternalCRIUSupport(Path imageDir) {
+		/*[IF JAVA_SPEC_VERSION < 24]*/
 		SecurityManager manager = System.getSecurityManager();
 		if (manager != null) {
 			manager.checkPermission(CRIU_DUMP_PERMISSION);
 		}
-
+		/*[ENDIF] JAVA_SPEC_VERSION < 24 */
 		setImageDir(imageDir);
 	}
 
@@ -431,7 +434,9 @@ public final class InternalCRIUSupport {
 	 * @param imageDir the directory as a java.nio.file.Path
 	 * @return this
 	 * @throws NullPointerException     if imageDir is null
+	/*[IF JAVA_SPEC_VERSION < 24]
 	 * @throws SecurityException        if no permission to access imageDir
+	/*[ENDIF] JAVA_SPEC_VERSION < 24
 	 * @throws IllegalArgumentException if imageDir is not a valid directory
 	 */
 	public InternalCRIUSupport setImageDir(Path imageDir) {
@@ -441,10 +446,12 @@ public final class InternalCRIUSupport {
 		}
 		String dir = imageDir.toAbsolutePath().toString();
 
+		/*[IF JAVA_SPEC_VERSION < 24]*/
 		SecurityManager manager = System.getSecurityManager();
 		if (manager != null) {
 			manager.checkWrite(dir);
 		}
+		/*[ENDIF] JAVA_SPEC_VERSION < 24 */
 
 		this.imageDir = dir;
 		return this;
@@ -592,7 +599,9 @@ public final class InternalCRIUSupport {
 	 * @param workDir the directory as a java.nio.file.Path
 	 * @return this
 	 * @throws NullPointerException     if workDir is null
+	/*[IF JAVA_SPEC_VERSION < 24]
 	 * @throws SecurityException        if no permission to access workDir
+	/*[ENDIF] JAVA_SPEC_VERSION < 24
 	 * @throws IllegalArgumentException if workDir is not a valid directory
 	 */
 	public InternalCRIUSupport setWorkDir(Path workDir) {
@@ -602,10 +611,12 @@ public final class InternalCRIUSupport {
 		}
 		String dir = workDir.toAbsolutePath().toString();
 
+		/*[IF JAVA_SPEC_VERSION < 24]*/
 		SecurityManager manager = System.getSecurityManager();
 		if (manager != null) {
 			manager.checkWrite(dir);
 		}
+		/*[ENDIF] JAVA_SPEC_VERSION < 24 */
 
 		this.workDir = dir;
 		return this;

@@ -86,8 +86,10 @@ public final class CRIUSupport {
 	 * @param imageDir the directory that will hold the dump files as a
 	 *                 java.nio.file.Path
 	 * @throws NullPointerException     if imageDir is null
+	/*[IF JAVA_SPEC_VERSION < 24]
 	 * @throws SecurityException        if no permission to access imageDir or no
 	 *                                  CRIU_DUMP_PERMISSION
+	/*[ENDIF] JAVA_SPEC_VERSION < 24
 	 * @throws IllegalArgumentException if imageDir is not a valid directory
 	 */
 	public CRIUSupport(Path imageDir) {
@@ -141,7 +143,9 @@ public final class CRIUSupport {
 	 * @param imageDir the directory as a java.nio.file.Path
 	 * @return this
 	 * @throws NullPointerException     if imageDir is null
+	/*[IF JAVA_SPEC_VERSION < 24]
 	 * @throws SecurityException        if no permission to access imageDir
+	/*[ENDIF] JAVA_SPEC_VERSION < 24
 	 * @throws IllegalArgumentException if imageDir is not a valid directory
 	 */
 	public CRIUSupport setImageDir(Path imageDir) {
@@ -283,7 +287,9 @@ public final class CRIUSupport {
 	 * @param workDir the directory as a java.nio.file.Path
 	 * @return this
 	 * @throws NullPointerException     if workDir is null
+	/*[IF JAVA_SPEC_VERSION < 24]
 	 * @throws SecurityException        if no permission to access workDir
+	/*[ENDIF] JAVA_SPEC_VERSION < 24
 	 * @throws IllegalArgumentException if workDir is not a valid directory
 	 */
 	public CRIUSupport setWorkDir(Path workDir) {
