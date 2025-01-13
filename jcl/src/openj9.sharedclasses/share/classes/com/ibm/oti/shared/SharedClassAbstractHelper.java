@@ -225,6 +225,7 @@ public abstract class SharedClassAbstractHelper extends SharedAbstractHelper imp
 	@Override
 	@SuppressWarnings("removal")
 	public synchronized void setSharingFilter(SharedClassFilter filter) {
+		/*[IF JAVA_SPEC_VERSION < 24]*/
 		if (System.getSecurityManager() != null) {
 			ClassLoader loader = getClassLoader();
 			if (loader == null) {
@@ -243,6 +244,7 @@ public abstract class SharedClassAbstractHelper extends SharedAbstractHelper imp
 				return;
 			}
 		}
+		/*[ENDIF] JAVA_SPEC_VERSION < 24 */
 		this.sharedClassFilter = filter;
 	}
 
