@@ -173,7 +173,9 @@ final class SharedClassHelperFactoryImpl extends SharedAbstractHelperFactory imp
 				/*[ENDIF] JAVA_SPEC_VERSION >= 24 */
 			}
 		}
+		/*[IF JAVA_SPEC_VERSION < 24]*/
 		return null;
+		/*[ENDIF] JAVA_SPEC_VERSION < 24 */
 	}
 
 	@Override
@@ -241,7 +243,9 @@ final class SharedClassHelperFactoryImpl extends SharedAbstractHelperFactory imp
 				/*[ENDIF] JAVA_SPEC_VERSION >= 24 */
 			}
 		}
+		/*[IF JAVA_SPEC_VERSION < 24]*/
 		return null;
+		/*[ENDIF] JAVA_SPEC_VERSION < 24 */
 	}
 
 	@Override
@@ -321,7 +325,9 @@ final class SharedClassHelperFactoryImpl extends SharedAbstractHelperFactory imp
 				/*[ENDIF] JAVA_SPEC_VERSION >= 24 */
 			}
 		}
+		/*[IF JAVA_SPEC_VERSION < 24]*/
 		return null;
+		/*[ENDIF] JAVA_SPEC_VERSION < 24 */
 	}
 
 }

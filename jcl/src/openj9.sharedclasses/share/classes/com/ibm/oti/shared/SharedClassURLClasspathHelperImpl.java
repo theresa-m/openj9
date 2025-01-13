@@ -48,7 +48,28 @@ final class SharedClassURLClasspathHelperImpl extends SharedClassAbstractHelper 
 		init();
 	}
 
+	SharedClassURLClasspathHelperImpl(ClassLoader loader, URL[] classpath, int id, boolean canFind, boolean canStore) {
+		new SharedClassURLClasspathHelperImpl(loader, classpath, id, true, true);
+	}
+
 	/* Not public - should only be created by factory */
+	/*[IF JAVA_SPEC_VERSION >= 24]*/
+	SharedClassURLClasspathHelperImpl(ClassLoader loader, URL[] classpath, int id) {
+		this.origurls = classpath;
+		this.urls = new URL[classpath.length];
+		this.urlCount = classpath.length;
+		this.validated = new boolean[classpath.length];
+		this.confirmedCount = 0;
+		this.invalidURLExists = false;
+		urlcpReadWriteLock = new ReentrantReadWriteLock();
+		initialize(loader, id, true, true);
+		initializeShareableClassloader(loader);
+		initializeURLs();
+		if (!invalidURLExists) {
+			notifyClasspathChange3(id, loader, this.urls, 0, this.urlCount, true);
+		}
+	}
+	/*[ELSE] JAVA_SPEC_VERSION >= 24 */
 	SharedClassURLClasspathHelperImpl(ClassLoader loader, URL[] classpath, int id, boolean canFind, boolean canStore) {
 		this.origurls = classpath;
 		this.urls = new URL[classpath.length];
@@ -64,6 +85,7 @@ final class SharedClassURLClasspathHelperImpl extends SharedClassAbstractHelper 
 			notifyClasspathChange3(id, loader, this.urls, 0, this.urlCount, true);
 		}
 	}
+	/*[ENDIF] JAVA_SPEC_VERSION >= 24 */
 
 	private void initializeURLs() {
 		for (int i=0; i<urlCount; i++) {

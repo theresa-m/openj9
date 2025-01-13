@@ -33,10 +33,17 @@ import com.ibm.oti.util.Msg;
  */
 final class SharedClassTokenHelperImpl extends SharedClassAbstractHelper implements SharedClassTokenHelper {
 	/* Not public - should only be created by factory */
+	/*[IF JAVA_SPEC_VERSION >= 24]*/
+	SharedClassTokenHelperImpl(ClassLoader loader, int id) {
+		initialize(loader, id, true, true);
+		initializeShareableClassloader(loader);
+	}
+	/*[ELSE] JAVA_SPEC_VERSION >= 24 */
 	SharedClassTokenHelperImpl(ClassLoader loader, int id, boolean canFind, boolean canStore) {
 		initialize(loader, id, canFind, canStore);
 		initializeShareableClassloader(loader);
 	}
+	/*[ENDIF] JAVA_SPEC_VERSION >= 24 */
 
 	private native boolean findSharedClassImpl2(int loaderId, String className, ClassLoader loader, String token,
 			boolean doFind, boolean doStore, byte[] romClassCookie);

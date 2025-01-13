@@ -47,10 +47,17 @@ final class SharedClassURLHelperImpl extends SharedClassAbstractHelper implement
 	// This field is examined using the CDS adaptor
 	public static final boolean MINIMIZE_ENABLED = true;
 
+	/*[IF JAVA_SPEC_VERSION >= 24]*/
+	SharedClassURLHelperImpl(ClassLoader loader, int id) {
+		initialize(loader, id, true, true);
+		initializeShareableClassloader(loader);
+	}
+	/*[ELSE] JAVA_SPEC_VERSION >= 24 */
 	SharedClassURLHelperImpl(ClassLoader loader, int id, boolean canFind, boolean canStore) {
 		initialize(loader, id, canFind, canStore);
 		initializeShareableClassloader(loader);
 	}
+	/*[ENDIF] JAVA_SPEC_VERSION >= 24 */
 
 	private static native void init();
 
