@@ -149,6 +149,15 @@ final class SharedClassHelperFactoryImpl extends SharedAbstractHelperFactory imp
 				throw new HelperAlreadyDefinedException(Msg.getString("K059d")); //$NON-NLS-1$
 			/*[ENDIF] JAVA_SPEC_VERSION >= 9 */
 			} else {
+				/*[IF JAVA_SPEC_VERSION >= 24]*/
+				SharedClassTokenHelper result = new SharedClassTokenHelperImpl(loader, getNewID());
+				SharedClassFilter filter = getGlobalSharingFilter();
+				if (filter != null) {
+					result.setSharingFilter(filter);
+				}
+				helpers.put(loader, result);
+				return result;
+				/*[ELSE] JAVA_SPEC_VERSION >= 24 */
 				boolean canFind = canFind(loader);
 				boolean canStore = canStore(loader);
 
@@ -161,6 +170,7 @@ final class SharedClassHelperFactoryImpl extends SharedAbstractHelperFactory imp
 					helpers.put(loader, result);
 					return result;
 				}
+				/*[ENDIF] JAVA_SPEC_VERSION >= 24 */
 			}
 		}
 		return null;
@@ -207,6 +217,15 @@ final class SharedClassHelperFactoryImpl extends SharedAbstractHelperFactory imp
 				throw new HelperAlreadyDefinedException(Msg.getString("K059d")); //$NON-NLS-1$
 			/*[ENDIF] JAVA_SPEC_VERSION >= 9 */
 			} else {
+				/*[IF JAVA_SPEC_VERSION >= 24]*/
+				SharedClassURLHelper result = new SharedClassURLHelperImpl(loader, getNewID());
+				SharedClassFilter filter = getGlobalSharingFilter();
+				if (filter != null) {
+					result.setSharingFilter(filter);
+				}
+				helpers.put(loader, result);
+				return result;
+				/*[ELSE] JAVA_SPEC_VERSION >= 24 */
 				boolean canFind = canFind(loader);
 				boolean canStore = canStore(loader);
 
@@ -219,6 +238,7 @@ final class SharedClassHelperFactoryImpl extends SharedAbstractHelperFactory imp
 					helpers.put(loader, result);
 					return result;
 				}
+				/*[ENDIF] JAVA_SPEC_VERSION >= 24 */
 			}
 		}
 		return null;
@@ -277,6 +297,15 @@ final class SharedClassHelperFactoryImpl extends SharedAbstractHelperFactory imp
 				}
 				/*[ENDIF] JAVA_SPEC_VERSION == 8 */
 			} else {
+				/*[IF JAVA_SPEC_VERSION >= 24]*/
+				result = new SharedClassURLClasspathHelperImpl(loader, classpath, getNewID());
+				SharedClassFilter filter = getGlobalSharingFilter();
+				if (filter != null) {
+					result.setSharingFilter(filter);
+				}
+				helpers.put(loader, result);
+				return result;
+				/*[ELSE] JAVA_SPEC_VERSION >= 24 */
 				boolean canFind = canFind(loader);
 				boolean canStore = canStore(loader);
 
@@ -289,6 +318,7 @@ final class SharedClassHelperFactoryImpl extends SharedAbstractHelperFactory imp
 					helpers.put(loader, result);
 					return result;
 				}
+				/*[ENDIF] JAVA_SPEC_VERSION >= 24 */
 			}
 		}
 		return null;
