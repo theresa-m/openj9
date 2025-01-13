@@ -92,10 +92,12 @@ public interface MemoryMXBean extends PlatformManagedObject {
 	 * @param value
 	 *            <code>true</code> enables verbose output ;
 	 *            <code>false</code> disables verbose output.
+	/*[IF JAVA_SPEC_VERSION < 24]
 	 * @throws SecurityException
 	 *             if a {@link SecurityManager} is being used and the caller
 	 *             does not have the <code>ManagementPermission</code> value
 	 *             of &quot;control&quot;.
+	/*[ENDIF] JAVA_SPEC_VERSION < 24
 	 * @see ManagementPermission
 	 */
 	public void setVerbose(boolean value);
