@@ -446,6 +446,7 @@ public final class ManagementUtils {
 	 *             (including primitive types).
 	 */
 	public static Class<?> getClassMaybePrimitive(String name) throws ClassNotFoundException {
+		/*[IF JAVA_SPEC_VERSION < 24]*/
 		int i = name.lastIndexOf('.');
 
 		if (i != -1) {
@@ -455,6 +456,7 @@ public final class ManagementUtils {
 				sm.checkPackageAccess(name.substring(0, i));
 			}
 		}
+		/*[ENDIF] JAVA_SPEC_VERSION < 24 */
 
 		Class<?> result = null;
 
