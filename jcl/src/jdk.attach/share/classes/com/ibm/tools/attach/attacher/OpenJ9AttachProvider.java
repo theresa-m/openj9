@@ -60,8 +60,9 @@ public class OpenJ9AttachProvider extends AttachProvider {
 	@Override
 	public OpenJ9VirtualMachine attachVirtualMachine(String id)
 			throws AttachNotSupportedException, IOException {
-
+		/*[IF JAVA_SPEC_VERSION < 24]*/
 		checkAttachSecurity();
+		/*[ENDIF] JAVA_SPEC_VERSION < 24 */
 		try {
 			OpenJ9VirtualMachine vm = new OpenJ9VirtualMachine(this, id);
 			IPC.logMessage("Attach target id: " + id); //$NON-NLS-1$
@@ -81,8 +82,9 @@ public class OpenJ9AttachProvider extends AttachProvider {
 	public OpenJ9VirtualMachine attachVirtualMachine (
 			VirtualMachineDescriptor descriptor)
 			throws AttachNotSupportedException, IOException {
-
+		/*[IF JAVA_SPEC_VERSION < 24]*/
 		checkAttachSecurity();
+		/*[ENDIF] JAVA_SPEC_VERSION < 24 */
 		if (!(descriptor.provider() instanceof OpenJ9AttachProvider)) {
 			/*[MSG "K0543", "Virtual provider does not match"]*/
 			throw new AttachNotSupportedException(com.ibm.oti.util.Msg.getString("K0543")); //$NON-NLS-1$
@@ -222,6 +224,7 @@ public class OpenJ9AttachProvider extends AttachProvider {
 		return "Java SE"; //$NON-NLS-1$
 	}
 
+	/*[IF JAVA_SPEC_VERSION < 24]*/
 	private static void checkAttachSecurity() {
 		@SuppressWarnings("removal")
 		final SecurityManager securityManager = System.getSecurityManager();
@@ -238,5 +241,5 @@ public class OpenJ9AttachProvider extends AttachProvider {
 		final static AttachPermission ATTACH_VM = new AttachPermission(
 				"attachVirtualMachine", null); //$NON-NLS-1$;
 	}
-
+	/*[ENDIF] JAVA_SPEC_VERSION < 24 */
 }
