@@ -69,11 +69,10 @@ public final class Trace {
 	public static final String EXIT = "4 "; //$NON-NLS-1$
 	public static final String EXCEPTION_EXIT = "5 "; //$NON-NLS-1$
 
-	/*[IF JAVA_SPEC_VERSION < 24]*/
+	// TODO remove these two things
 	private static final String LEGACY_TRACE_PERMISSION_PROPERTY = "com.ibm.jvm.enableLegacyTraceSecurity"; //$NON-NLS-1$
 
 	private static final TracePermission TRACE_PERMISSION = new TracePermission();
-	/*[ENDIF] JAVA_SPEC_VERSION < 24 */
 
 	/**
 	 * Initialize the class.
@@ -287,7 +286,8 @@ public final class Trace {
 		if (!("false".equalsIgnoreCase(com.ibm.oti.vm.VM //$NON-NLS-1$
 				.internalGetProperties().getProperty(LEGACY_TRACE_PERMISSION_PROPERTY)))
 		) {
-			checkTraceSecurityPermssion();
+			// TODO put back
+			//checkTraceSecurityPermssion();
 		}
 	}
 

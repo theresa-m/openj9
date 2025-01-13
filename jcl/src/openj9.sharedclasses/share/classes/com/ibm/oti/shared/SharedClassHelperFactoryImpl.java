@@ -149,8 +149,9 @@ final class SharedClassHelperFactoryImpl extends SharedAbstractHelperFactory imp
 				throw new HelperAlreadyDefinedException(Msg.getString("K059d")); //$NON-NLS-1$
 			/*[ENDIF] JAVA_SPEC_VERSION >= 9 */
 			} else {
-				boolean canFind = canFind(loader);
-				boolean canStore = canStore(loader);
+				// TODO remove these and update SharedClassTokenHelperImpl
+				boolean canFind = true;// canFind(loader);
+				boolean canStore = true;//canStore(loader);
 
 				if (canFind || canStore) {
 					SharedClassTokenHelper result = new SharedClassTokenHelperImpl(loader, getNewID(), canFind, canStore);
@@ -207,8 +208,8 @@ final class SharedClassHelperFactoryImpl extends SharedAbstractHelperFactory imp
 				throw new HelperAlreadyDefinedException(Msg.getString("K059d")); //$NON-NLS-1$
 			/*[ENDIF] JAVA_SPEC_VERSION >= 9 */
 			} else {
-				boolean canFind = canFind(loader);
-				boolean canStore = canStore(loader);
+				boolean canFind = true;//canFind(loader);
+				boolean canStore = true;//canStore(loader);
 
 				if (canFind || canStore) {
 					SharedClassURLHelper result = new SharedClassURLHelperImpl(loader, getNewID(), canFind, canStore);
@@ -277,8 +278,8 @@ final class SharedClassHelperFactoryImpl extends SharedAbstractHelperFactory imp
 				}
 				/*[ENDIF] JAVA_SPEC_VERSION == 8 */
 			} else {
-				boolean canFind = canFind(loader);
-				boolean canStore = canStore(loader);
+				boolean canFind = true;//canFind(loader);
+				boolean canStore = true;//canStore(loader);
 
 				if (canFind || canStore) {
 					result = new SharedClassURLClasspathHelperImpl(loader, classpath, getNewID(), canFind, canStore);

@@ -52,8 +52,8 @@ final class SharedDataHelperFactoryImpl extends SharedAbstractHelperFactory impl
 					return (SharedDataHelper)helper;
 				}
 			} else {
-				boolean canFind = canFind(owner);
-				boolean canStore = canStore(owner);
+				boolean canFind = true;//canFind(owner);
+				boolean canStore = true;//canStore(owner);
 
 				if (canFind || canStore) {
 					SharedDataHelper result = new SharedDataHelperImpl(owner, getNewID(), canFind, canStore);
