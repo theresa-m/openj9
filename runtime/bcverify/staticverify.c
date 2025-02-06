@@ -1285,7 +1285,7 @@ checkStackMap (J9CfrClassFile* classfile, J9CfrMethod * method, J9CfrAttributeCo
 				offset++;
 
 				/* Throw the VerifyError without delay in the case of bad offset so as to match the RI's behavior */
-				if ((offset >= code->codeLength) || (0 == map[offset])) {
+				if (offset >= code->codeLength) {
 					errorCode = FALLBACK_VERIFY_ERROR;
 					exceptionDetails->stackmapFrameIndex = (I_32)j;
 					exceptionDetails->stackmapFrameBCI = (U_32)offset;
