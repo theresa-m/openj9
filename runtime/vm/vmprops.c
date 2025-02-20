@@ -1413,7 +1413,7 @@ getMUtf8String(J9JavaVM *vm, const char *userString, UDATA stringLength)
 		}
 		result = mutf8Buffer;
 	} else {
-#if defined(WIN32)
+#if defined(WIN32) || defined(OSX)
 		I_32 fromCode = J9STR_CODE_UTF8; /* command-line arguments should be in UTF-8 */
 #else /* defined(WIN32) */
 		I_32 fromCode = J9STR_CODE_PLATFORM_RAW;
