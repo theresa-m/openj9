@@ -267,8 +267,8 @@ Java_com_ibm_oti_vm_VM_getStackMarker(JNIEnv *env, jclass rcv)
 	vmfuncs->internalExitVMToJNI(vmThread);
 
 	// TODO explain token
-	token = (vmThread->stackObject->end - walkState.bp) << 32 
-	token |= walkState.inlineDepth
+	token = (vmThread->stackObject->end - walkState.bp) << 32;
+	token |= walkState.inlineDepth;
 	return token;
 }
 
@@ -311,10 +311,10 @@ Java_com_ibm_oti_vm_VM_getLUDCL(JNIEnv *env, jclass rcv, jlong stackMarker)
 	/* Temporarily overwrite the LUDCL variables in the thread.
 	 * TODO - why? replace with what?
 	 */
-	U_32 savedInlineDepth = thread->ludclInlineDepth;
-	U_32 savedBPOffset = thread->ludclBPOffset;
-	thread->ludclInlineDepth = (U_32) stackMarker;
-	thread->savedBPOffset = (U_32) (stackMarker >> 32);
+	U_32 savedInlineDepth = vmThread->ludclInlineDepth;
+	U_32 savedBPOffset = vmThread->ludclBPOffset;
+	vmThread->ludclInlineDepth = (U_32) stackMarker;
+	vmThread->ludclBPOffset = (U_32) (stackMarker >> 32);
 
 	walkState.walkThread = vmThread;
 	walkState.skipCount = 0;
@@ -327,8 +327,8 @@ Java_com_ibm_oti_vm_VM_getLUDCL(JNIEnv *env, jclass rcv, jlong stackMarker)
 	result = vm->internalVMFunctions->j9jni_createLocalRef(env, walkState.userData1);
 
 	/* TODO put back values*/
-	thread->ludclInlineDepth = savedInlineDepth;
-	thread->ludclBPOffset = savedBPOffset;
+	vmThread->ludclInlineDepth = savedInlineDepth;
+	vmThread->ludclBPOffset = savedBPOffset;
 	vm->internalVMFunctions->internalExitVMToJNI(vmThread);
 
 	return result;
