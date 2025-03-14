@@ -303,6 +303,8 @@ omr_add_exports(jclse
 	Java_com_ibm_oti_vm_VM_markCurrentThreadAsSystemImpl
 	Java_com_ibm_oti_vm_VM_setCommonData
 	Java_com_ibm_oti_vm_VM_getJ9ConstantPoolFromJ9Class
+	Java_com_ibm_oti_vm_VM_getLUDCL
+	Java_com_ibm_oti_vm_VM_getStackMarker
 	Java_com_ibm_oti_vm_VM_isJVMInSingleThreadedMode
 	Java_com_ibm_rmi_io_IIOPInputStream_00024LUDCLStackWalkOptimizer_LUDCLMarkFrame
 	Java_com_ibm_rmi_io_IIOPInputStream_00024LUDCLStackWalkOptimizer_LUDCLUnmarkFrameImpl
@@ -429,10 +431,6 @@ omr_add_exports(jclse
 	Java_sun_reflect_ConstantPool_getSize0
 	Java_sun_reflect_ConstantPool_getStringAt0
 	Java_sun_reflect_ConstantPool_getUTF8At0
-
-	Java_com_ibm_oti_vm_VM_LUDCLMarkFrame
-	Java_com_ibm_oti_vm_VM_LUDCLUnmarkFrameImpl
-	Java_com_ibm_oti_vm_VM_getLUDCL
 )
 
 if(JAVA_SPEC_VERSION LESS 17)
