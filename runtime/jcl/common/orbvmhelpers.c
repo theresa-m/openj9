@@ -299,9 +299,8 @@ Java_com_ibm_oti_vm_ORBVMHelpers_LatestUserDefinedLoader(JNIEnv *env, jclass rcv
 	return result;
 }
 
-
 jobject JNICALL
-Java_com_ibm_oti_vm_VM_getLUDCL(JNIEnv *env, jclass rcv, jlong stackMarker)
+Java_com_ibm_oti_vm_VM_ludclSearchFromMarker(JNIEnv *env, jclass rcv, jlong stackMarker)
 {
 	J9VMThread *vmThread = (J9VMThread *)env;
 	J9JavaVM *vm = vmThread->javaVM;

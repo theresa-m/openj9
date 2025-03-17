@@ -642,7 +642,7 @@ public static Properties internalGetProperties() {
  * Mark the current frame as the point at which to
  * terminate the Last User-Defined ClassLoader (LUDCL) search.
  * 
- * See getLUDCL.
+ * See ludclSearchFromMarker.
  *
  * The method marks the current frame and returns the values from the
  * VMThread with the stackOffset encoded in the high 32 bits and the
@@ -657,7 +657,7 @@ public static native long getStackMarker();
  * Search up until the stackMarker. Return null if nothing 
  * is found, this means the ludcl hasn't changed.
  */
-public static native ClassLoader getLUDCL(long stackMarker);
+public static native ClassLoader ludclSearchFromMarker(long stackMarker);
 
 /*[IF JFR_SUPPORT]*/
 
