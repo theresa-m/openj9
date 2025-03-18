@@ -255,10 +255,12 @@ Java_com_ibm_oti_vm_VM_getStackMarker(JNIEnv *env, jclass rcv)
 	J9StackWalkState walkState;
 	jlong token = 0 ;
 
-	// TODO need to understand these
+	Trc_orbvmhelpers_getStackMarker_Entry(env);
+
+	// TODO what should skipCount and maxFrames be?
 	walkState.walkThread = vmThread;
-	walkState.skipCount = 2;
-	walkState.maxFrames = 2;
+	walkState.skipCount = 2; // 1;
+	walkState.maxFrames = 2; // 1;
 	walkState.flags = J9_STACKWALK_VISIBLE_ONLY | J9_STACKWALK_COUNT_SPECIFIED | J9_STACKWALK_INCLUDE_NATIVES;
 	walkState.userData1 = NULL;
 
@@ -269,6 +271,8 @@ Java_com_ibm_oti_vm_VM_getStackMarker(JNIEnv *env, jclass rcv)
 	// TODO explain token
 	token = (vmThread->stackObject->end - walkState.bp) << 32;
 	token |= walkState.inlineDepth;
+
+	Trc_orbvmhelpers_getStackMarker_Exit(env, (vmThread->stackObject->end - walkState.bp) << 32, walkState.inlineDepth);
 	return token;
 }
 
@@ -306,6 +310,8 @@ Java_com_ibm_oti_vm_VM_ludclSearchFromMarker(JNIEnv *env, jclass rcv, jlong stac
 	J9JavaVM *vm = vmThread->javaVM;
 	J9StackWalkState walkState;
 	jobject result;
+
+	Trc_orbvmhelpers_ludclSearchFromMarker_Entry(env);
 	
 	/* Temporarily overwrite the LUDCL variables in the thread.
 	 * TODO - why? replace with what?
@@ -329,6 +335,8 @@ Java_com_ibm_oti_vm_VM_ludclSearchFromMarker(JNIEnv *env, jclass rcv, jlong stac
 	vmThread->ludclInlineDepth = savedInlineDepth;
 	vmThread->ludclBPOffset = savedBPOffset;
 	vm->internalVMFunctions->internalExitVMToJNI(vmThread);
+
+	Trc_orbvmhelpers_ludclSearchFromMarker_Exit(env, result);
 
 	return result;
 }
