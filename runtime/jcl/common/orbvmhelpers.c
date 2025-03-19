@@ -24,6 +24,7 @@
 #include "j9.h"
 #include "j9cp.h"
 #include "jclprots.h"
+#include "ut_j9jcl.h"
 
 jboolean JNICALL
 Java_com_ibm_oti_vm_ORBVMHelpers_is32Bit(JNIEnv *env, jclass rcv)
@@ -256,6 +257,7 @@ Java_com_ibm_oti_vm_VM_getStackMarker(JNIEnv *env, jclass rcv)
 	jlong token = 0 ;
 
 	Trc_orbvmhelpers_getStackMarker_Entry(env);
+	//printf("getStackMarker entry\n");
 
 	// TODO what should skipCount and maxFrames be?
 	walkState.walkThread = vmThread;
@@ -273,6 +275,7 @@ Java_com_ibm_oti_vm_VM_getStackMarker(JNIEnv *env, jclass rcv)
 	token |= walkState.inlineDepth;
 
 	Trc_orbvmhelpers_getStackMarker_Exit(env, (vmThread->stackObject->end - walkState.bp) << 32, walkState.inlineDepth);
+	//printf("getStackMarker exit %ld %lu\n", (vmThread->stackObject->end - walkState.bp) << 32, walkState.inlineDepth);
 	return token;
 }
 
@@ -289,6 +292,8 @@ Java_com_ibm_oti_vm_ORBVMHelpers_LatestUserDefinedLoader(JNIEnv *env, jclass rcv
 	J9StackWalkState walkState;
 	jobject result;
 
+	Trc_orbvmhelpers_LatestUserDefinedLoader_Entry(env);
+
 	walkState.walkThread = vmThread;
 	walkState.skipCount = 0;
 	walkState.flags = J9_STACKWALK_VISIBLE_ONLY | J9_STACKWALK_ITERATE_FRAMES | J9_STACKWALK_INCLUDE_NATIVES;
@@ -299,6 +304,8 @@ Java_com_ibm_oti_vm_ORBVMHelpers_LatestUserDefinedLoader(JNIEnv *env, jclass rcv
 
 	result = vm->internalVMFunctions->j9jni_createLocalRef(env, walkState.userData1);
 	vm->internalVMFunctions->internalExitVMToJNI(vmThread);
+
+	Trc_orbvmhelpers_LatestUserDefinedLoader_Exit(env);
 
 	return result;
 }
@@ -312,6 +319,7 @@ Java_com_ibm_oti_vm_VM_ludclSearchFromMarker(JNIEnv *env, jclass rcv, jlong stac
 	jobject result;
 
 	Trc_orbvmhelpers_ludclSearchFromMarker_Entry(env);
+	//printf("ludclSearchFromMarker enter\n");
 	
 	/* Temporarily overwrite the LUDCL variables in the thread.
 	 * TODO - why? replace with what?
@@ -336,6 +344,7 @@ Java_com_ibm_oti_vm_VM_ludclSearchFromMarker(JNIEnv *env, jclass rcv, jlong stac
 	vmThread->ludclBPOffset = savedBPOffset;
 	vm->internalVMFunctions->internalExitVMToJNI(vmThread);
 
+	//printf("ludclSearchFromMarker exit %d\n", (result != NULL));
 	Trc_orbvmhelpers_ludclSearchFromMarker_Exit(env, result);
 
 	return result;

@@ -717,4 +717,6 @@ TraceEntry=Trc_JCL_com_ibm_oti_shared_getCachedURL_Entry_1 Overhead=1 Level=2 Te
 TraceEntry=Trc_orbvmhelpers_getStackMarker_Entry Overhead=1 Level=3 Template="getStackMarker()"
 TraceExit=Trc_orbvmhelpers_getStackMarker_Exit Overhead=1 Level=3 Template="getStackMarker() %d %d"
 TraceEntry=Trc_orbvmhelpers_ludclSearchFromMarker_Entry Overhead=1 Level=3 Template="ludclSearchFromMarker()"
-TraceExit=Trc_orbvmhelpers_ludclSearchFromMarker_Exit Overhead=1 Level=3 Template="ludclSearchFromMarker() %lu"
+TraceExit=Trc_orbvmhelpers_ludclSearchFromMarker_Exit Overhead=1 Level=3 Template="ludclSearchFromMarker() %llu"
+TraceEntry=Trc_orbvmhelpers_LatestUserDefinedLoader_Entry Overhead=1 Level=3 Template="orbvm LatestUserDefinedLoader()"
+TraceExit=Trc_orbvmhelpers_LatestUserDefinedLoader_Exit Overhead=1 Level=3 Template="orbvm LatestUserDefinedLoader()"
