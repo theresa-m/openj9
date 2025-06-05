@@ -1192,7 +1192,7 @@ restart:
 				J9ObjectMonitor *syncObjectMonitor = current->objectWaitMonitor;
 				U_32 state = J9VMJAVALANGVIRTUALTHREAD_STATE(currentThread, current->vthread);
 				next = current->nextWaitingContinuation;
-				if (state != 18 && state != 17) {
+				if (state != 18 && state != 17) { // WAIT and TIMED_WAIT
 					printf("Process thread: %p om: %p state: %u, count %u\n", current, syncObjectMonitor, state, syncObjectMonitor->platformThreadWaitCount);
 				}
 				/* Check if the blocking monitor has platform thread waiting,
