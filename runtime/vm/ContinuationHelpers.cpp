@@ -1192,6 +1192,7 @@ restart:
 				J9ObjectMonitor *syncObjectMonitor = current->objectWaitMonitor;
 				U_32 state = J9VMJAVALANGVIRTUALTHREAD_STATE(currentThread, current->vthread);
 				next = current->nextWaitingContinuation;
+				printf("Process thread: %p om: %p state: %u, count %u\n", current, syncObjectMonitor, state, syncObjectMonitor->platformThreadWaitCount);
 
 				/* Check if the blocking monitor has platform thread waiting,
 				 * which doesn't notify the unblocker when exiting monitor.
