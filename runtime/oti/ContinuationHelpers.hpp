@@ -365,9 +365,11 @@ public:
 		while (NULL != *link) {
 			current = *link;
 			vthread = current->vthread;
+			printf("Notify vthread: %p %p %p %u\n", objectMonitor, vthread, link, J9VMJAVALANGVIRTUALTHREAD_STATE(vmThread, vthread)); // 1 call
 			if (J9VMJAVALANGTHREAD_DEADINTERRUPT(vmThread, vthread)) {
 				/* Remove virtual threads that have been interrupted. */
 				*link = current->nextWaitingContinuation;
+				printf("New link: %p\n", link);
 				current->nextWaitingContinuation = NULL;
 			} else {
 				/* Set the notified and onWaitingList flags for virtual threads that have not been interrupted. */
@@ -380,6 +382,7 @@ public:
 				}
 
 				current->objectWaitMonitor->virtualThreadWaitCount += 1;
+				printf("virtualThreadWaitCount: %d\n", current->objectWaitMonitor->virtualThreadWaitCount);
 				notified = true;
 
 				if (!notifyAll) {
@@ -398,10 +401,20 @@ public:
 				vm->blockedContinuations = objectMonitor->waitingContinuations;
 				objectMonitor->waitingContinuations = NULL;
 			} else {
+				printf("before: %u %p %p %p\n", J9VMJAVALANGVIRTUALTHREAD_STATE(vmThread, vthread), objectMonitor->waitingContinuations, current->nextWaitingContinuation, vm->blockedContinuations);
+				// printf("Final state is: %u\n", J9VMJAVALANGVIRTUALTHREAD_STATE(vmThread, vthread));
+				// printf("before objectMonitor->waitingContinuations: %p\n", objectMonitor->waitingContinuations);
+				// printf("before current->nextWaitingContinuation: %p\n", current->nextWaitingContinuation);
+				// printf("before vm->blockedContinuations: %p\n", vm->blockedContinuations);
 				objectMonitor->waitingContinuations = current->nextWaitingContinuation;
 				current->nextWaitingContinuation = vm->blockedContinuations;
 				vm->blockedContinuations = current;
+				printf("after: %u %p %p %p\n", J9VMJAVALANGVIRTUALTHREAD_STATE(vmThread, vthread), objectMonitor->waitingContinuations, current->nextWaitingContinuation, vm->blockedContinuations);
+				// printf("after objectMonitor->waitingContinuations: %p\n", objectMonitor->waitingContinuations);
+				// printf("after current->nextWaitingContinuation: %p\n", current->nextWaitingContinuation);
+				// printf("after vm->blockedContinuations: %p\n", vm->blockedContinuations);
 			}
+			//printf("Mer notify thread: %p om: %p\n", vmThread, objectMonitor); // no calls
 			omrthread_monitor_notify(vm->blockedVirtualThreadsMutex);
 		}
 
