@@ -1193,7 +1193,7 @@ restart:
 				U_32 state = J9VMJAVALANGVIRTUALTHREAD_STATE(currentThread, current->vthread);
 				next = current->nextWaitingContinuation;
 				if (state == 13) {
-					printf("Process thread: %p om: %p state: %u, count %u\n", current, syncObjectMonitor, state, syncObjectMonitor->platformThreadWaitCount);
+					//printf("Process thread: %p om: %p state: %u, count %u\n", current, syncObjectMonitor, state, syncObjectMonitor->platformThreadWaitCount);
 				}
 				/* Check if the blocking monitor has platform thread waiting,
 				 * which doesn't notify the unblocker when exiting monitor.
@@ -1250,6 +1250,9 @@ restart:
 				} /* switch (state) */
 
 				if (unblocked) {
+					if (state == 13) {
+						//printf("U: %p %p\n", current, syncObjectMonitor);
+					}
 					/* Add to Java unblock list. */
 					J9VMJAVALANGVIRTUALTHREAD_SET_NEXT(currentThread, current->vthread, unblockedList);
 					unblockedList = current->vthread;

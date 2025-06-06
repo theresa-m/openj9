@@ -5820,6 +5820,7 @@ ffi_OOM:
 			rc = tryEnterBlockingMonitor(REGISTER_ARGS, syncObject, J9VM_CONTINUATION_RETURN_FROM_OBJECT_WAIT);
 			J9VMContinuation *continuation = _currentThread->currentContinuation;
 			if ((NULL != continuation) && (EXECUTE_BYTECODE == rc)) {
+				printf("Ret %p %p\n", continuation, continuation->objectWaitMonitor);
 				J9VMJDKINTERNALVMCONTINUATION_SET_BLOCKER(_currentThread, continuationObject, NULL);
 				syncObject = *(j9object_t *)(_sp + 8);
 				omrthread_monitor_t monitor = getMonitorForWait(_currentThread, syncObject);
