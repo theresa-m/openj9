@@ -5826,7 +5826,7 @@ ffi_OOM:
 				monitor->count = continuation->waitingMonitorEnterCount;
 				_currentThread->ownedMonitorCount += monitor->count - 1;
 				continuation->waitingMonitorEnterCount = 0; // doesn't get set to 0?
-				printf("Ret %p %lu\n", continuation, continuation->waitingMonitorEnterCount);
+				//printf("Ret %p %lu\n", continuation, continuation->waitingMonitorEnterCount);
 
 				j9object_t threadObject = _currentThread->threadObject;
 				bool interrupted = J9VMJAVALANGTHREAD_DEADINTERRUPT(_currentThread, threadObject);

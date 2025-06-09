@@ -1228,6 +1228,7 @@ restart:
 					/* All blocking/waiting monitor have to be inflated, if the monitor has not been inflated,
 					 * then the owner have not yet released the flatlock.
 					 */
+					printf("t: %p om: %p %u %lu\n", current, syncObjectMonitor, J9_ARE_ANY_BITS_SET(((J9ThreadMonitor *)monitor)->flags, J9THREAD_MONITOR_INFLATED), monitor->count);
 					if (J9_ARE_ANY_BITS_SET(((J9ThreadMonitor *)monitor)->flags, J9THREAD_MONITOR_INFLATED)) {
 						if (0 == monitor->count) {
 							unblocked = true;
@@ -1250,7 +1251,7 @@ restart:
 				} /* switch (state) */
 
 				if (unblocked) {
-					if (state == 13) {
+					if (state == 13) { // this only happens once
 						//printf("U: %p %p\n", current, syncObjectMonitor);
 					}
 					/* Add to Java unblock list. */
