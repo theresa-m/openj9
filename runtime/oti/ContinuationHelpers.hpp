@@ -402,19 +402,11 @@ public:
 				objectMonitor->waitingContinuations = NULL;
 			} else {
 				printf("before: %u %p %p %p\n", J9VMJAVALANGVIRTUALTHREAD_STATE(vmThread, vthread), objectMonitor->waitingContinuations, current->nextWaitingContinuation, vm->blockedContinuations);
-				// printf("Final state is: %u\n", J9VMJAVALANGVIRTUALTHREAD_STATE(vmThread, vthread));
-				// printf("before objectMonitor->waitingContinuations: %p\n", objectMonitor->waitingContinuations);
-				// printf("before current->nextWaitingContinuation: %p\n", current->nextWaitingContinuation);
-				// printf("before vm->blockedContinuations: %p\n", vm->blockedContinuations);
 				objectMonitor->waitingContinuations = current->nextWaitingContinuation;
 				current->nextWaitingContinuation = vm->blockedContinuations;
 				vm->blockedContinuations = current;
 				printf("after: %u %p %p %p\n", J9VMJAVALANGVIRTUALTHREAD_STATE(vmThread, vthread), objectMonitor->waitingContinuations, current->nextWaitingContinuation, vm->blockedContinuations);
-				// printf("after objectMonitor->waitingContinuations: %p\n", objectMonitor->waitingContinuations);
-				// printf("after current->nextWaitingContinuation: %p\n", current->nextWaitingContinuation);
-				// printf("after vm->blockedContinuations: %p\n", vm->blockedContinuations);
 			}
-			//printf("Mer notify thread: %p om: %p\n", vmThread, objectMonitor); // no calls
 			omrthread_monitor_notify(vm->blockedVirtualThreadsMutex);
 		}
 
