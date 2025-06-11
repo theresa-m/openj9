@@ -5844,12 +5844,12 @@ ffi_OOM:
 
 				/* Only throw an exception if the virtual thread has not been notified. */
 				if (interrupted	&& !notified) {
-					printf("interrupt %p\n", continuation);
+					printf("interrupt %p %p\n", continuation, monitor);
 					setCurrentException(_currentThread, J9VMCONSTANTPOOL_JAVALANGINTERRUPTEDEXCEPTION, NULL);
 					VMStructHasBeenUpdated(REGISTER_ARGS);
 					rc = GOTO_THROW_CURRENT_EXCEPTION;
 				} else {
-					printf("ret %p\n", continuation);
+					printf("ret %p %p\n", continuation, monitor);
 					restoreInternalNativeStackFrame(REGISTER_ARGS);
 					updateVMStruct(REGISTER_ARGS);
 					returnVoidFromINL(REGISTER_ARGS, 4);
