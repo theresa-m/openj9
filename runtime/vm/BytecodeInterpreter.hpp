@@ -1549,6 +1549,9 @@ obj:
 
 		updateVMStruct(REGISTER_ARGS);
 		J9VMJAVALANGVIRTUALTHREAD_SET_STATE(_currentThread, _currentThread->threadObject, newThreadState);
+		if (newThreadState == JAVA_LANG_VIRTUALTHREAD_BLOCKING) {
+			printf("2 %p\n", _currentThread->threadObject);
+		}
 
 		if (JAVA_LANG_VIRTUALTHREAD_BLOCKING == newThreadState) {
 			if (J9_ARE_NO_BITS_SET(continuation->runtimeFlags, J9VM_CONTINUATION_RUNTIMEFLAG_JVMTI_CONTENDED_MONITOR_ENTER_RECORDED)) {
@@ -5254,6 +5257,9 @@ done:
 				 * yieldPinnedContinuation() from being ignored by the unblocker.
 				 */
 				J9VMJAVALANGVIRTUALTHREAD_SET_STATE(_currentThread, _currentThread->threadObject, newState);
+				if (newState == JAVA_LANG_VIRTUALTHREAD_BLOCKING) {
+					printf("3 %p\n", _currentThread->threadObject);
+				}
 				/* Try to yield the virtual thread if it will be blocked. */
 				UDATA result = preparePinnedVirtualThreadForUnmount(_currentThread, object, true);
 				VMStructHasBeenUpdated(REGISTER_ARGS);

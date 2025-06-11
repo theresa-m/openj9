@@ -376,6 +376,7 @@ public:
 				U_32 state = J9VMJAVALANGVIRTUALTHREAD_STATE(vmThread, vthread);
 				if ((JAVA_LANG_VIRTUALTHREAD_WAIT == state) || (JAVA_LANG_VIRTUALTHREAD_TIMED_WAIT == state)) {
 					/* Update the thread state to BLOCKED. */
+					printf("1 %p %p\n", vthread, objectMonitor);
 					J9VMJAVALANGVIRTUALTHREAD_SET_STATE(vmThread, vthread, JAVA_LANG_VIRTUALTHREAD_BLOCKED);
 				}
 
