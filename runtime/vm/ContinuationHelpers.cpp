@@ -1225,7 +1225,7 @@ restart:
 				) {
 					hasPlatformThreadWaiting = true;
 				}
-
+				printf("%p %p %u\n", current, syncObjectMonitor, state);
 				/* Skip vthreads that are still in transition. */
 				switch (state) {
 				case JAVA_LANG_VIRTUALTHREAD_BLOCKING:
