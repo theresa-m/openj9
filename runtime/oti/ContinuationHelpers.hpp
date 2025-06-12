@@ -405,7 +405,7 @@ public:
 			}
 			omrthread_monitor_notify(vm->blockedVirtualThreadsMutex);
 		}
-
+		printf("4 %p %p %u %u\n", vthread, objectMonitor, state, J9VMJAVALANGVIRTUALTHREAD_STATE(vmThread, vthread));
 		omrthread_monitor_exit(vm->blockedVirtualThreadsMutex);
 
 		return notified;
