@@ -1239,6 +1239,17 @@ restart:
 				case JAVA_LANG_VIRTUALTHREAD_TIMED_WAIT:
 					/* WAIT/TIMED_WAIT can only be added to blocked list if they have been notified. */
 					Assert_VM_true(J9VMJAVALANGVIRTUALTHREAD_NOTIFIED(currentThread, current->vthread));
+					/* The transition to BLOCKED may have been missed if vthread was in a WAITING state while notified. */
+					if (MM_ObjectAccessBarrierAPI(currentThread).inlineMixedObjectCompareAndSwapU32(
+									currentThread,
+									current->vthread,
+									J9VMJAVALANGVIRTUALTHREAD_STATE_OFFSET(currentThread),
+									state,
+									JAVA_LANG_VIRTUALTHREAD_BLOCKED,
+									true)
+					) {
+						continue;
+					}
 					break;
 				case JAVA_LANG_VIRTUALTHREAD_BLOCKED:
 				{
