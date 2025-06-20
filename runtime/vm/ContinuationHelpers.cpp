@@ -1250,6 +1250,7 @@ restart:
 					) {
 						Assert_VM_true(syncObjectMonitor->virtualThreadWaitCount > 0);
 						omrthread_monitor_t monitor = syncObjectMonitor->monitor;
+						J9VMJAVALANGVIRTUALTHREAD_SET_BLOCKPERMIT(currentThread, current->vthread, JNI_TRUE);
 						/* All blocking/waiting monitor have to be inflated, if the monitor has not been inflated,
 						* then the owner have not yet released the flatlock.
 						*/
