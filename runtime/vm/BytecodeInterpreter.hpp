@@ -1557,6 +1557,7 @@ obj:
 					continuation->startTicks = j9time_nano_time();
 				}
 				if (J9_EVENT_IS_HOOKED(_vm->hookInterface, J9HOOK_VM_MONITOR_CONTENDED_ENTER)) {
+					printf("monitor contended enter 1\n");
 					ALWAYS_TRIGGER_J9HOOK_VM_MONITOR_CONTENDED_ENTER(_vm->hookInterface, _currentThread, continuation->objectWaitMonitor->monitor);
 				}
 				/* It is possible that a continuation reaches yieldPinnedContinuation multiple times trying to enter the same monitor.

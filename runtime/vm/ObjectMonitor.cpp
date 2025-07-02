@@ -186,6 +186,7 @@ objectMonitorEnterBlocking(J9VMThread *currentThread)
 		if (J9_EVENT_IS_HOOKED(vm->hookInterface, J9HOOK_VM_MONITOR_CONTENDED_ENTER)) {
 			bool frameBuilt = saveBlockingEnterObject(currentThread);
 			VM_VMAccess::setPublicFlags(currentThread, J9_PUBLIC_FLAGS_THREAD_BLOCKED);
+			printf("monitor contended enter 2\n");
 			ALWAYS_TRIGGER_J9HOOK_VM_MONITOR_CONTENDED_ENTER(vm->hookInterface, currentThread, monitor);
 			restoreBlockingEnterObject(currentThread, frameBuilt);
 		}

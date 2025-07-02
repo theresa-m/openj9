@@ -988,14 +988,18 @@ jvmtiGetCurrentContendedMonitor(jvmtiEnv *env,
 					if (NULL != syncObject) {
 						U_32 state = J9VMJAVALANGVIRTUALTHREAD_STATE(currentThread, threadObject);
 						if ((JVMTI_VTHREAD_STATE_BLOCKING == state) || (JVMTI_VTHREAD_STATE_BLOCKED == state)) {
+							printf("*MER* %p %p %u\n", syncObject, threadObject, state);
 							rv_monitor = (jobject)vmFuncs->j9jni_createLocalRef((JNIEnv *)currentThread, syncObject);
 						}
+					} else {
+						printf("*MER* no blocker %p\n", threadObject);
 					}
 				}
 #endif /* JAVA_SPEC_VERSION >= 24 */
 				/* Prior to JDK24, an unmounted VirtualThread cannot be contended. */
 				goto release;
 			} else if ((NULL != targetThread) && (threadObject == targetThread->carrierThreadObject) && (NULL != targetThread->currentContinuation)) {
+				printf("*MER* running thread %p\n", threadObject);
 				/* CarrierThread with VirtualThread mounted cannot be contended. */
 				goto release;
 			}
@@ -1010,6 +1014,7 @@ jvmtiGetCurrentContendedMonitor(jvmtiEnv *env,
 			&& (OMR_ARE_NO_BITS_SET(vmstate, J9VMTHREAD_STATE_PARKED | J9VMTHREAD_STATE_PARKED_TIMED))
 			) {
 				rv_monitor = (jobject)vmFuncs->j9jni_createLocalRef((JNIEnv *)currentThread, lockObject);
+				printf("*MER* this one2 %p %lu\n", threadObject, vmstate);
 			} else {
 				rv_monitor = NULL;
 #if JAVA_SPEC_VERSION >= 24
@@ -1024,7 +1029,10 @@ jvmtiGetCurrentContendedMonitor(jvmtiEnv *env,
 						if (NULL != syncObject) {
 							U_32 state = J9VMJAVALANGVIRTUALTHREAD_STATE(currentThread, threadObject);
 							if ((JVMTI_VTHREAD_STATE_BLOCKING == state) || (JVMTI_VTHREAD_STATE_BLOCKED == state)) {
+								printf("*MER* 2 %p %p %u\n", syncObject, threadObject, state); // good one goes here
 								rv_monitor = (jobject)vmFuncs->j9jni_createLocalRef((JNIEnv *)currentThread, syncObject);
+							} else {
+								printf("*MER* this one3 %p %u\n", threadObject, state);
 							}
 						}
 					}
@@ -1043,6 +1051,7 @@ done:
 	}
 
 	if (NULL != monitor_ptr) {
+		printf("*MER* rv_monitor %p\n", rv_monitor);
 		*monitor_ptr = rv_monitor;
 	}
 	TRACE_JVMTI_RETURN(jvmtiGetCurrentContendedMonitor);
