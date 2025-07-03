@@ -245,7 +245,7 @@ enterContinuation(J9VMThread *currentThread, j9object_t continuationObject)
 	if (started && (J9VM_CONTINUATION_RETURN_FROM_YIELD != continuation->returnState)) {
 		/* Continuation is still in a blocked list. This can happen with TIMED_WAIT.
 		 * It must be removed from the waiting list.
-		 */
+		 */ // here?
 		bool errorNone = VM_ContinuationHelpers::removeBlockingContinuationFromLists(currentThread, continuation);
 		Assert_VM_true(errorNone);
 	}

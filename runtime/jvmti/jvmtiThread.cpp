@@ -976,7 +976,7 @@ jvmtiGetCurrentContendedMonitor(jvmtiEnv *env,
 
 #if JAVA_SPEC_VERSION >= 19
 			j9object_t threadObject = (NULL == thread) ? currentThread->threadObject : J9_JNI_UNWRAP_REFERENCE(thread);
-
+			printf("*MER* thread %p targetThread %p\n", thread, targetThread);
 			if ((NULL == targetThread) && IS_JAVA_LANG_VIRTUALTHREAD(currentThread, threadObject)) {
 #if JAVA_SPEC_VERSION >= 24
 				j9object_t continuationObject = J9VMJAVALANGVIRTUALTHREAD_CONT(currentThread, threadObject);
@@ -1016,15 +1016,16 @@ jvmtiGetCurrentContendedMonitor(jvmtiEnv *env,
 				rv_monitor = (jobject)vmFuncs->j9jni_createLocalRef((JNIEnv *)currentThread, lockObject);
 				printf("*MER* this one2 %p %lu\n", threadObject, vmstate);
 			} else {
+				printf("*MER* else case\n");
 				rv_monitor = NULL;
 #if JAVA_SPEC_VERSION >= 24
 				/* Check if this a blocked virtual thread. */
-				if (NULL != targetThread->currentContinuation) {
+				if (NULL != targetThread->currentContinuation) { // could be this?
 					j9object_t continuationObject = J9VMJAVALANGVIRTUALTHREAD_CONT(currentThread, threadObject);
-
+					printf("*MER* got to here cont %p\n", continuationObject);
 					if (NULL != continuationObject) {
 						j9object_t syncObject = J9VMJDKINTERNALVMCONTINUATION_BLOCKER(currentThread, continuationObject);
-
+						printf("*MER* got to here blocker %p\n", syncObject);
 						/* Check if the Continuation.blocker field is set. */
 						if (NULL != syncObject) {
 							U_32 state = J9VMJAVALANGVIRTUALTHREAD_STATE(currentThread, threadObject);
