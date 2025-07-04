@@ -987,6 +987,8 @@ jvmtiGetCurrentContendedMonitor(jvmtiEnv *env,
 					/* Check if the Continuation.blocker field is set. */
 					if (NULL != syncObject) {
 						U_32 state = J9VMJAVALANGVIRTUALTHREAD_STATE(currentThread, threadObject);
+						// the state must be wrong
+						printf("state %u\n", state);
 						if ((JVMTI_VTHREAD_STATE_BLOCKING == state) || (JVMTI_VTHREAD_STATE_BLOCKED == state)) {
 							printf("*MER* %p %p %u\n", syncObject, threadObject, state);
 							rv_monitor = (jobject)vmFuncs->j9jni_createLocalRef((JNIEnv *)currentThread, syncObject);
@@ -995,7 +997,7 @@ jvmtiGetCurrentContendedMonitor(jvmtiEnv *env,
 						printf("*MER* no blocker %p\n", threadObject);
 					}
 				} else {
-					Assert_JVMTI_true(0);
+					Assert_JVMTI_true(0); // assert here to get a dump
 				}
 #endif /* JAVA_SPEC_VERSION >= 24 */
 				/* Prior to JDK24, an unmounted VirtualThread cannot be contended. */
