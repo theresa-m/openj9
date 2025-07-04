@@ -980,10 +980,10 @@ jvmtiGetCurrentContendedMonitor(jvmtiEnv *env,
 			if ((NULL == targetThread) && IS_JAVA_LANG_VIRTUALTHREAD(currentThread, threadObject)) {
 #if JAVA_SPEC_VERSION >= 24
 				j9object_t continuationObject = J9VMJAVALANGVIRTUALTHREAD_CONT(currentThread, threadObject);
-
+				printf("*MER* continuationObject %p\n", continuationObject); // must be this one
 				if (NULL != continuationObject) {
 					j9object_t syncObject = J9VMJDKINTERNALVMCONTINUATION_BLOCKER(currentThread, continuationObject);
-
+					printf("*MER* blocker %p\n", syncObject);
 					/* Check if the Continuation.blocker field is set. */
 					if (NULL != syncObject) {
 						U_32 state = J9VMJAVALANGVIRTUALTHREAD_STATE(currentThread, threadObject);
