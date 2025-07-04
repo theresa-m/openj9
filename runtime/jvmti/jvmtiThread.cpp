@@ -994,6 +994,8 @@ jvmtiGetCurrentContendedMonitor(jvmtiEnv *env,
 					} else {
 						printf("*MER* no blocker %p\n", threadObject);
 					}
+				} else {
+					Assert_JVMTI_true(0);
 				}
 #endif /* JAVA_SPEC_VERSION >= 24 */
 				/* Prior to JDK24, an unmounted VirtualThread cannot be contended. */
