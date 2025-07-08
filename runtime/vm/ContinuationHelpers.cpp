@@ -1238,6 +1238,20 @@ restart:
 				/* Skip vthreads that are still in transition. */
 				switch (state) {
 				case JAVA_LANG_VIRTUALTHREAD_BLOCKING:
+				{
+					omrthread_monitor_t monitor = syncObjectMonitor->monitor;
+					/* All blocking/waiting monitor have to be inflated, if the monitor has not been inflated,
+					 * then the owner have not yet released the flatlock.
+					 */
+					if (J9_ARE_ANY_BITS_SET(((J9ThreadMonitor *)monitor)->flags, J9THREAD_MONITOR_INFLATED)) {
+						if (0 == monitor->count) {
+							J9VMJAVALANGVIRTUALTHREAD_SET_BLOCKPERMIT(currentThread, current->vthread, JNI_TRUE);
+						}
+					}
+					previous = current;
+					current = next;
+					continue;
+				}
 				case JAVA_LANG_VIRTUALTHREAD_WAITING:
 				case JAVA_LANG_VIRTUALTHREAD_TIMED_WAITING:
 					J9VMJAVALANGVIRTUALTHREAD_SET_BLOCKPERMIT(currentThread, current->vthread, JNI_TRUE);
