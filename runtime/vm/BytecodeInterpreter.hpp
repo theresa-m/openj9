@@ -2145,6 +2145,7 @@ done:
 			/* Collapse stack frame */
 			_sp = walkState->sp;
 			/* Set up return address and branch to DLT entrypoint */
+			printf("Doing DLT thread=%p cont=%p entry=%p\n", _currentThread, _currentThread->currentContinuation, dltEntry);
 			rc = promotedMethodOnTransitionFromJIT(REGISTER_ARGS, walkState->userData1, dltEntry);
 		}
 		return rc;
