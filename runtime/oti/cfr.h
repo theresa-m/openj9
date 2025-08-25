@@ -888,6 +888,8 @@ typedef struct J9CfrClassFile {
 #define CFR_ACC_INTERFACE  					0x00000200
 #define CFR_ACC_ABSTRACT  					0x00000400
 #define CFR_ACC_STRICT  					0x00000800
+/* ACC_STRICT was a method flag removed in Java 17. It is repurposed for strict fields in Valhalla as CFR_ACC_STRICT_INIT */
+#define CFR_ACC_STRICT_INIT  				0x00000800
 #define CFR_ACC_SYNTHETIC  					0x00001000
 #define CFR_ACC_ANNOTATION 					0x00002000
 #define CFR_ACC_ENUM  						0x00004000
