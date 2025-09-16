@@ -99,7 +99,8 @@
 		<output regex="no" type="failure">Problem running command</output>
 	</test>
 
-	<test id="Run !j9object $arrayAddr$ to display flattened array contents">
+	<!-- ToDo: disabled temporarily due to https://github.com/eclipse-openj9/openj9/issues/22642 -->
+	<!-- test id="Run !j9object $arrayAddr$ to display flattened array contents">
 		<command command="$JDMPVIEW_EXE$">
 			<arg>-core $DUMPFILE$</arg>
 			<input>!j9object $arrayAddr$</input>
@@ -149,7 +150,7 @@
 		</command>
 		<output regex="no" type="success" showMatch="yes">I i = 0x45456767</output>
 		<output regex="no" type="failure">Problem running command</output>
-	</test>
+	</test -->
 	
 	<test id="Run !j9object $valueAddr1$ to show the fields of the reference object. Make sure field vline is not flattened">
 		<command command="$JDMPVIEW_EXE$">

@@ -3458,7 +3458,6 @@ void TR_ResolvedJ9Method::construct()
       {x(TR::java_lang_J9VMInternals_isClassModifierPublic,               "isClassModifierPublic", "(I)Z")},
       {x(TR::java_lang_J9VMInternals_getArrayLengthAsObject,              "getArrayLengthAsObject", "(Ljava/lang/Object;)I")},
       {x(TR::java_lang_J9VMInternals_rawNewInstance,                      "rawNewInstance", "(Ljava/lang/Class;)Ljava/lang/Object;")},
-      {x(TR::java_lang_J9VMInternals_rawNewArrayInstance,                 "rawNewArrayInstance", "(ILjava/lang/Class;)Ljava/lang/Object;")},
       {x(TR::java_lang_J9VMInternals_defaultClone,                        "defaultClone", "(Ljava/lang/Object;)Ljava/lang/Object;")},
       {x(TR::java_lang_J9VMInternals_getNumBitsInReferenceField,          "getNumBitsInReferenceField", "()I")},
       {x(TR::java_lang_J9VMInternals_getNumBytesInReferenceField,         "getNumBytesInReferenceField", "()I")},
@@ -3932,14 +3931,6 @@ void TR_ResolvedJ9Method::construct()
 
    static X ValueClassMethods[] =
       {
-      {x(TR::jdk_internal_value_ValueClass_newArrayInstance, "newArrayInstance", "(Ljdk/internal/value/CheckedType;I)[Ljava/lang/Object;")},
-      {x(TR::jdk_internal_value_ValueClass_newNullRestrictedArray, "newNullRestrictedArray", "(Ljava/lang/Class;I)[Ljava/lang/Object;")},
-      {  TR::unknownMethod}
-      };
-
-   static X NullRestrictedCheckedTypeMethods[] =
-      {
-      {x(TR::jdk_internal_value_NullRestrictedCheckedType_of, "of", "(Ljava/lang/Class;)Ljdk/internal/value/NullRestrictedCheckedType;")},
       {  TR::unknownMethod}
       };
 
@@ -4416,7 +4407,6 @@ void TR_ResolvedJ9Method::construct()
       {
       { "java/lang/invoke/ConvertHandle$FilterHelpers", ConvertHandleFilterHelpersMethods },
       { "java/lang/invoke/DirectMethodHandle$Accessor", DirectMethodHandleAccessorMethods },
-      { "jdk/internal/value/NullRestrictedCheckedType", NullRestrictedCheckedTypeMethods },
       { 0 }
       };
 

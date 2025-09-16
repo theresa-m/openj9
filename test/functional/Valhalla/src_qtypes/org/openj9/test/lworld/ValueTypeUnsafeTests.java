@@ -24,7 +24,6 @@ package org.openj9.test.lworld;
 
 import jdk.internal.misc.Unsafe;
 import jdk.internal.value.ValueClass;
-import jdk.internal.vm.annotation.ImplicitlyConstructible;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
@@ -95,7 +94,8 @@ public class ValueTypeUnsafeTests {
 	static public void setUp() {
 		vtPoint = new ValueTypePoint2D(new ValueTypeInt(7), new ValueTypeInt(8));
 
-		vtPointAry = (ValueTypePoint2D[])ValueClass.newNullRestrictedArray(ValueTypePoint2D.class, 2);
+		vtPointAry = (ValueTypePoint2D[]) ValueClass.newNullRestrictedAtomicArray(ValueTypePoint2D.class, 2,
+				new ValueTypePoint2D(new ValueTypeInt(0), new ValueTypeInt(0)));
 		vtPointAry[0] = new ValueTypePoint2D(new ValueTypeInt(5), new ValueTypeInt(10));
 		vtPointAry[1] = new ValueTypePoint2D(new ValueTypeInt(10), new ValueTypeInt(20));
 
@@ -246,50 +246,6 @@ public class ValueTypeUnsafeTests {
 		Point2D[] ary = {};
 		long size = myUnsafe.valueHeaderSize(ary.getClass());
 		assertEquals(size, 0);
-	}
-
-	@Test
-	static public void testUninitializedDefaultValueOfValueType() throws Throwable {
-		// create a new ValueTypePoint2D to ensure that the class has been initialized befoere myUnsafe.uninitializedDefaultValue is called
-		ValueTypePoint2D newPoint = new ValueTypePoint2D(new ValueTypeInt(1), new ValueTypeInt(1));
-		ValueTypePoint2D p = myUnsafe.uninitializedDefaultValue(newPoint.getClass());
-		assertEquals(p.x.i, 0);
-		assertEquals(p.y.i, 0);
-	}
-
-	@Test
-	static public void testUninitializedDefaultValueOfNonValueType() throws Throwable {
-		Point2D p = myUnsafe.uninitializedDefaultValue(Point2D.class);
-		assertNull(p);
-	}
-
-	@Test
-	static public void testUninitializedDefaultValueOfNull() throws Throwable {
-		Object o = myUnsafe.uninitializedDefaultValue(null);
-		assertNull(o);
-	}
-
-	@Test
-	static public void testUninitializedDefaultValueOfVTArray() throws Throwable {
-		Object o = myUnsafe.uninitializedDefaultValue(vtIntAry.getClass());
-		assertNull(o);
-	}
-
-	@Test
-	static public void testUninitializedDefaultValueOfArray() throws Throwable {
-		Point2D[] ary = {};
-		Object o = myUnsafe.uninitializedDefaultValue(ary.getClass());
-		assertNull(o);
-	}
-
-	@Test
-	static public void testuninitializedVTClassHasNullDefaultValue() {
-		@ImplicitlyConstructible
-		value class NeverInitialized {
-			final ValueTypeInt i;
-			NeverInitialized(ValueTypeInt i) { this.i = i; }
-		}
-		assertNull(myUnsafe.uninitializedDefaultValue(NeverInitialized.class));
 	}
 
 	@Test
