@@ -2302,9 +2302,8 @@ public class ValueTypeTests {
 		checkCastRefClassOnNull.invoke();
 	}
 
-/*
 	// ToDo: disabled as per https://github.com/eclipse-openj9/openj9/issues/22642
-	@Test(priority=1)
+	@Test(priority=1, enabled=false)
 	static public void testClassIsInstanceNullableArrays() throws Throwable {
 		ValueTypePoint2D[] nonNullableArray = (ValueTypePoint2D[]) ValueClass.newNullRestrictedAtomicArray(
 				ValueTypePoint2D.class, 1, new ValueTypePoint2D(new ValueTypeInt(0), new ValueTypeInt(0)));
@@ -2315,7 +2314,6 @@ public class ValueTypeTests {
 		assertFalse(nonNullableArray.getClass().isInstance(nullableArray));
 		assertTrue(nullableArray.getClass().isInstance(nonNullableArray));
 	}
-*/
 
 	/*
 	 * Maintain a buffer of flattened arrays with long-aligned valuetypes while keeping a certain amount of classes alive at any

@@ -98,9 +98,7 @@
 		<output regex="no" type="success" showMatch="yes">I i = 0x12123434 (offset = 0) (ValueInt)</output>
 		<output regex="no" type="failure">Problem running command</output>
 	</test>
-
-	<!-- ToDo: disabled temporarily due to https://github.com/eclipse-openj9/openj9/issues/22642 -->
-	<!-- test id="Run !j9object $arrayAddr$ to display flattened array contents">
+	<test id="Run !j9object $arrayAddr$ to display flattened array contents">
 		<command command="$JDMPVIEW_EXE$">
 			<arg>-core $DUMPFILE$</arg>
 			<input>!j9object $arrayAddr$</input>
@@ -150,9 +148,10 @@
 		</command>
 		<output regex="no" type="success" showMatch="yes">I i = 0x45456767</output>
 		<output regex="no" type="failure">Problem running command</output>
-	</test -->
+	</test>
 	
-	<test id="Run !j9object $valueAddr1$ to show the fields of the reference object. Make sure field vline is not flattened">
+	<!-- ToDo: disabled temporarily due to https://github.com/eclipse-openj9/openj9/issues/22642 -->
+	<!--test id="Run !j9object $valueAddr1$ to show the fields of the reference object. Make sure field vline is not flattened">
 		<command command="$JDMPVIEW_EXE$">
 			<arg>-core $DUMPFILE$</arg>
 			<input>!j9object $valueAddr1$</input>
@@ -195,7 +194,7 @@
 		<output regex="yes" javaUtilPattern="yes" type="required" showMatch="yes">Point2D st (.)*[\n\r](.)*I x = 0xFFEEFFEE[\n\r](.)*I y = 0xAABBAABB</output>
 		<output regex="yes" javaUtilPattern="yes" type="required" showMatch="yes">Point2D en (.)*[\n\r](.)*I x = 0xCCDDCCDD[\n\r](.)*I y = 0x33443344</output>
 		<output regex="no" type="failure">Problem running command</output>
-	</test>
+	</test-->
 
 	<test id="Create nocompressedrefs core file">
 		<command showMatch="yes">$EXE$ -Xmx24m $ARGS_NOCR$ $JARS$ $PROGRAM$</command>

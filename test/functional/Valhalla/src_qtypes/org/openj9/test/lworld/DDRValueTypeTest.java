@@ -63,6 +63,8 @@ public class DDRValueTypeTest {
 		Object valueTypeWithVolatileFields = ValueTypeTests.createValueTypeWithVolatileFields();
 
 		Object[] valArray = ValueClass.newNullRestrictedAtomicArray(assortedValueWithSingleAlignmentClass, 2, assortedValueWithSingleAlignment);
+		// ToDo: remove following initialization as per https://github.com/eclipse-openj9/openj9/issues/22642
+		valArray[0] = assortedValueWithSingleAlignment;
 		valArray[1] = assortedValueWithSingleAlignmentAlt;
 
 		ValueTypeTests.checkObject(assortedValueWithSingleAlignment, 

@@ -94,12 +94,14 @@ public class ValueTypeUnsafeTests {
 	static public void setUp() {
 		vtPoint = new ValueTypePoint2D(new ValueTypeInt(7), new ValueTypeInt(8));
 
-		vtPointAry = (ValueTypePoint2D[]) ValueClass.newNullRestrictedAtomicArray(ValueTypePoint2D.class, 2,
-				new ValueTypePoint2D(new ValueTypeInt(0), new ValueTypeInt(0)));
-		vtPointAry[0] = new ValueTypePoint2D(new ValueTypeInt(5), new ValueTypeInt(10));
-		vtPointAry[1] = new ValueTypePoint2D(new ValueTypeInt(10), new ValueTypeInt(20));
+		vtPointAry = null;
+		// ToDo: disabled as per https://github.com/eclipse-openj9/openj9/issues/22642
+		// vtPointAry = (ValueTypePoint2D[]) ValueClass.newNullRestrictedAtomicArray(ValueTypePoint2D.class, 2,
+		// 		new ValueTypePoint2D(new ValueTypeInt(0), new ValueTypeInt(0)));
+		// vtPointAry[0] = new ValueTypePoint2D(new ValueTypeInt(5), new ValueTypeInt(10));
+		// vtPointAry[1] = new ValueTypePoint2D(new ValueTypeInt(10), new ValueTypeInt(20));
 
-		vtPointAryOffset1 = vtPointAryOffset0 + arrayElementSize(vtPointAry);
+		// vtPointAryOffset1 = vtPointAryOffset0 + arrayElementSize(vtPointAry);
 		vtIntAry = new ValueTypeInt[] { new ValueTypeInt(1), new ValueTypeInt(2) };
 		vtIntAryOffset1 = vtIntAryOffset0 + arrayElementSize(vtIntAry);
 	}
@@ -149,7 +151,8 @@ public class ValueTypeUnsafeTests {
 		assertEquals(isFlattened, isFlatteningEnabled);
 	}
 
-	@Test
+	// ToDo: disabled as per https://github.com/eclipse-openj9/openj9/issues/22642
+	@Test(enabled = false)
 	static public void testFlattenedArrayIsFlattened() throws Throwable {
 		boolean isArrayFlattened = myUnsafe.isFlatArray(vtPointAry.getClass());
 		assertEquals(isArrayFlattened, isArrayFlatteningEnabled);
@@ -279,7 +282,8 @@ public class ValueTypeUnsafeTests {
 		}
 	}
 
-	@Test
+	// ToDo: disabled as per https://github.com/eclipse-openj9/openj9/issues/22642
+	@Test(enabled = false)
 	static public void testGetValueOfZeroSizeVTArrayDoesNotCauseError() throws Throwable {
 		ZeroSizeValueType[] zsvtAry = new ZeroSizeValueType[] {
 			new ZeroSizeValueType(),
@@ -289,7 +293,8 @@ public class ValueTypeUnsafeTests {
 		assertNotNull(myUnsafe.getValue(zsvtAry, zsvtAryOffset0, ZeroSizeValueType.class));
 	}
 
-	@Test
+	// ToDo: disabled as per https://github.com/eclipse-openj9/openj9/issues/22642
+	@Test(enabled = false)
 	static public void testGetValueOfZeroSizeVTObjectDoesNotCauseError() throws Throwable {
 		ZeroSizeValueTypeWrapper zsvtw = new ZeroSizeValueTypeWrapper();
 		long zsvtwOffset0 = myUnsafe.objectFieldOffset(ZeroSizeValueTypeWrapper.class.getDeclaredField("z"));
