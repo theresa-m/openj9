@@ -38,7 +38,8 @@ JVM_CopyOfSpecialArray(JNIEnv *env, jarray orig, jint from, jint to)
 JNIEXPORT jboolean JNICALL
 JVM_IsAtomicArray(JNIEnv *env, jobject obj)
 {
-	assert(!"JVM_IsAtomicArray unimplemented");
+	// no support
+	return FALSE;
 }
 
 JNIEXPORT jboolean JNICALL
