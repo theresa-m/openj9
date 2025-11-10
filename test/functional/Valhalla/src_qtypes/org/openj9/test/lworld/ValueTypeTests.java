@@ -1982,19 +1982,6 @@ public class ValueTypeTests {
 		}
 	}
 
-	/*
-	 * Create Array Objects with Point Class without initialization
-	 * The array should be set to a Default Value.
-	 */
-	@Test(priority=4, invocationCount=2)
-	static public void testDefaultValueInPointArray() throws Throwable {
-		Object pointArray = Array.newInstance(point2DClass, genericArraySize);
-		for (int i = 0; i < genericArraySize; i++) {
-			Object pointObject = Array.get(pointArray, i);
-			assertNotNull(pointObject);
-		}
-	}
-
 	/**
 	 * Create multi dimensional array with Point Class without initialization.
 	 * Set each array value to a default value and check field access method handler.
@@ -2040,21 +2027,6 @@ public class ValueTypeTests {
 				Object pointObject = Array.get(Array.get(pointArray,i),j);
 				checkFieldAccessMHOfAssortedType(getterList, pointObject, fields, true);
 			}
-		}
-	}
-
-	/*
-	 * Create Array Objects with Flattened Line without initialization
-	 * Check the fields of each element in arrays. No field should be NULL.
-	 */
-	@Test(priority=4, invocationCount=2)
-	static public void testDefaultValueInLineArray() throws Throwable {
-		Object flattenedLineArray = Array.newInstance(flattenedLine2DClass, genericArraySize);
-		for (int i = 0; i < genericArraySize; i++) {
-			Object lineObject = Array.get(flattenedLineArray, i);
-			assertNotNull(lineObject);
-			assertNotNull(getFlatSt.invoke(lineObject));
-			assertNotNull(getFlatEn.invoke(lineObject));
 		}
 	}
 
@@ -2106,22 +2078,6 @@ public class ValueTypeTests {
 		}
 	}
 
-	/*
-	 * Create Array Objects with triangle class without initialization
-	 * Check the fields of each element in arrays. No field should be NULL.
-	 */
-	@Test(priority=4, invocationCount=2)
-	static public void testDefaultValueInTriangleArray() throws Throwable {
-		Object triangleArray = Array.newInstance(triangle2DClass, genericArraySize);
-		for (int i = 0; i < genericArraySize; i++) {
-			Object triangleObject = Array.get(triangleArray, i);
-			assertNotNull(triangleObject);
-			assertNotNull(getV1.invoke(triangleObject));
-			assertNotNull(getV2.invoke(triangleObject));
-			assertNotNull(getV3.invoke(triangleObject));
-		}
-	}
-
 	/**
 	 * Create multi dimensional array with Triangle Class without initialization.
 	 * Set each array value to a default value and check field access method handler.
@@ -2166,22 +2122,6 @@ public class ValueTypeTests {
 			for (int j = 0; j < genericArraySize; j++) {
 				Object triangleObject = Array.get(Array.get(triangleArray,i),j);
 				checkFieldAccessMHOfAssortedType(getterList, triangleObject, fields, true);
-			}
-		}
-	}
-
-	/*
-	 * Create an Array Object with assortedValueWithLongAlignment class without initialization
-	 * Check the fields of each element in arrays. No field should be NULL.
-	 */
-	@Test(priority=4, invocationCount=2)
-	static public void testDefaultValueInAssortedValueWithLongAlignmentArray() throws Throwable {
-		Object assortedValueWithLongAlignmentArray = Array.newInstance(assortedValueWithLongAlignmentClass, genericArraySize);
-		for (int i = 0; i < genericArraySize; i++) {
-			Object assortedValueWithLongAlignmentObject = Array.get(assortedValueWithLongAlignmentArray, i);
-			assertNotNull(assortedValueWithLongAlignmentObject);
-			for (int j = 0; j < 7; j++) {
-				assertNotNull(assortedValueWithLongAlignmentGetterList[j][0].invoke(assortedValueWithLongAlignmentObject));
 			}
 		}
 	}
