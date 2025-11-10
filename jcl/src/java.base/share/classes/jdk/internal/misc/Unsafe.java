@@ -7173,7 +7173,7 @@ public final class Unsafe {
 	}
 
 	public int fieldLayout(Field f) {
-		throw new Error("jdk.internal.misc.Unsafe.fieldLayout unimplemented"); //$NON-NLS-1$
+		return 0;
 	}
 
 	public <V> V getFlatValue(Object obj, long offset, int layoutKind, Class<?> valueType) {
