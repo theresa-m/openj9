@@ -1719,6 +1719,22 @@ readdWide:
 	}
 }
 
+#if defined(J9VM_OPT_VALHALLA_STRICT_FIELDS)
+void
+ClassFileWriter::writeUnsetFields(U_16 numberOfUnsetFields, U_8 **typeInfo)
+{
+	J9ROMConstantPoolItem * constantPool = J9_ROM_CP_FROM_ROM_CLASS(_romClass);
+	U_8 *cursor = *typeInfo;
+	U_16 cpIndex;
+	for (U_16 i = 0; i < numberOfUnsetFields; i++) {
+		NEXT_U16(cpIndex, cursor);
+		J9ROMFieldRef *cpItem = (J9ROMFieldRef *)constantPool + cpIndex;
+		addNASEntry(J9ROMFIELDREF_NAMEANDSIGNATURE(cpItem));
+	}
+	*typeInfo = cursor;
+}
+#endif /* defined(J9VM_OPT_VALHALLA_STRICT_FIELDS) */
+
 void
 ClassFileWriter::writeVerificationTypeInfo(U_16 count, U_8 ** typeInfo)
 {
@@ -1796,7 +1812,8 @@ ClassFileWriter::writeStackMapTableAttribute(J9ROMMethod * romMethod)
 	NEXT_U16(numEntries, stackMap);
 	writeU16(numEntries);
 
-	for (U_16 i = 0; i < numEntries; i++) {
+	U_16 i = 0;
+	while (i < numEntries) {
 		U_8 frameType;
 
 		NEXT_U8(frameType, stackMap);
@@ -1811,9 +1828,29 @@ ClassFileWriter::writeStackMapTableAttribute(J9ROMMethod * romMethod)
 			 * };
 			 */
 			writeVerificationTypeInfo(1, &stackMap);
+#if defined(J9VM_OPT_VALHALLA_STRICT_FIELDS)
+		} else if (CFR_STACKMAP_EARLY_LARVAL > frameType) { /* 128..245 */
+			/* Reserved frame types - no extra data */
+			Trc_BCU_Assert_ShouldNeverHappen();
+		} else if (CFR_STACKMAP_EARLY_LARVAL == frameType) { /* 246 */
+			/*
+			 * EARLY_LARVAL {
+			 *		U_16 numberOfUnsetFields
+			 *		U_16 unsetFields[numberOfUnsetFields]
+			 *		base frame
+			 * };
+			 */
+			U_16 numberOfUnsetFields;
+			NEXT_U16(numberOfUnsetFields, stackMap);
+			writeU16(numberOfUnsetFields);
+			writeUnsetFields(numberOfUnsetFields, &stackMap);
+			/* Write base frame. */
+			continue;
+#else /* defined(J9VM_OPT_VALHALLA_STRICT_FIELDS) */
 		} else if (CFR_STACKMAP_SAME_LOCALS_1_STACK_EXTENDED > frameType) { /* 128..246 */
 			/* Reserved frame types - no extra data */
 			Trc_BCU_Assert_ShouldNeverHappen();
+#endif /* defined(J9VM_OPT_VALHALLA_STRICT_FIELDS) */
 		} else if (CFR_STACKMAP_SAME_LOCALS_1_STACK_EXTENDED == frameType) { /* 247 */
 			/*
 			 * SAME_LOCALS_1_STACK_EXTENDED {
@@ -1884,6 +1921,7 @@ ClassFileWriter::writeStackMapTableAttribute(J9ROMMethod * romMethod)
 			/* verification_type_info stack[number of stack items] */
 			writeVerificationTypeInfo(stackItemsCount, &stackMap);
 		}
+		 i++;
 	}
 
 	writeU32At((U_32)(_classFileCursor - start), attributeLenAddr);

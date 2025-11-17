@@ -957,10 +957,9 @@ private:
 	}
 
 #if defined(J9VM_OPT_VALHALLA_STRICT_FIELDS)
-	void visitUnsetField(U_16 cpIndex, U_16 nameIndex)
+	void visitUnsetField(U_16 nasIndex)
 	{
-		U_8 *nameData = _classFileOracle->getUTF8Data(nameIndex);
-		_cursor->writeBigEndianU16(_constantPoolMap->getROMClassCPIndex(nameIndex), Cursor::GENERIC);
+		_cursor->writeBigEndianU16(_constantPoolMap->getROMClassCPIndex(nasIndex), Cursor::GENERIC);
 	}
 #endif /* defined(J9VM_OPT_VALHALLA_STRICT_FIELDS) */
 

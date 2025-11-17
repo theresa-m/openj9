@@ -310,6 +310,9 @@ private:
 	void writeAttributes();
 	void writeCodeAttribute(J9ROMMethod * method);
 	void writeVerificationTypeInfo(U_16 count, U_8 ** typeInfo);
+#if defined(J9VM_OPT_VALHALLA_STRICT_FIELDS)
+	void writeUnsetFields(U_16 numberOfUnsetFields, U_8 **typeInfo);
+#endif /* defined(J9VM_OPT_VALHALLA_STRICT_FIELDS) */
 	void writeStackMapTableAttribute(J9ROMMethod * romMethod);
 	void writeSignatureAttribute(J9UTF8 * genericSignature);
 	void writeAnnotationElement(U_8 **annotationElement);

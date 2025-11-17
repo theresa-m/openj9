@@ -129,6 +129,7 @@ public class RomClassWalker extends ClassWalker {
 	public static final int CFR_STACKMAP_SAME = 0;
 	public static final int CFR_STACKMAP_SAME_LOCALS_1_STACK = 64;
 	public static final int CFR_STACKMAP_SAME_LOCALS_1_STACK_END = 128;
+	public static final int CFR_STACKMAP_EARLY_LARVAL = 246;
 	public static final int CFR_STACKMAP_SAME_LOCALS_1_STACK_EXTENDED = 247;
 	public static final int CFR_STACKMAP_SAME_EXTENDED = 251;
 	public static final int CFR_STACKMAP_APPEND_BASE = 251;
@@ -636,7 +637,7 @@ public class RomClassWalker extends ClassWalker {
 			} else if (shapeDesc == J9CPTYPE_DOUBLE) {
 				classWalkerCallback.addSlot(clazz, SlotType.J9_I64, I64Pointer.cast(cpEntry), "cpField8");
 
-			} else if (shapeDesc == J9CPTYPE_FIELD) {
+			} else if (shapeDesc == J9CPTYPE_FIELD) { // here?
 				J9ROMFieldRefPointer ref = J9ROMFieldRefPointer.cast(cpEntry);
 				classWalkerCallback.addSlot(clazz, SlotType.J9_SRPNAS, ref.nameAndSignatureEA(), "cpFieldNAS");
 				classWalkerCallback.addSlot(clazz, SlotType.J9_U32, ref.classRefCPIndexEA(), "cpFieldClassRef");
@@ -803,8 +804,8 @@ public class RomClassWalker extends ClassWalker {
 	private long allSlotsInStackMapFramesDo(U8Pointer cursor, long frameCount) throws CorruptDataException {
 		U8Pointer cursorStart = U8Pointer.NULL;
 		long count;
-
-		for (; frameCount > 0; frameCount--) {
+		boolean walkBaseFrame = false;
+		while (frameCount > 0) {
 			long frameType;
 			int length;
 
@@ -812,7 +813,11 @@ public class RomClassWalker extends ClassWalker {
 				cursorStart = cursor;
 			}
 
-			classWalkerCallback.addSlot(clazz, SlotType.J9_U8, cursor, "stackMapFrameType");
+			if (walkBaseFrame) {
+				classWalkerCallback.addSlot(clazz, SlotType.J9_U8, cursor, "baseFrameType");
+			} else {
+				classWalkerCallback.addSlot(clazz, SlotType.J9_U8, cursor, "stackMapFrameType");
+			}
 			frameType = cursor.at(0).longValue();
 			cursor = cursor.add(1);
 
@@ -824,8 +829,27 @@ public class RomClassWalker extends ClassWalker {
 					return cursor.getAddress() - cursorStart.getAddress();
 				}
 				cursor = cursor.add(length);
-			} else if (CFR_STACKMAP_SAME_LOCALS_1_STACK_EXTENDED > frameType) { /* 128..246 */
+			} else if (CFR_STACKMAP_EARLY_LARVAL > frameType) { /* 128..245 */
 				/* Reserved frame types - no extra data */
+			} else if (CFR_STACKMAP_EARLY_LARVAL == frameType) { /* 246 */
+				classWalkerCallback.addSlot(clazz, SlotType.J9_U16, cursor, "numberOfUnsetFields");
+				count = SWAP2BE(U16Pointer.cast(cursor).at(0).shortValue());
+				cursor = cursor.add(2);
+				for (; count > 0; count--) {
+					classWalkerCallback.addSlot(clazz, SlotType.J9_U16, cursor, "nasCp"); // remove
+					//int nasCp = SWAP2BE(U16Pointer.cast(cursor).at(0).shortValue());
+					//int nasCp = U16Pointer.cast(cursor).at(0).shortValue();
+					cursor = cursor.add(2);
+
+					// PointerPointer cpEntry = PointerPointer.cast(J9ROMClassHelper.constantPool(romClass));
+					// cpEntry = cpEntry.addOffset(J9ROMConstantPoolItem.SIZEOF * nasCp);
+
+					// // not quite sure what to do here
+					// J9ROMFieldRefPointer ref = J9ROMFieldRefPointer.cast(cpEntry);
+					// classWalkerCallback.addSlot(clazz, SlotType.J9_SRPNAS, ref.nameAndSignatureEA(), "cpUnsetFieldNAS");
+				}
+				walkBaseFrame = true;
+				continue;
 			} else if (CFR_STACKMAP_SAME_LOCALS_1_STACK_EXTENDED == frameType) { /* 247 */
 				classWalkerCallback.addSlot(clazz, SlotType.J9_U16, cursor, "stackMapFrameOffset");
 				cursor = cursor.add(2);
@@ -879,6 +903,7 @@ public class RomClassWalker extends ClassWalker {
 					cursor = cursor.add(length);
 				}
 			}
+			frameCount--;
 		}
 		return cursor.getAddress() - cursorStart.getAddress();
 	}

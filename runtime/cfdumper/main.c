@@ -163,6 +163,9 @@ static J9ROMClass *translateClassBytes (U_8 * data, U_32 dataLength, char *reque
 static void printDisassembledMethod (J9CfrClassFile* classfile, J9CfrMethod* method, BOOLEAN bigEndian, U_8* bytecodes, U_32 bytecodesLength);
 static void printDisassembledMethods (J9CfrClassFile *classfile);
 static void dumpClassFile (J9CfrClassFile* classfile);
+#if defined(J9VM_OPT_VALHALLA_STRICT_FIELDS)
+static U_8 *dumpUnsetFields(J9CfrClassFile *classfile, U_8 *slotData,  U_32 tabLevel);
+#endif /* defined(J9VM_OPT_VALHALLA_STRICT_FIELDS) */
 static U_8 * dumpStackMapSlots (J9CfrClassFile* classfile, U_8 * slotData, U_16 slotCount);
 static I_32 processClassFile (J9CfrClassFile* classfile, U_32 dataLength, char* requestedFile, U_32 flags);
 static I_32 getBytes (const char* filename, U_8** dataHandle);
@@ -7408,16 +7411,18 @@ static void dumpTypeAnnotations (J9CfrClassFile* classfile, J9CfrTypeAnnotation 
 
 static void dumpStackMap(J9CfrAttributeStackMap * stackMap, J9CfrClassFile* classfile, U_32 tabLevel)
 {
-	U_32 i, j;
+	U_32 i, j = 0;
 	U_32 framePC = (U_32) -1;
 	U_8 frameType;
 	U_8 *framePointer = stackMap->entries;
 	U_8 *frameEnd = framePointer+stackMap->mapLength;
 	U_16 offset;
+#if defined(J9VM_OPT_VALHALLA_STRICT_FIELDS)
+	BOOLEAN writeBaseFrame = FALSE;
+#endif /* defined(J9VM_OPT_VALHALLA_STRICT_FIELDS) */
 
 	PORT_ACCESS_FROM_PORT(portLib);
-
-	for(j = 0; j < stackMap->numberOfEntries; j++) {
+	while (j < stackMap->numberOfEntries) {
 		if (framePointer >= frameEnd) {
 			j9tty_printf( PORTLIB, "End of StackMapTable attribute reached before last field\n");
 			return;
@@ -7425,7 +7430,12 @@ static void dumpStackMap(J9CfrAttributeStackMap * stackMap, J9CfrClassFile* clas
 		for(i = 0; i < tabLevel; i++) {
 			j9tty_printf( PORTLIB, "  ");
 		}
-
+#if defined(J9VM_OPT_VALHALLA_STRICT_FIELDS)
+		if (writeBaseFrame) {
+			j9tty_printf( PORTLIB, "  base frame: ");
+			writeBaseFrame = FALSE;
+		}
+#endif /* defined(J9VM_OPT_VALHALLA_STRICT_FIELDS) */
 		if (stackMap->tag == CFR_ATTRIBUTE_StackMap) {
 			frameType = 255;
 		} else {
@@ -7443,9 +7453,21 @@ static void dumpStackMap(J9CfrAttributeStackMap * stackMap, J9CfrClassFile* clas
 			framePointer = dumpStackMapSlots(classfile, framePointer, 1);
 			j9tty_printf( PORTLIB, "\n");
 
+#if defined(J9VM_OPT_VALHALLA_STRICT_FIELDS)
+		} else if (frameType < 246) {
+			j9tty_printf( PORTLIB, "UNKNOWN FRAME TAG %02x\n", frameType);
+
+		} else if (frameType == 246) {
+			j9tty_printf( PORTLIB, "early_larval:\n");
+			framePointer = dumpUnsetFields(classfile, framePointer, tabLevel + 1);
+			writeBaseFrame = TRUE;
+			continue;
+
+#else /* defined(J9VM_OPT_VALHALLA_STRICT_FIELDS) */
 		} else if (frameType < 247) {
 			j9tty_printf( PORTLIB, "UNKNOWN FRAME TAG %02x\n", frameType);
 
+#endif /* defined(J9VM_OPT_VALHALLA_STRICT_FIELDS) */
 		} else if (frameType == 247) {
 			offset = (framePointer[0] << 8) + framePointer[1];
 			framePointer +=2;
@@ -7492,11 +7514,42 @@ static void dumpStackMap(J9CfrAttributeStackMap * stackMap, J9CfrClassFile* clas
 			framePointer = dumpStackMapSlots(classfile, framePointer, offset);
 			j9tty_printf( PORTLIB, "\n");
 		}
+		j++;
 	}
 
 	return;
 }
 
+#if defined(J9VM_OPT_VALHALLA_STRICT_FIELDS)
+static U_8 *dumpUnsetFields(J9CfrClassFile *classfile, U_8 *slotData,  U_32 tabLevel)
+{
+	U_32 i = 0;
+	U_16 numberOfUnsetFields = (slotData[0] << 8) + slotData[1];
+	slotData += 2;
+
+	PORT_ACCESS_FROM_PORT(portLib);
+	for(i = 0; i < tabLevel; i++) {
+		j9tty_printf(PORTLIB, "  ");
+	}
+	j9tty_printf(PORTLIB, "unset fields: %i\n", numberOfUnsetFields);
+	tabLevel += 1;
+	for (; numberOfUnsetFields > 0; numberOfUnsetFields--) {
+		for(i = 0; i < tabLevel; i++) {
+			j9tty_printf(PORTLIB, "  ");
+		}
+		U_16 nameAndSignatureIndex = (slotData[0] << 8) + slotData[1];
+		slotData += 2;
+		U_16 nameIndex = classfile->constantPool[nameAndSignatureIndex].slot1;
+		U_16 signatureIndex = classfile->constantPool[nameAndSignatureIndex].slot2;
+		j9tty_printf(PORTLIB, "NAS: %i, Name: %i -> %s, Signature: %i -> %s\n",
+			nameAndSignatureIndex,
+			nameIndex, classfile->constantPool[nameIndex].bytes,
+			signatureIndex, classfile->constantPool[signatureIndex].bytes);
+	}
+	tabLevel -= 1;
+	return slotData;
+}
+#endif /* defined(J9VM_OPT_VALHALLA_STRICT_FIELDS) */
 
 static U_8 * dumpStackMapSlots(J9CfrClassFile* classfile, U_8 * slotData, U_16 slotCount)
 {
