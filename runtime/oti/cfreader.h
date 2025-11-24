@@ -40,6 +40,7 @@
 
 #define CFR_MAJOR_VERSION_REQUIRING_STACKMAPS 51
 
+/* @ddr_namespace: map_to_type=J9Cfreader */
 /* Flags for StackMapTable frame types */
 #define	CFR_STACKMAP_SAME														(U_8) 0
 #define	CFR_STACKMAP_SAME_LOCALS_1_STACK						(U_8) 64

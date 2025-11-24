@@ -94,6 +94,7 @@ import com.ibm.j9ddr.vm29.types.U16;
 import com.ibm.j9ddr.vm29.types.U32;
 import com.ibm.j9ddr.vm29.types.U8;
 import com.ibm.j9ddr.vm29.types.UDATA;
+import com.ibm.j9ddr.vm29.structure.J9Cfreader;
 
 public class J9BCUtil {
 	private static final String nl = System.getProperty("line.separator");
@@ -1174,9 +1175,9 @@ public class J9BCUtil {
 					out.print("pc: " + mapPC +" same_locals_1_stack_item: ");
 					stackMapData = dumpStackMapSlots(out, romclass, stackMapData, 1);
 					out.println();
-				} else if (mapType < 246) {
+				} else if (mapType < J9Cfreader.CFR_STACKMAP_EARLY_LARVAL) {
 					out.println("UNKNOWN FRAME TAG: (" + mapType + ")\n");
-				} else if (mapType == 246) {
+				} else if (mapType == J9Cfreader.CFR_STACKMAP_EARLY_LARVAL) {
 					out.println("early_larval:");
 					stackMapData = dumpUnsetFields(out, romclass, stackMapData);
 					dumpBaseFrame = true;
