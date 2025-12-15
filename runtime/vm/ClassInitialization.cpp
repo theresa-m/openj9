@@ -413,6 +413,7 @@ doVerify:
 #if defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES)
 				/* verify flattenable fields */
 				if (NULL != clazz->flattenedClassCache) {
+					printf("hi\n");
 					UDATA numberOfFlattenedFields = clazz->flattenedClassCache->numberOfEntries;
 
 					calculateFlattenedFieldAddresses(currentThread, clazz);
@@ -423,6 +424,7 @@ doVerify:
 						bool isStatic = J9_VM_FCC_ENTRY_IS_STATIC_FIELD(entry);
 
 						if (isStatic) {
+							printf("hi2\n");
 							J9UTF8 *signature = J9ROMFIELDSHAPE_SIGNATURE(entry->field);
 							U_8 *signatureChars = J9UTF8_DATA(signature);
 
@@ -593,6 +595,7 @@ doVerify:
 #if defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES)
 				/* prepare flattenable fields */
 				if (NULL != clazz->flattenedClassCache) {
+					printf("hi3\n");
 					UDATA numberOfFlattenedFields = clazz->flattenedClassCache->numberOfEntries;
 
 					for (UDATA i = 0; i < numberOfFlattenedFields; i++) {
@@ -755,6 +758,7 @@ doVerify:
 #if defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES)
 				/* init flattenable fields */
 				if (NULL != clazz->flattenedClassCache) {
+					printf("hi4\n");
 					UDATA numberOfFlattenedFields = clazz->flattenedClassCache->numberOfEntries;
 
 					for (UDATA i = 0; i < numberOfFlattenedFields; i++) {
@@ -793,8 +797,9 @@ initFailed:
 				}
 #if defined(J9VM_OPT_VALHALLA_STRICT_FIELDS)
 				/* All strict static fields must be set by the end of <clinit>. */
-				if (clazz->strictStaticFieldCounter > 0) {
+				if ((NULL != clazz->flattenedClassCache) && (clazz->flattenedClassCache->strictStaticFieldCounter > 0)) {
 					J9UTF8 *className = J9ROMCLASS_CLASSNAME(clazz->romClass);
+					printf("too many strict fields\n");
 					setCurrentExceptionNLSWithArgs(
 							currentThread,
 							J9NLS_VM_CLASS_LOADING_ERROR_STRICT_STATIC_FIELDS_UNSET,

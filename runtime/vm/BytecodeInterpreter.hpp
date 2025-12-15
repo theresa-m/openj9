@@ -4447,6 +4447,59 @@ done:
 		return rc;
 	}
 
+#if defined(J9VM_OPT_VALHALLA_STRICT_FIELDS)
+	/* jdk.internal.misc.Unsafe: public native void notifyStrictStaticAccess0(Class<?> clz, long staticFieldOffset, boolean writing); */
+	VMINLINE VM_BytecodeAction
+	inlUnsafeNotifyStrictStaticAccess0(REGISTER_ARGS_LIST)
+	{
+		VM_BytecodeAction rc = EXECUTE_BYTECODE;
+		//U_8 writing = (U_8)*(I_32 *)_sp;
+		// UDATA staticFieldOffset = (UDATA)*(I_64 *)(_sp + 1);
+		// //j9object_t clz = *(j9object_t *)(_sp + 3);
+
+		// if (NULL == clz) {
+		// 	rc = THROW_NPE;
+		// } else {
+		// 	//J9Class *clzJ9Class = J9VM_J9CLASS_FROM_HEAPCLASS(_currentThread, clz);
+			
+		// 	if (J9_ARE_NO_BITS_SET(staticFieldOffset, J9_SUN_STATIC_FIELD_OFFSET_TAG)) {
+		// 		buildInternalNativeStackFrame(REGISTER_ARGS);
+		// 		updateVMStruct(REGISTER_ARGS);
+		// 		prepareForExceptionThrow(_currentThread);
+		// 		setCurrentExceptionUTF(_currentThread, J9VMCONSTANTPOOL_JAVALANGILLEGALARGUMENTEXCEPTION, NULL);
+		// 		VMStructHasBeenUpdated(REGISTER_ARGS);
+		// 		rc = GOTO_THROW_CURRENT_EXCEPTION;
+		// 	}
+
+		// 	//void *valueAddress = (void*)((UDATA)fieldClass->ramStatics + (offset & ~(UDATA)J9_SUN_FIELD_OFFSET_MASK));
+			
+		// 	// this would only work if the field has already been resolved once.
+		// 	// go through ram constant pool and find the J9RAMStaticFieldRef
+		// 	// that matches the value address?
+
+		// 	// find more about how valueAddress is calculated
+		// }
+
+		return rc;
+
+		// staticFieldOffset contains:
+		// - J9JNIFieldID offset
+		// - J9_SUN_STATIC_FIELD_OFFSET_TAG (assert this)
+		// - J9_SUN_FINAL_FIELD_OFFSET_TAG
+
+		// TODO how do I get the field?
+
+		// method should:
+		// X check that class is not null
+		// X check that staticFieldOffset has J9_SUN_STATIC_FIELD_OFFSET_TAG set
+		// checks that field index is a valid range?
+		// check that resolved field is strict and static?
+		// do i need to check for uninitizliedthis?
+		// if not set and is putfield set the field
+		// if not set and is read throw an error
+		// if set, field is final and has been read, putfield should fail
+	}
+#endif /* defined(J9VM_OPT_VALHALLA_STRICT_FIELDS) */
 #if defined(J9VM_OPT_VALHALLA_VALUE_TYPES)
 	/* jdk.internal.misc.Unsafe: public native <V> long valueHeaderSize(Class<V> clz); */
 	VMINLINE VM_BytecodeAction
@@ -7664,6 +7717,9 @@ retry:
 		IDATA volatile flagsAndClass = ramStaticFieldRef->flagsAndClass;
 		UDATA volatile classAndFlags = 0;
 		void* volatile valueAddress = NULL;
+#if defined(J9VM_OPT_VALHALLA_STRICT_FIELDS)
+		//J9Class *ramClass = NULL;
+#endif /* defined(J9VM_OPT_VALHALLA_STRICT_FIELDS) */
 
 		if (J9_UNEXPECTED(!VM_VMHelpers::staticFieldRefIsResolved(flagsAndClass, valueOffset))) {
 			/* Unresolved */
@@ -7691,17 +7747,34 @@ retry:
 		valueAddress = J9STATICADDRESS(flagsAndClass, valueOffset);
 
 #if defined(J9VM_OPT_VALHALLA_STRICT_FIELDS)
-		if (J9ClassInitNotInitialized == (ramConstantPool->ramClass->initializeStatus & J9ClassInitStatusMask)) {
-			if (J9_STATIC_FIELD_STRICT_INIT_IS_UNSET(classAndFlags)) {
-				/* If a strict field has never been set, fail. */
-				rc = THROW_ILLEGAL_STATE_EXCEPTION;
-				goto done;
-			} else if (J9_STATIC_FIELD_STRICT_INIT_WAS_WRITTEN(classAndFlags)) {
-				classAndFlags &= ~J9StaticFieldRefStrictInitMask;
-				classAndFlags |= J9StaticFieldRefStrictInitRead;
-				ramStaticFieldRef->flagsAndClass = J9FLAGSANDCLASS_FROM_CLASSANDFLAGS(classAndFlags);
-			}
-		}
+		// ramClass = ramConstantPool->ramClass;
+		// if (J9_ARE_ALL_BITS_SET(classAndFlags, J9StaticFieldRefStrict)
+		// 	&& (NULL != ramClass->flattenedClassCache)
+		// 	&& (J9ClassInitNotInitialized == (ramClass->initializeStatus & J9ClassInitStatusMask))
+		// ) {
+		// 	printf("here1\n");
+		// 	// find entry - mkae this a method like findIndexInFlattenedClassCache
+		// 	UDATA numberOfFlattenedFields = ramClass->flattenedClassCache->numberOfEntries;
+		// 	J9FlattenedClassCacheEntry *entry = NULL;
+		// 	for (UDATA i = 0; i < numberOfFlattenedFields; i++) {
+		// 		// rename or make a function?
+		// 		J9FlattenedClassCacheEntry *tempEntry = J9_VM_FCC_ENTRY_FROM_CLASS(ramClass, i);
+		// 		if (((I_64)tempEntry->offset == valueOffset)) { // is this right?
+		// 			printf("found a match\n");
+		// 			entry = tempEntry;
+		// 			break;
+		// 		}
+		// 	}
+		// 	Assert_VM_true(NULL != entry);
+		// 	Assert_VM_true(J9_VM_FCC_ENTRY_IS_STATIC_FIELD(entry));
+		// 	if (J9_VM_FCC_ENTRY_IS_STRICT_STATIC_UNSET(entry)) {
+		// 		/* If a strict field has never been set, fail. */
+		// 		rc = THROW_GET_STRICT_STATIC_NOT_SET;
+		// 		goto done;
+		// 	} else {
+		// 		entry->clazz = (J9Class *)(J9_VM_FCC_CLASS_FLAGS_STATIC_FIELD | J9_VM_FCC_CLASS_FLAGS_STRICT_STATIC_FIELD_WRITTEN | J9_VM_FCC_CLASS_FLAGS_STRICT_STATIC_FIELD_READ);
+		// 	}
+		// }
 #endif /* defined(J9VM_OPT_VALHALLA_STRICT_FIELDS) */
 
 #if defined(DO_HOOKS)
@@ -7756,7 +7829,7 @@ done:
 		void* volatile valueAddress = NULL;
 		void *resolveResult = NULL;
 #if defined(J9VM_OPT_VALHALLA_STRICT_FIELDS)
-		J9Class *ramClass = NULL;
+		//J9Class *ramClass = NULL;
 #endif /* defined(J9VM_OPT_VALHALLA_STRICT_FIELDS) */
 
 		if (J9_UNEXPECTED(!(
@@ -7788,22 +7861,37 @@ done:
 		valueAddress = J9STATICADDRESS(flagsAndClass, valueOffset);
 
 #if defined(J9VM_OPT_VALHALLA_STRICT_FIELDS)
-		ramClass = ramConstantPool->ramClass;
-		if (J9ClassInitNotInitialized == (ramClass->initializeStatus & J9ClassInitStatusMask)) {
-			if (J9_STATIC_FIELD_STRICT_INIT_IS_UNSET(classAndFlags)) {
-				Assert_VM_true(ramClass->strictStaticFieldCounter > 0);
-				ramClass->strictStaticFieldCounter -= 1;
-				classAndFlags &= ~J9StaticFieldRefStrictInitMask;
-				classAndFlags |= J9StaticFieldRefStrictInitWritten;
-				ramStaticFieldRef->flagsAndClass = J9FLAGSANDCLASS_FROM_CLASSANDFLAGS(classAndFlags);
-			} else if (J9_STATIC_FIELD_STRICT_INIT_WAS_WRITTEN_AND_READ(classAndFlags)
-				&& J9_ARE_ANY_BITS_SET(classAndFlags, J9StaticFieldRefFinal)
-			) {
-				/* If the strict final field was read, fail. */
-				rc = THROW_ILLEGAL_STATE_EXCEPTION;
-				goto done;
-			}
-		}
+	// ramClass = ramConstantPool->ramClass;
+	// if (J9_ARE_ALL_BITS_SET(classAndFlags, J9StaticFieldRefStrict)
+	// 	&& (NULL != ramClass->flattenedClassCache)
+	// 	&& (J9ClassInitNotInitialized == (ramClass->initializeStatus & J9ClassInitStatusMask))
+	// ) {
+	// 	// find entry
+	// 	UDATA numberOfFlattenedFields = ramClass->flattenedClassCache->numberOfEntries;
+	// 	J9FlattenedClassCacheEntry *entry = NULL;
+	// 	for (UDATA i = 0; i < numberOfFlattenedFields; i++) {
+	// 		// rename or make a function?
+	// 		J9FlattenedClassCacheEntry *tempEntry = J9_VM_FCC_ENTRY_FROM_CLASS(ramClass, i);
+	// 		if (((I_64)tempEntry->offset == valueOffset)) { // is this right?
+	// 			entry = tempEntry;
+	// 			break;
+	// 		}
+	// 	}
+	// 	Assert_VM_true(NULL != entry);
+	// 	Assert_VM_true(J9_VM_FCC_ENTRY_IS_STATIC_FIELD(entry));
+	// 	/* if not set mark as written*/
+	// 	if (J9_VM_FCC_ENTRY_IS_STRICT_STATIC_UNSET(entry)) {
+	// 		Assert_VM_true(ramClass->flattenedClassCache->strictStaticFieldCounter > 0);
+	// 		ramClass->flattenedClassCache->strictStaticFieldCounter -= 1;
+	// 		entry->clazz = (J9Class *)(J9_VM_FCC_CLASS_FLAGS_STATIC_FIELD | J9_VM_FCC_CLASS_FLAGS_STRICT_STATIC_FIELD_WRITTEN);
+	// 	} else if (J9_VM_FCC_ENTRY_IS_STRICT_STATIC_READ(entry)
+	// 		&& J9_ARE_ANY_BITS_SET(classAndFlags, J9StaticFieldRefFinal)
+	// 	) {
+	// 		/* If the strict final field was read, fail. */
+	// 		rc = THROW_PUT_STRICT_STATIC_FINAL_AFTER_READ;
+	// 		goto done;
+	// 	}
+	// }
 #endif /* defined(J9VM_OPT_VALHALLA_STRICT_FIELDS) */
 
 #if defined(DO_HOOKS)
@@ -10701,6 +10789,9 @@ public:
 		JUMP_TABLE_ENTRY(J9_BCLOOP_SEND_TARGET_INL_UNSAFE_COMPAREANDSWAPOBJECT),
 		JUMP_TABLE_ENTRY(J9_BCLOOP_SEND_TARGET_INL_UNSAFE_COMPAREANDSWAPLONG),
 		JUMP_TABLE_ENTRY(J9_BCLOOP_SEND_TARGET_INL_UNSAFE_COMPAREANDSWAPINT),
+#if defined(J9VM_OPT_VALHALLA_STRICT_FIELDS)
+		JUMP_TABLE_ENTRY(J9_BCLOOP_SEND_TARGET_INL_UNSAFE_NOTIFYSTRICTSTATICACCESS0),
+#endif /* J9VM_OPT_VALHALLA_STRICT_FIELDS */
 #if defined(J9VM_OPT_VALHALLA_VALUE_TYPES)
 		JUMP_TABLE_ENTRY(J9_BCLOOP_SEND_TARGET_INL_UNSAFE_VALUEHEADERSIZE),
 		JUMP_TABLE_ENTRY(J9_BCLOOP_SEND_TARGET_INL_UNSAFE_GETOBJECTSIZE),
@@ -10803,11 +10894,15 @@ public:
 #endif /* defined(J9VM_OPT_CRIU_SUPPORT) */
 
 #if defined(J9VM_OPT_VALHALLA_STRICT_FIELDS)
-#define PERFORM_ACTION_ILLEGAL_STATE_EXCEPTION \
-		case THROW_ILLEGAL_STATE_EXCEPTION: \
-			goto illegalStateException;
+#define PERFORM_ACTION_THROW_GET_STRICT_STATIC_NOT_SET \
+	case THROW_GET_STRICT_STATIC_NOT_SET: \
+	goto illegalStateException_getStrictStaticNotSet;
+#define PERFORM_ACTION_THROW_PUT_STRICT_STATIC_FINAL_AFTER_READ \
+	case THROW_PUT_STRICT_STATIC_FINAL_AFTER_READ: \
+		goto illegalStateException_putStrictStaticFinalAfterRead;
 #else /* defined(J9VM_OPT_VALHALLA_STRICT_FIELDS) */
-#define PERFORM_ACTION_ILLEGAL_STATE_EXCEPTION
+#define PERFORM_ACTION_THROW_GET_STRICT_STATIC_NOT_SET
+#define PERFORM_ACTION_THROW_PUT_STRICT_STATIC_FINAL_AFTER_READ
 #endif /* defined(J9VM_OPT_VALHALLA_STRICT_FIELDS) */
 
 #define PERFORM_ACTION(functionCall) \
@@ -10868,7 +10963,8 @@ public:
 			goto i2j; \
 		PERFORM_ACTION_VALUE_TYPE_IMSE \
 		PERFORM_ACTION_CRIU_STM_THROW \
-		PERFORM_ACTION_ILLEGAL_STATE_EXCEPTION \
+		PERFORM_ACTION_THROW_GET_STRICT_STATIC_NOT_SET \
+		PERFORM_ACTION_THROW_PUT_STRICT_STATIC_FINAL_AFTER_READ \
 		DEBUG_ACTIONS \
 		default: \
 			Assert_VM_unreachable(); \
@@ -11319,6 +11415,10 @@ runMethod: {
 		PERFORM_ACTION(inlUnsafeCompareAndSwapLong(REGISTER_ARGS));
 	JUMP_TARGET(J9_BCLOOP_SEND_TARGET_INL_UNSAFE_COMPAREANDSWAPINT):
 		PERFORM_ACTION(inlUnsafeCompareAndSwapInt(REGISTER_ARGS));
+#if defined(J9VM_OPT_VALHALLA_STRICT_FIELDS)
+	JUMP_TARGET(J9_BCLOOP_SEND_TARGET_INL_UNSAFE_NOTIFYSTRICTSTATICACCESS0):
+		PERFORM_ACTION(inlUnsafeNotifyStrictStaticAccess0(REGISTER_ARGS));
+#endif /* defined(J9VM_OPT_VALHALLA_STRICT_FIELDS) */
 #if defined(J9VM_OPT_VALHALLA_VALUE_TYPES)
 	JUMP_TARGET(J9_BCLOOP_SEND_TARGET_INL_UNSAFE_VALUEHEADERSIZE):
 		PERFORM_ACTION(inlUnsafeValueHeaderSize(REGISTER_ARGS));
@@ -11575,10 +11675,16 @@ incompatibleClassChange:
 	goto throwCurrentException;
 
 #if defined(J9VM_OPT_VALHALLA_STRICT_FIELDS)
-illegalStateException:
+illegalStateException_getStrictStaticNotSet:
 	updateVMStruct(REGISTER_ARGS);
 	prepareForExceptionThrow(_currentThread);
-	setCurrentExceptionUTF(_currentThread, J9VMCONSTANTPOOL_JAVALANGILLEGALSTATEEXCEPTION, NULL);
+	setCurrentExceptionNLS(_currentThread, J9VMCONSTANTPOOL_JAVALANGILLEGALSTATEEXCEPTION, J9NLS_VM_GET_STRICT_STATIC_NOT_SET);
+	VMStructHasBeenUpdated(REGISTER_ARGS);
+	goto throwCurrentException;
+illegalStateException_putStrictStaticFinalAfterRead:
+	updateVMStruct(REGISTER_ARGS);
+	prepareForExceptionThrow(_currentThread);
+	setCurrentExceptionNLS(_currentThread, J9VMCONSTANTPOOL_JAVALANGILLEGALSTATEEXCEPTION, J9NLS_VM_PUT_FINAL_STRICT_STATIC_AFTER_READ);
 	VMStructHasBeenUpdated(REGISTER_ARGS);
 	goto throwCurrentException;
 #endif /* defined(J9VM_OPT_VALHALLA_STRICT_FIELDS) */

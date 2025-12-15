@@ -1967,7 +1967,7 @@ checkSuperClassAndInterfaces(J9VMThread *vmThread, J9ClassLoader *classLoader, J
  * 1. Attempts to load NullRestricted value classes.
  *
  * 2. Records total number of flattenable instance fields
- * to flattenedClassCache->numberOfEntries.
+ * to flattenedClassCache->numberOfEntries. (includes strict fields now)
  *
  * 3. Sets the J9ClassLargestAlignmentConstraintDouble flag if any
  * of the fields are double-aligned. Similarily, it sets the
@@ -1996,6 +1996,7 @@ loadFlattenableFieldValueClasses(J9VMThread *currentThread, J9ClassLoader *class
 	J9ROMFieldShape *field = romFieldsStartDo(romClass, &fieldWalkState);
 	BOOLEAN result = TRUE;
 	UDATA flattenableFieldCount = 0;
+	U_16 strictStaticFieldCounter = 0;
 	bool eligibleForFastSubstitutability = true;
 
 	/* iterate over fields and load classes of fields marked as NullRestricted */
@@ -2060,11 +2061,19 @@ loadFlattenableFieldValueClasses(J9VMThread *currentThread, J9ClassLoader *class
 			}
 		} else {
 			if (J9_ARE_ALL_BITS_SET(modifiers, J9FieldFlagIsNullRestricted)) {
+			/* for static include all strict fields. null restricted fields must be strict. */
+			//if (J9_ARE_ALL_BITS_SET(modifiers, J9AccStrictInit)) {
 				J9FlattenedClassCacheEntry *entry = J9_VM_FCC_ENTRY_FROM_FCC(flattenedClassCache, flattenableFieldCount);
 				entry->clazz = (J9Class *)J9_VM_FCC_CLASS_FLAGS_STATIC_FIELD;
 				entry->field = field;
 				entry->offset = UDATA_MAX;
 				flattenableFieldCount += 1;
+				if (J9_ARE_ALL_BITS_SET(modifiers, J9FieldFlagConstant)) {
+					// clean up the way these flags are written with line 2066?
+					entry->clazz = (J9Class *)(J9_VM_FCC_CLASS_FLAGS_STATIC_FIELD | J9_VM_FCC_CLASS_FLAGS_STRICT_STATIC_FIELD_WRITTEN);
+				} else {
+					strictStaticFieldCounter += 1;
+				}
 			}
 		}
 
@@ -2074,6 +2083,7 @@ loadFlattenableFieldValueClasses(J9VMThread *currentThread, J9ClassLoader *class
 		*valueTypeFlags |= J9ClassCanSupportFastSubstitutability;
 	}
 	flattenedClassCache->numberOfEntries = flattenableFieldCount;
+	flattenedClassCache->strictStaticFieldCounter = strictStaticFieldCounter;
 	if (NULL != superClazz) {
 		*valueTypeFlags |= (J9ClassHasReferences & superClazz->classFlags);
 	}
@@ -3252,9 +3262,6 @@ fail:
 			ramClass->module = NULL;
 			ramClass->reservedCounter = 0;
 			ramClass->cancelCounter = 0;
-#if defined(J9VM_OPT_VALHALLA_STRICT_FIELDS)
-			ramClass->strictStaticFieldCounter = 0;
-#endif /* defined(J9VM_OPT_VALHALLA_STRICT_FIELDS) */
 
 			/* hostClass is exclusively defined only in Unsafe.defineAnonymousClass.
 			 * For all other cases, clazz->hostClass points to itself (clazz).
@@ -3674,19 +3681,6 @@ fail:
 			}
 		}
 	}
-
-#if defined(J9VM_OPT_VALHALLA_STRICT_FIELDS)
-	if (J9_CLASSFILE_OR_ROMCLASS_SUPPORTS_STRICT_FIELDS(romClass)) {
-		J9ROMFieldWalkState fieldWalkState = {0};
-		J9ROMFieldShape *field = romFieldsStartDo(romClass, &fieldWalkState);
-		while (NULL != field) {
-			if (J9_ARE_ALL_BITS_SET(field->modifiers, J9AccStatic | J9AccStrictInit)) {
-				ramClass->strictStaticFieldCounter += 1;
-			}
-			field = romFieldsNextDo(&fieldWalkState);
-		}
-	}
-#endif /* defined(J9VM_OPT_VALHALLA_STRICT_FIELDS) */
 
 #if defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES)
 	state->valueTypeFlags = *valueTypeFlags;
