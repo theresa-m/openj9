@@ -4329,11 +4329,7 @@ done:
 				returnSingleFromINL(REGISTER_ARGS, VM_UnsafeAPI::arrayBaseOffset(_currentThread, (J9ArrayClass*)arrayClazz), 2);
 			} else {
 				buildInternalNativeStackFrame(REGISTER_ARGS);
-				updateVMStruct(REGISTER_ARGS);
-				prepareForExceptionThrow(_currentThread);
-				setCurrentExceptionUTF(_currentThread, J9VMCONSTANTPOOL_JAVALANGILLEGALARGUMENTEXCEPTION, NULL);
-				VMStructHasBeenUpdated(REGISTER_ARGS);
-				rc = GOTO_THROW_CURRENT_EXCEPTION;
+				rc = THROW_ILLEGAL_ARGUMENT_EXCEPTION;
 			}
 		}
 		return rc;
@@ -4354,11 +4350,7 @@ done:
 				returnSingleFromINL(REGISTER_ARGS, VM_UnsafeAPI::arrayIndexScale((J9ArrayClass*)arrayClazz), 2);
 			} else {
 				buildInternalNativeStackFrame(REGISTER_ARGS);
-				updateVMStruct(REGISTER_ARGS);
-				prepareForExceptionThrow(_currentThread);
-				setCurrentExceptionUTF(_currentThread, J9VMCONSTANTPOOL_JAVALANGILLEGALARGUMENTEXCEPTION, NULL);
-				VMStructHasBeenUpdated(REGISTER_ARGS);
-				rc = GOTO_THROW_CURRENT_EXCEPTION;
+				rc = THROW_ILLEGAL_ARGUMENT_EXCEPTION;
 			}
 		}
 		return rc;
@@ -4453,51 +4445,88 @@ done:
 	inlUnsafeNotifyStrictStaticAccess0(REGISTER_ARGS_LIST)
 	{
 		VM_BytecodeAction rc = EXECUTE_BYTECODE;
-		//U_8 writing = (U_8)*(I_32 *)_sp;
-		// UDATA staticFieldOffset = (UDATA)*(I_64 *)(_sp + 1);
-		// //j9object_t clz = *(j9object_t *)(_sp + 3);
+		U_8 writing = (U_8)*(I_32 *)_sp;
+		UDATA staticFieldOffset = (UDATA)*(I_64 *)(_sp + 1);
+		j9object_t clz = *(j9object_t *)(_sp + 3);
+		J9Class *ramClass = NULL;
+		void *valueAddress = NULL;
+		J9FlattenedClassCacheEntry *entry = NULL;
+		UDATA numberOfFlattenedFields = 0;
 
-		// if (NULL == clz) {
-		// 	rc = THROW_NPE;
-		// } else {
-		// 	//J9Class *clzJ9Class = J9VM_J9CLASS_FROM_HEAPCLASS(_currentThread, clz);
-			
-		// 	if (J9_ARE_NO_BITS_SET(staticFieldOffset, J9_SUN_STATIC_FIELD_OFFSET_TAG)) {
-		// 		buildInternalNativeStackFrame(REGISTER_ARGS);
-		// 		updateVMStruct(REGISTER_ARGS);
-		// 		prepareForExceptionThrow(_currentThread);
-		// 		setCurrentExceptionUTF(_currentThread, J9VMCONSTANTPOOL_JAVALANGILLEGALARGUMENTEXCEPTION, NULL);
-		// 		VMStructHasBeenUpdated(REGISTER_ARGS);
-		// 		rc = GOTO_THROW_CURRENT_EXCEPTION;
-		// 	}
+		/* clz can't be null. */
+		if (NULL == clz) {
+			rc = THROW_NPE;
+			goto done;
+		}
 
-		// 	//void *valueAddress = (void*)((UDATA)fieldClass->ramStatics + (offset & ~(UDATA)J9_SUN_FIELD_OFFSET_MASK));
-			
-		// 	// this would only work if the field has already been resolved once.
-		// 	// go through ram constant pool and find the J9RAMStaticFieldRef
-		// 	// that matches the value address?
+		/* staticFieldOffset must reference a static field. */
+		if (J9_ARE_NO_BITS_SET(staticFieldOffset, J9_SUN_STATIC_FIELD_OFFSET_TAG)) {
+			rc = THROW_ILLEGAL_ARGUMENT_EXCEPTION;
+			goto done;
+		}
 
-		// 	// find more about how valueAddress is calculated
-		// }
+		ramClass = J9VM_J9CLASS_FROM_HEAPCLASS(_currentThread, clz);
+		/* ramClass must not be fully initialized meaning clinit is still running.
+		 * ramClass must have a flattenedClassCache otherwise this class has no static strict fields.
+		 */
+		if ((J9ClassInitNotInitialized != (ramClass->initializeStatus & J9ClassInitStatusMask)) 
+			|| (NULL == ramClass->flattenedClassCache)) {
+			rc = THROW_ILLEGAL_ARGUMENT_EXCEPTION;
+			goto done;
+		}
 
+		/* Find flattenedClassCache entry. */
+		valueAddress = (void*)((UDATA)ramClass->ramStatics + (staticFieldOffset & ~(UDATA)J9_SUN_FIELD_OFFSET_MASK));
+		numberOfFlattenedFields = ramClass->flattenedClassCache->numberOfEntries;
+		//J9FlattenedClassCacheEntry *entry = NULL;
+		for (UDATA i = 0; i < numberOfFlattenedFields; i++) {
+			// rename or make a function?
+			J9FlattenedClassCacheEntry *tempEntry = J9_VM_FCC_ENTRY_FROM_CLASS(ramClass, i);
+			if (tempEntry->offset == (UDATA)valueAddress) {
+				entry = tempEntry;
+				break;
+			}
+		}
+		Assert_VM_true(NULL != entry);
+		Assert_VM_true(J9_VM_FCC_ENTRY_IS_STATIC_FIELD(entry));
+
+		/* make these into methods? */
+		if (writing) { // putstatic
+			if (J9_VM_FCC_ENTRY_IS_STRICT_STATIC_UNSET(entry)) {
+				Assert_VM_true(ramClass->flattenedClassCache->strictStaticFieldCounter > 0);
+				ramClass->flattenedClassCache->strictStaticFieldCounter -= 1;
+				// this isn't right for primitives
+				entry->clazz = (J9Class *)(J9_VM_FCC_CLASS_FLAGS_STATIC_FIELD | J9_VM_FCC_CLASS_FLAGS_STRICT_STATIC_FIELD_WRITTEN);
+			} else if (J9_ARE_ALL_BITS_SET(staticFieldOffset, J9_SUN_FINAL_FIELD_OFFSET_TAG) && J9_VM_FCC_ENTRY_IS_STRICT_STATIC_READ(entry)) {
+				// if set, field is final and has been read, putfield should fail
+				rc = THROW_PUT_STRICT_STATIC_FINAL_AFTER_READ;
+				goto done;
+			}
+		} else { // getstatic
+			if (J9_VM_FCC_ENTRY_IS_STRICT_STATIC_UNSET(entry)) {
+				// if not set and is read throw an error
+				rc = THROW_GET_STRICT_STATIC_NOT_SET;
+				goto done;
+			} else {
+				// this isn't right for primitives
+				entry->clazz = (J9Class *)(J9_VM_FCC_CLASS_FLAGS_STATIC_FIELD | J9_VM_FCC_CLASS_FLAGS_STRICT_STATIC_FIELD_WRITTEN | J9_VM_FCC_CLASS_FLAGS_STRICT_STATIC_FIELD_READ);
+			}
+		}
+
+		// success
+		returnVoidFromINL(REGISTER_ARGS, 5);
+done:
 		return rc;
-
-		// staticFieldOffset contains:
-		// - J9JNIFieldID offset
-		// - J9_SUN_STATIC_FIELD_OFFSET_TAG (assert this)
-		// - J9_SUN_FINAL_FIELD_OFFSET_TAG
-
-		// TODO how do I get the field?
 
 		// method should:
 		// X check that class is not null
 		// X check that staticFieldOffset has J9_SUN_STATIC_FIELD_OFFSET_TAG set
-		// checks that field index is a valid range?
-		// check that resolved field is strict and static?
-		// do i need to check for uninitizliedthis?
-		// if not set and is putfield set the field
-		// if not set and is read throw an error
-		// if set, field is final and has been read, putfield should fail
+		// X checks that field index is a valid range?
+		// X check that resolved field is strict and static?
+		// X check uninitialized this state
+		// X if not set and is putfield set the field
+		// X if not set and is read throw an error
+		// X if set, field is final and has been read, putfield should fail
 	}
 #endif /* defined(J9VM_OPT_VALHALLA_STRICT_FIELDS) */
 #if defined(J9VM_OPT_VALHALLA_VALUE_TYPES)
@@ -4763,11 +4792,7 @@ done:
 
 		if (J9ROMCLASS_IS_ARRAY(componentType->romClass) && ((((J9ArrayClass *)componentType)->arity + 1) > J9_ARRAY_DIMENSION_LIMIT)) {
 			/* The spec says to throw this exception if the number of dimensions is greater than J9_ARRAY_DIMENSION_LIMIT */
-			updateVMStruct(REGISTER_ARGS);
-			prepareForExceptionThrow(_currentThread);
-			setCurrentExceptionUTF(_currentThread, J9VMCONSTANTPOOL_JAVALANGILLEGALARGUMENTEXCEPTION, NULL);
-			VMStructHasBeenUpdated(REGISTER_ARGS);
-			rc = GOTO_THROW_CURRENT_EXCEPTION;
+			rc = THROW_ILLEGAL_ARGUMENT_EXCEPTION;
 			goto done;
 		}
 
@@ -10976,6 +11001,8 @@ public:
 		PERFORM_ACTION_CRIU_STM_THROW \
 		PERFORM_ACTION_THROW_GET_STRICT_STATIC_NOT_SET \
 		PERFORM_ACTION_THROW_PUT_STRICT_STATIC_FINAL_AFTER_READ \
+		case THROW_ILLEGAL_ARGUMENT_EXCEPTION: \
+			goto illegalArgumentException; \
 		DEBUG_ACTIONS \
 		default: \
 			Assert_VM_unreachable(); \
@@ -11699,6 +11726,12 @@ illegalStateException_putStrictStaticFinalAfterRead:
 	VMStructHasBeenUpdated(REGISTER_ARGS);
 	goto throwCurrentException;
 #endif /* defined(J9VM_OPT_VALHALLA_STRICT_FIELDS) */
+illegalArgumentException:
+	updateVMStruct(REGISTER_ARGS);
+	prepareForExceptionThrow(_currentThread);
+	setCurrentExceptionUTF(_currentThread, J9VMCONSTANTPOOL_JAVALANGILLEGALARGUMENTEXCEPTION, NULL);
+	VMStructHasBeenUpdated(REGISTER_ARGS);
+	goto throwCurrentException;
 
 negativeArraySize:
 	updateVMStruct(REGISTER_ARGS);

@@ -64,6 +64,8 @@ typedef enum {
 	THROW_GET_STRICT_STATIC_NOT_SET,
 	THROW_PUT_STRICT_STATIC_FINAL_AFTER_READ,
 #endif /* defined(J9VM_OPT_VALHALLA_STRICT_FIELDS) */
+	// version?
+	THROW_ILLEGAL_ARGUMENT_EXCEPTION,
 	/* All values after this line are for the debug interpreter only - add general values above this line */
 	GOTO_EXECUTE_BREAKPOINTED_BYTECODE,
 	HANDLE_POP_FRAMES,
