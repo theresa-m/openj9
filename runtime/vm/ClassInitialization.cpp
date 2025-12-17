@@ -413,18 +413,23 @@ doVerify:
 #if defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES)
 				/* verify flattenable fields */
 				if (NULL != clazz->flattenedClassCache) {
-					printf("hi\n");
 					UDATA numberOfFlattenedFields = clazz->flattenedClassCache->numberOfEntries;
 
+					// need this - it sets the offset value
 					calculateFlattenedFieldAddresses(currentThread, clazz);
 
 					for (UDATA i = 0; i < numberOfFlattenedFields; i++) {
 						J9FlattenedClassCacheEntry *entry = J9_VM_FCC_ENTRY_FROM_CLASS(clazz, i);
 						J9Class *entryClazz = NULL;
 						bool isStatic = J9_VM_FCC_ENTRY_IS_STATIC_FIELD(entry);
+						bool isPrimitive = J9_VM_FCC_ENTRY_IS_STRICT_STATIC_PRIMITIVE(entry);
+
+						// just don't do any of this for primitives
+						if (isStatic && isPrimitive) {
+							continue;
+						}
 
 						if (isStatic) {
-							printf("hi2\n");
 							J9UTF8 *signature = J9ROMFIELDSHAPE_SIGNATURE(entry->field);
 							U_8 *signatureChars = J9UTF8_DATA(signature);
 
@@ -522,7 +527,7 @@ doVerify:
 				}
 				clazz = VM_VMHelpers::currentClass(clazz);
 #if defined(J9VM_OPT_VALHALLA_VALUE_TYPES)
-				if (J9_IS_J9CLASS_VALUETYPE(clazz)) {
+				if (clazz->flattenedClassCache != NULL) {
 					PUSH_OBJECT_IN_SPECIAL_FRAME(currentThread, initializationLock);
 					/* Preparation is the earliest point where the defaultValue would needed. 
 					* I.e pre-filling static fields. Therefore, the defaultValue must be allocated at 
@@ -595,11 +600,15 @@ doVerify:
 #if defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES)
 				/* prepare flattenable fields */
 				if (NULL != clazz->flattenedClassCache) {
-					printf("hi3\n");
 					UDATA numberOfFlattenedFields = clazz->flattenedClassCache->numberOfEntries;
 
 					for (UDATA i = 0; i < numberOfFlattenedFields; i++) {
 						J9FlattenedClassCacheEntry *entry = J9_VM_FCC_ENTRY_FROM_CLASS(clazz, i);
+
+						if (J9_VM_FCC_ENTRY_IS_STRICT_STATIC_PRIMITIVE(entry)) {
+							continue;
+						}
+
 						J9Class *entryClazz = J9_VM_FCC_CLASS_FROM_ENTRY(entry);
 
 						bool isStatic = J9_VM_FCC_ENTRY_IS_STATIC_FIELD(entry);
@@ -649,10 +658,10 @@ doVerify:
 						if (VM_VMHelpers::exceptionPending(currentThread)) {
 							goto done;
 						}
-
-						if (isStatic) {
-							classPrepareWithWithUnflattenedFlattenables(currentThread, clazz, entry, entryClazz);
-						}
+						// removed in aditis pr
+						// if (isStatic) {
+						// 	classPrepareWithWithUnflattenedFlattenables(currentThread, clazz, entry, entryClazz);
+						// }
 					}
 				}
 
@@ -758,11 +767,13 @@ doVerify:
 #if defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES)
 				/* init flattenable fields */
 				if (NULL != clazz->flattenedClassCache) {
-					printf("hi4\n");
 					UDATA numberOfFlattenedFields = clazz->flattenedClassCache->numberOfEntries;
 
 					for (UDATA i = 0; i < numberOfFlattenedFields; i++) {
 						J9FlattenedClassCacheEntry *entry = J9_VM_FCC_ENTRY_FROM_CLASS(clazz, i);
+						if (J9_VM_FCC_ENTRY_IS_STRICT_STATIC_PRIMITIVE(entry)) {
+							continue;
+						}
 						J9Class *entryClazz = J9_VM_FCC_CLASS_FROM_ENTRY(entry);
 						Trc_VM_classInitStateMachine_initFlattenableField(currentThread, entryClazz);
 						PUSH_OBJECT_IN_SPECIAL_FRAME(currentThread, initializationLock);

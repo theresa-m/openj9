@@ -706,7 +706,7 @@ tryAgain:
 
 	/* Get the class.  Stop immediately if an exception occurs. */
 	romFieldRef = (J9ROMFieldRef *)&ramCP->romConstantPool[cpIndex];
-	resolvedClass = resolveClassRef(vmStruct, ramCP, romFieldRef->classRefCPIndex, resolveFlags);
+	resolvedClass = resolveClassRef(vmStruct, ramCP, romFieldRef->classRefCPIndex, resolveFlags); // ?
 	/* If resolvedClass is NULL, the exception has already been set. */
 	if (resolvedClass != NULL) {
 		J9JavaVM *javaVM = vmStruct->javaVM;
@@ -740,6 +740,7 @@ tryAgain:
 		if (staticAddress != NULL) {
 			modifiers = field->modifiers;
 			localClassAndFlags = definingClass;
+			//printf("defining class is %p\n", definingClass);
 			initStatus = definingClass->initializeStatus;
 
 			if (resolvedField != NULL) {
@@ -991,7 +992,7 @@ resolveInstanceFieldRefInto(J9VMThread *vmStruct, J9Method *method, J9ConstantPo
 		 * since ValueType superclasses can not have fields.
 		 */
 #if defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES)
-		if (J9_IS_J9CLASS_VALUETYPE(resolvedClass)) {
+		if (J9_IS_J9CLASS_VALUETYPE(resolvedClass)) { // this?
 			flattenedClassCache = resolvedClass->flattenedClassCache;
 			fieldIndex = findIndexInFlattenedClassCache(flattenedClassCache, nameAndSig);
 			if (UDATA_MAX != fieldIndex) {

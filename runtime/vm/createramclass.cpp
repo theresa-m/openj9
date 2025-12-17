@@ -2060,20 +2060,26 @@ loadFlattenableFieldValueClasses(J9VMThread *currentThread, J9ClassLoader *class
 				break;
 			}
 		} else {
-			if (J9_ARE_ALL_BITS_SET(modifiers, J9FieldFlagIsNullRestricted)) {
 			/* for static include all strict fields. null restricted fields must be strict. */
-			//if (J9_ARE_ALL_BITS_SET(modifiers, J9AccStrictInit)) {
+			if (J9_ARE_ALL_BITS_SET(modifiers, J9AccStrictInit)) {
 				J9FlattenedClassCacheEntry *entry = J9_VM_FCC_ENTRY_FROM_FCC(flattenedClassCache, flattenableFieldCount);
-				entry->clazz = (J9Class *)J9_VM_FCC_CLASS_FLAGS_STATIC_FIELD;
-				entry->field = field;
-				entry->offset = UDATA_MAX;
-				flattenableFieldCount += 1;
+				UDATA flags = J9_VM_FCC_CLASS_FLAGS_STATIC_FIELD;
+				/* If field is initialized through the ConstantValue attribute set as written. */
 				if (J9_ARE_ALL_BITS_SET(modifiers, J9FieldFlagConstant)) {
-					// clean up the way these flags are written with line 2066?
-					entry->clazz = (J9Class *)(J9_VM_FCC_CLASS_FLAGS_STATIC_FIELD | J9_VM_FCC_CLASS_FLAGS_STRICT_STATIC_FIELD_WRITTEN);
+					flags |= J9_VM_FCC_CLASS_FLAGS_STRICT_STATIC_FIELD_WRITTEN;
 				} else {
 					strictStaticFieldCounter += 1;
 				}
+				/* if primitive don't try to set a ram class later */
+				// TODO not sure about arrays
+				if ('L' != signatureChars[0]) {
+					flags |= J9_VM_FCC_CLASS_FLAGS_STRICT_STATIC_FIELD_IS_PRIMITIVE;
+				}
+				flattenableFieldCount += 1;
+
+				entry->clazz = (J9Class *)flags;
+				entry->field = field;
+				entry->offset = UDATA_MAX;
 			}
 		}
 

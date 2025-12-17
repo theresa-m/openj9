@@ -61,203 +61,203 @@ public class StrictFieldTests {
 		}
 	}
 
-	// /* If a strict static final field in larval state is set after it has been
-	//  * read, an exception is thrown.
-	//  */
-	// @Test(expectedExceptions = IllegalStateException.class,
-	// 	expectedExceptionsMessageRegExp = ".*Final strict static field is set after read.*")
-	// static public void testPutStaticInLarvalForReadStrictFinalField() throws Throwable {
-	// 	Class<?> c = StrictFieldGenerator.generateTestPutStaticInLarvalForReadStrictFinalField();
-	// 	try {
-	// 		c.newInstance();
-	// 	} catch (ExceptionInInitializerError e) {
-	// 		throw e.getException();
-	// 	}
-	// }
+	/* If a strict static final field in larval state is set after it has been
+	 * read, an exception is thrown.
+	 */
+	@Test(expectedExceptions = IllegalStateException.class,
+		expectedExceptionsMessageRegExp = ".*Final strict static field is set after read.*")
+	static public void testPutStaticInLarvalForReadStrictFinalField() throws Throwable {
+		Class<?> c = StrictFieldGenerator.generateTestPutStaticInLarvalForReadStrictFinalField();
+		try {
+			c.newInstance();
+		} catch (ExceptionInInitializerError e) {
+			throw e.getException();
+		}
+	}
 
-	// /* If at the end of the larval state a strict static field is not set,
-	//  * class initialization fails and an exception should be thrown.
-	//  * Test with one unset field.
-	//  */
-	// @Test(expectedExceptions = IllegalStateException.class,
-	// 	expectedExceptionsMessageRegExp = ".*Strict static fields are unset after initialization of.*")
-	// static public void testStrictStaticFieldNotSetInLarval() throws Throwable {
-	// 	Class<?> c = StrictFieldGenerator.generateTestStrictStaticFieldNotSetInLarval();
-	// 	try {
-	// 		c.newInstance();
-	// 	} catch (ExceptionInInitializerError e) {
-	// 		throw e.getException();
-	// 	}
-	// }
+	/* If at the end of the larval state a strict static field is not set,
+	 * class initialization fails and an exception should be thrown.
+	 * Test with one unset field.
+	 */
+	@Test(expectedExceptions = IllegalStateException.class,
+		expectedExceptionsMessageRegExp = ".*Strict static fields are unset after initialization of.*")
+	static public void testStrictStaticFieldNotSetInLarval() throws Throwable {
+		Class<?> c = StrictFieldGenerator.generateTestStrictStaticFieldNotSetInLarval();
+		try {
+			c.newInstance();
+		} catch (ExceptionInInitializerError e) {
+			throw e.getException();
+		}
+	}
 
-	// /* If at the end of the larval state a strict static field is not set,
-	//  * class initialization fails and an exception should be thrown.
-	//  * Test with one set field and one unset field.
-	//  */
-	// @Test(expectedExceptions = IllegalStateException.class,
-	// 	expectedExceptionsMessageRegExp = ".*Strict static fields are unset after initialization of.*")
-	// static public void testStrictStaticFieldNotSetInLarvalMulti() throws Throwable {
-	// 	Class<?> c = StrictFieldGenerator.generateTestStrictStaticFieldNotSetInLarvalMulti();
-	// 	try {
-	// 		c.newInstance();
-	// 	} catch (ExceptionInInitializerError e) {
-	// 		throw e.getException();
-	// 	}
-	// }
+	/* If at the end of the larval state a strict static field is not set,
+	 * class initialization fails and an exception should be thrown.
+	 * Test with one set field and one unset field.
+	 */
+	@Test(expectedExceptions = IllegalStateException.class,
+		expectedExceptionsMessageRegExp = ".*Strict static fields are unset after initialization of.*")
+	static public void testStrictStaticFieldNotSetInLarvalMulti() throws Throwable {
+		Class<?> c = StrictFieldGenerator.generateTestStrictStaticFieldNotSetInLarvalMulti();
+		try {
+			c.newInstance();
+		} catch (ExceptionInInitializerError e) {
+			throw e.getException();
+		}
+	}
 
-	// /* Put field twice in a row to ensure field flags are retained. */
-	// @Test
-	// static public void testStrictStaticFieldPutTwice() throws Throwable {
-	// 	Class<?> c = StrictFieldGenerator.generateTestStrictStaticFieldPutTwice();
-	// 	c.newInstance();
-	// }
+	/* Put field twice in a row to ensure field flags are retained. */
+	@Test
+	static public void testStrictStaticFieldPutTwice() throws Throwable {
+		Class<?> c = StrictFieldGenerator.generateTestStrictStaticFieldPutTwice();
+		c.newInstance();
+	}
 
-	// /* A strict instance field must be assigned by putfield before invoking an
-	//  * instance initialization method of the direct superclass.
-	//  */
-	// @Test
-	// static public void testInstanceStrictFieldSetBeforeSuperclassInit() throws Throwable {
-	// 	Class<?> c = StrictFieldGenerator.generateTestInstanceStrictFieldSetBeforeSuperclassInit();
-	// 	c.newInstance();
-	// }
+	/* A strict instance field must be assigned by putfield before invoking an
+	 * instance initialization method of the direct superclass.
+	 */
+	@Test
+	static public void testInstanceStrictFieldSetBeforeSuperclassInit() throws Throwable {
+		Class<?> c = StrictFieldGenerator.generateTestInstanceStrictFieldSetBeforeSuperclassInit();
+		c.newInstance();
+	}
 
-	// @Test(expectedExceptions = VerifyError.class, expectedExceptionsMessageRegExp = ".*<init>.*JBinvokespecial.*")
-	// static public void testInstanceStrictFieldNotSetBeforeSuperclassInit() throws Throwable {
-	// 	Class<?> c = StrictFieldGenerator.generateTestInstanceStrictFieldNotSetBeforeSuperclassInit();
-	// 	c.newInstance();
-	// }
+	@Test(expectedExceptions = VerifyError.class, expectedExceptionsMessageRegExp = ".*<init>.*JBinvokespecial.*")
+	static public void testInstanceStrictFieldNotSetBeforeSuperclassInit() throws Throwable {
+		Class<?> c = StrictFieldGenerator.generateTestInstanceStrictFieldNotSetBeforeSuperclassInit();
+		c.newInstance();
+	}
 
-	// @Test(expectedExceptions = VerifyError.class, expectedExceptionsMessageRegExp = ".*<init>.*JBinvokespecial.*")
-	// static public void testInstanceStrictFieldNotSetBeforeSuperclassInitMulti() throws Throwable {
-	// 	Class<?> c = StrictFieldGenerator.generateTestInstanceStrictFieldNotSetBeforeSuperclassInitMulti();
-	// 	c.newInstance();
-	// }
+	@Test(expectedExceptions = VerifyError.class, expectedExceptionsMessageRegExp = ".*<init>.*JBinvokespecial.*")
+	static public void testInstanceStrictFieldNotSetBeforeSuperclassInitMulti() throws Throwable {
+		Class<?> c = StrictFieldGenerator.generateTestInstanceStrictFieldNotSetBeforeSuperclassInitMulti();
+		c.newInstance();
+	}
 
-	// /* A strict final instance field may not be assigned after invoking
-	//  * another instance initialization method of this.
-	//  */
-	// @Test(expectedExceptions = VerifyError.class, expectedExceptionsMessageRegExp = ".*<init>.*JBputfield.*")
-	// static public void testInstanceStrictFinalFieldSetAfterThisInit() throws Throwable {
-	// 	Class<?> c = StrictFieldGenerator.testInstanceStrictFinalFieldSetAfterThisInit();
-	// 	c.newInstance();
-	// }
+	/* A strict final instance field may not be assigned after invoking
+	 * another instance initialization method of this.
+	 */
+	@Test(expectedExceptions = VerifyError.class, expectedExceptionsMessageRegExp = ".*<init>.*JBputfield.*")
+	static public void testInstanceStrictFinalFieldSetAfterThisInit() throws Throwable {
+		Class<?> c = StrictFieldGenerator.testInstanceStrictFinalFieldSetAfterThisInit();
+		c.newInstance();
+	}
 
-	// /* A non-final strict instance field may be assigned after invoking
-	//  * another instance initialization method of this.
-	//  */
-	// @Test
-	// static public void testInstanceStrictNonFinalFieldSetAfterThisInit() throws Throwable {
-	// 	Class<?> c = StrictFieldGenerator.generateTestInstanceStrictNonFinalFieldSetAfterThisInit();
-	// 	c.newInstance();
-	// }
+	/* A non-final strict instance field may be assigned after invoking
+	 * another instance initialization method of this.
+	 */
+	@Test
+	static public void testInstanceStrictNonFinalFieldSetAfterThisInit() throws Throwable {
+		Class<?> c = StrictFieldGenerator.generateTestInstanceStrictNonFinalFieldSetAfterThisInit();
+		c.newInstance();
+	}
 
-	// /* If an uninitialized 'this' reference is used with IFNONNULL,
-	//  * verification must fail with a VerifyError.
-	//  */
-	// @Test(expectedExceptions = VerifyError.class,
-	// 	expectedExceptionsMessageRegExp = ".*<init>.*JBifnonnull.*")
-	// static public void testIfNonNullUninitializedThis() throws Throwable {
-	// 	Class<?> c = StrictFieldGenerator.generateTestIfNonNullUninitializedThis();
-	// 	c.newInstance();
-	// }
+	/* If an uninitialized 'this' reference is used with IFNONNULL,
+	 * verification must fail with a VerifyError.
+	 */
+	@Test(expectedExceptions = VerifyError.class,
+		expectedExceptionsMessageRegExp = ".*<init>.*JBifnonnull.*")
+	static public void testIfNonNullUninitializedThis() throws Throwable {
+		Class<?> c = StrictFieldGenerator.generateTestIfNonNullUninitializedThis();
+		c.newInstance();
+	}
 
-	// /* If an uninitialized 'this' reference is used with IFNULL,
-	//  * verification must fail with a VerifyError.
-	//  */
-	// @Test(expectedExceptions = VerifyError.class,
-	// 	expectedExceptionsMessageRegExp = ".*<init>.*JBifnull.*")
-	// static public void testIfNullUninitializedThis() throws Throwable {
-	// 	Class<?> c = StrictFieldGenerator.generateTestIfNullUninitializedThis();
-	// 	c.newInstance();
-	// }
+	/* If an uninitialized 'this' reference is used with IFNULL,
+	 * verification must fail with a VerifyError.
+	 */
+	@Test(expectedExceptions = VerifyError.class,
+		expectedExceptionsMessageRegExp = ".*<init>.*JBifnull.*")
+	static public void testIfNullUninitializedThis() throws Throwable {
+		Class<?> c = StrictFieldGenerator.generateTestIfNullUninitializedThis();
+		c.newInstance();
+	}
 
-	// /* If a newly created value object of  uninitialized type is used with IF_ACMPEQ
-	//  * verification must fail with a VerifyError.
-	//  */
-	// @Test(expectedExceptions = VerifyError.class,
-	// 	expectedExceptionsMessageRegExp = ".*<init>.*JBifacmpeq.*")
-	// static public void testIfAcmpeqUninitializedValue() throws Throwable {
-	// 	Class<?> c = StrictFieldGenerator.generateTestIfAcmpeqUninitializedValue();
-	// 	c.newInstance();
-	// }
+	/* If a newly created value object of  uninitialized type is used with IF_ACMPEQ
+	 * verification must fail with a VerifyError.
+	 */
+	@Test(expectedExceptions = VerifyError.class,
+		expectedExceptionsMessageRegExp = ".*<init>.*JBifacmpeq.*")
+	static public void testIfAcmpeqUninitializedValue() throws Throwable {
+		Class<?> c = StrictFieldGenerator.generateTestIfAcmpeqUninitializedValue();
+		c.newInstance();
+	}
 
-	// /* If a newly created value object of uninitialized type is used with IF_ACMPNE
-	//  * verification must fail with a VerifyError.
-	//  */
-	// @Test(expectedExceptions = VerifyError.class,
-	// 	expectedExceptionsMessageRegExp = ".*<init>.*JBifacmpne.*")
-	// static void testIfAcmpneUninitializedValue() throws Throwable {
-	// 	Class<?> c = StrictFieldGenerator.generateTestIfAcmpneUninitializedValue();
-	// 	c.newInstance();
-	// }
+	/* If a newly created value object of uninitialized type is used with IF_ACMPNE
+	 * verification must fail with a VerifyError.
+	 */
+	@Test(expectedExceptions = VerifyError.class,
+		expectedExceptionsMessageRegExp = ".*<init>.*JBifacmpne.*")
+	static void testIfAcmpneUninitializedValue() throws Throwable {
+		Class<?> c = StrictFieldGenerator.generateTestIfAcmpneUninitializedValue();
+		c.newInstance();
+	}
 
-	// /**
-	//  * ASM does not support stack map customizations so its not yet possible
-	//  * to generate incorrect stack maps to test the early larval frame.
-	//  * I'm waiting on https://github.com/adoptium/TKG/issues/770 to write
-	//  * some tests using jasm.
-	//  * In the meantime we can generate a class with the
-	//  * -XDgenerateEarlyLarvalFrame option to do some basic validation on early
-	//  * larval frame support.
-	//  *
-	//  * Future tests:
-	//  * - check that a base frame exists
-	//  * - check that the base frame is not an early larval frame
-	//  * - check that cp index is not out of range
-	//  * - check that cp index is CONSTANT_NameAndType_info
-	//  * - fail if cp doesn't refer to a strict instance field
-	//  * - fail if not in the list and not set
-	//  */
+	/**
+	 * ASM does not support stack map customizations so its not yet possible
+	 * to generate incorrect stack maps to test the early larval frame.
+	 * I'm waiting on https://github.com/adoptium/TKG/issues/770 to write
+	 * some tests using jasm.
+	 * In the meantime we can generate a class with the
+	 * -XDgenerateEarlyLarvalFrame option to do some basic validation on early
+	 * larval frame support.
+	 *
+	 * Future tests:
+	 * - check that a base frame exists
+	 * - check that the base frame is not an early larval frame
+	 * - check that cp index is not out of range
+	 * - check that cp index is CONSTANT_NameAndType_info
+	 * - fail if cp doesn't refer to a strict instance field
+	 * - fail if not in the list and not set
+	 */
 
-	// static class EarlyLarvalStackMapNoUnsetFields {
-	// 	// StackMapTable: number_of_entries = 2
-	// 	// frame_type = 12 /* same */
-	// 	// frame_type = 246 /* early_larval */
-	// 	// 	number of unset_fields = 0
-	// 	// 		offset_delta = 4
-	// 	// 		locals = [ this, int ]
-	// 	// 		stack = []
-	// 	@Strict int i;
-	// 	EarlyLarvalStackMapNoUnsetFields(boolean b) {
-	// 		if (b) {
-	// 			i = 1;
-	// 		} else {
-	// 			i = 2;
-	// 		}
-	// 		super();
-	// 	}
-	// }
+	static class EarlyLarvalStackMapNoUnsetFields {
+		// StackMapTable: number_of_entries = 2
+		// frame_type = 12 /* same */
+		// frame_type = 246 /* early_larval */
+		// 	number of unset_fields = 0
+		// 		offset_delta = 4
+		// 		locals = [ this, int ]
+		// 		stack = []
+		@Strict int i;
+		EarlyLarvalStackMapNoUnsetFields(boolean b) {
+			if (b) {
+				i = 1;
+			} else {
+				i = 2;
+			}
+			super();
+		}
+	}
 
-	// @Test
-	// static public void testEarlyLarvalStackMapNoUnsetFields() throws Throwable {
-	// 	EarlyLarvalStackMapNoUnsetFields earlyLarvalStackMapNoUnsetFields = new EarlyLarvalStackMapNoUnsetFields(true);
-	// }
+	@Test
+	static public void testEarlyLarvalStackMapNoUnsetFields() throws Throwable {
+		EarlyLarvalStackMapNoUnsetFields earlyLarvalStackMapNoUnsetFields = new EarlyLarvalStackMapNoUnsetFields(true);
+	}
 
-	// static class EarlyLarvalStackMap {
-	// 	// StackMapTable: number_of_entries = 2
-	// 	// frame_type = 12 /* same */
-	// 	// frame_type = 246 /* early_larval */
-	// 	//   number of unset_fields = 1
-	// 	//     unset_field = #NameAndType j:I
-	// 	//       offset_delta = 4
-	// 	//       locals = [ this, int ]
-	// 	//       stack = []
-	// 	@Strict int i;
-	// 	/* j will not have been set at the first early larval frame. */
-	// 	@Strict int j;
-	// 	EarlyLarvalStackMap(boolean b) {
-	// 		if (b) {
-	// 			i = 1;
-	// 		} else {
-	// 			i = 2;
-	// 		}
-	// 		j = 0;
-	// 		super();
-	// 	}
-	// }
+	static class EarlyLarvalStackMap {
+		// StackMapTable: number_of_entries = 2
+		// frame_type = 12 /* same */
+		// frame_type = 246 /* early_larval */
+		//   number of unset_fields = 1
+		//     unset_field = #NameAndType j:I
+		//       offset_delta = 4
+		//       locals = [ this, int ]
+		//       stack = []
+		@Strict int i;
+		/* j will not have been set at the first early larval frame. */
+		@Strict int j;
+		EarlyLarvalStackMap(boolean b) {
+			if (b) {
+				i = 1;
+			} else {
+				i = 2;
+			}
+			j = 0;
+			super();
+		}
+	}
 
-	// @Test
-	// static public void testEarlyLarvalStackMap() throws Throwable {
-	// 	EarlyLarvalStackMap earlyLarvalStackMap = new EarlyLarvalStackMap(true);
-	// }
+	@Test
+	static public void testEarlyLarvalStackMap() throws Throwable {
+		EarlyLarvalStackMap earlyLarvalStackMap = new EarlyLarvalStackMap(true);
+	}
 }

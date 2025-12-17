@@ -392,7 +392,7 @@ staticFieldAddress(J9VMThread *vmStruct, J9Class *clazz, U_8 *fieldName, UDATA f
 										sourceClass);
 
 	if (field) {
-		staticAddress = (UDATA *) offsetOrAddress;
+		staticAddress = (UDATA *) offsetOrAddress; // this one - are we just assuming this is an offset?
 		if (0 == (field->modifiers & J9AccStatic)) {
 			if ((options & (J9_LOOK_NO_THROW | J9_LOOK_NO_JAVA)) == 0) {
 				setCurrentException (vmStruct, J9VMCONSTANTPOOL_JAVALANGINCOMPATIBLECLASSCHANGEERROR, NULL);

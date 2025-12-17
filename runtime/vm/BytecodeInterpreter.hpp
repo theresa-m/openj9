@@ -4684,6 +4684,7 @@ done:
 
 		if (NULL != clz) {
 			J9Class *clzJ9Class = J9VM_J9CLASS_FROM_HEAPCLASS(_currentThread, clz);
+			// TODO check that this is a null restricted array?
 			if ((!J9CLASS_IS_ARRAY(clzJ9Class)) && (NULL != clzJ9Class->flattenedClassCache)) {
 
 				/* caller provided offset will include header size but entry->offset does not */
@@ -7718,7 +7719,7 @@ retry:
 		UDATA volatile classAndFlags = 0;
 		void* volatile valueAddress = NULL;
 #if defined(J9VM_OPT_VALHALLA_STRICT_FIELDS)
-		//J9Class *ramClass = NULL;
+		J9Class *ramClass = NULL;
 #endif /* defined(J9VM_OPT_VALHALLA_STRICT_FIELDS) */
 
 		if (J9_UNEXPECTED(!VM_VMHelpers::staticFieldRefIsResolved(flagsAndClass, valueOffset))) {
@@ -7747,34 +7748,34 @@ retry:
 		valueAddress = J9STATICADDRESS(flagsAndClass, valueOffset);
 
 #if defined(J9VM_OPT_VALHALLA_STRICT_FIELDS)
-		// ramClass = ramConstantPool->ramClass;
-		// if (J9_ARE_ALL_BITS_SET(classAndFlags, J9StaticFieldRefStrict)
-		// 	&& (NULL != ramClass->flattenedClassCache)
-		// 	&& (J9ClassInitNotInitialized == (ramClass->initializeStatus & J9ClassInitStatusMask))
-		// ) {
-		// 	printf("here1\n");
-		// 	// find entry - mkae this a method like findIndexInFlattenedClassCache
-		// 	UDATA numberOfFlattenedFields = ramClass->flattenedClassCache->numberOfEntries;
-		// 	J9FlattenedClassCacheEntry *entry = NULL;
-		// 	for (UDATA i = 0; i < numberOfFlattenedFields; i++) {
-		// 		// rename or make a function?
-		// 		J9FlattenedClassCacheEntry *tempEntry = J9_VM_FCC_ENTRY_FROM_CLASS(ramClass, i);
-		// 		if (((I_64)tempEntry->offset == valueOffset)) { // is this right?
-		// 			printf("found a match\n");
-		// 			entry = tempEntry;
-		// 			break;
-		// 		}
-		// 	}
-		// 	Assert_VM_true(NULL != entry);
-		// 	Assert_VM_true(J9_VM_FCC_ENTRY_IS_STATIC_FIELD(entry));
-		// 	if (J9_VM_FCC_ENTRY_IS_STRICT_STATIC_UNSET(entry)) {
-		// 		/* If a strict field has never been set, fail. */
-		// 		rc = THROW_GET_STRICT_STATIC_NOT_SET;
-		// 		goto done;
-		// 	} else {
-		// 		entry->clazz = (J9Class *)(J9_VM_FCC_CLASS_FLAGS_STATIC_FIELD | J9_VM_FCC_CLASS_FLAGS_STRICT_STATIC_FIELD_WRITTEN | J9_VM_FCC_CLASS_FLAGS_STRICT_STATIC_FIELD_READ);
-		// 	}
-		// }
+		ramClass = ramConstantPool->ramClass;
+		if (J9_ARE_ALL_BITS_SET(classAndFlags, J9StaticFieldRefStrict)
+			&& (NULL != ramClass->flattenedClassCache)
+			&& (J9ClassInitNotInitialized == (ramClass->initializeStatus & J9ClassInitStatusMask))
+		) {
+			printf("here1\n");
+			// find entry - mkae this a method like findIndexInFlattenedClassCache
+			UDATA numberOfFlattenedFields = ramClass->flattenedClassCache->numberOfEntries;
+			J9FlattenedClassCacheEntry *entry = NULL;
+			for (UDATA i = 0; i < numberOfFlattenedFields; i++) {
+				// rename or make a function?
+				J9FlattenedClassCacheEntry *tempEntry = J9_VM_FCC_ENTRY_FROM_CLASS(ramClass, i);
+				if (tempEntry->offset == (UDATA)valueAddress) {
+					entry = tempEntry;
+					break;
+				}
+			}
+			Assert_VM_true(NULL != entry);
+			Assert_VM_true(J9_VM_FCC_ENTRY_IS_STATIC_FIELD(entry));
+			if (J9_VM_FCC_ENTRY_IS_STRICT_STATIC_UNSET(entry)) {
+				/* If a strict field has never been set, fail. */
+				rc = THROW_GET_STRICT_STATIC_NOT_SET;
+				goto done;
+			} else {
+				// this isn't right for primitives
+				entry->clazz = (J9Class *)(J9_VM_FCC_CLASS_FLAGS_STATIC_FIELD | J9_VM_FCC_CLASS_FLAGS_STRICT_STATIC_FIELD_WRITTEN | J9_VM_FCC_CLASS_FLAGS_STRICT_STATIC_FIELD_READ);
+			}
+		}
 #endif /* defined(J9VM_OPT_VALHALLA_STRICT_FIELDS) */
 
 #if defined(DO_HOOKS)
@@ -7829,7 +7830,8 @@ done:
 		void* volatile valueAddress = NULL;
 		void *resolveResult = NULL;
 #if defined(J9VM_OPT_VALHALLA_STRICT_FIELDS)
-		//J9Class *ramClass = NULL;
+		J9Class *ramClass = NULL;
+		J9FlattenedClassCacheEntry *entry = NULL;
 #endif /* defined(J9VM_OPT_VALHALLA_STRICT_FIELDS) */
 
 		if (J9_UNEXPECTED(!(
@@ -7861,37 +7863,40 @@ done:
 		valueAddress = J9STATICADDRESS(flagsAndClass, valueOffset);
 
 #if defined(J9VM_OPT_VALHALLA_STRICT_FIELDS)
-	// ramClass = ramConstantPool->ramClass;
-	// if (J9_ARE_ALL_BITS_SET(classAndFlags, J9StaticFieldRefStrict)
-	// 	&& (NULL != ramClass->flattenedClassCache)
-	// 	&& (J9ClassInitNotInitialized == (ramClass->initializeStatus & J9ClassInitStatusMask))
-	// ) {
-	// 	// find entry
-	// 	UDATA numberOfFlattenedFields = ramClass->flattenedClassCache->numberOfEntries;
-	// 	J9FlattenedClassCacheEntry *entry = NULL;
-	// 	for (UDATA i = 0; i < numberOfFlattenedFields; i++) {
-	// 		// rename or make a function?
-	// 		J9FlattenedClassCacheEntry *tempEntry = J9_VM_FCC_ENTRY_FROM_CLASS(ramClass, i);
-	// 		if (((I_64)tempEntry->offset == valueOffset)) { // is this right?
-	// 			entry = tempEntry;
-	// 			break;
-	// 		}
-	// 	}
-	// 	Assert_VM_true(NULL != entry);
-	// 	Assert_VM_true(J9_VM_FCC_ENTRY_IS_STATIC_FIELD(entry));
-	// 	/* if not set mark as written*/
-	// 	if (J9_VM_FCC_ENTRY_IS_STRICT_STATIC_UNSET(entry)) {
-	// 		Assert_VM_true(ramClass->flattenedClassCache->strictStaticFieldCounter > 0);
-	// 		ramClass->flattenedClassCache->strictStaticFieldCounter -= 1;
-	// 		entry->clazz = (J9Class *)(J9_VM_FCC_CLASS_FLAGS_STATIC_FIELD | J9_VM_FCC_CLASS_FLAGS_STRICT_STATIC_FIELD_WRITTEN);
-	// 	} else if (J9_VM_FCC_ENTRY_IS_STRICT_STATIC_READ(entry)
-	// 		&& J9_ARE_ANY_BITS_SET(classAndFlags, J9StaticFieldRefFinal)
-	// 	) {
-	// 		/* If the strict final field was read, fail. */
-	// 		rc = THROW_PUT_STRICT_STATIC_FINAL_AFTER_READ;
-	// 		goto done;
-	// 	}
-	// }
+	ramClass = ramConstantPool->ramClass;
+	
+	if (J9_ARE_ALL_BITS_SET(classAndFlags, J9StaticFieldRefStrict)
+		&& (NULL != ramClass->flattenedClassCache)
+		&& (J9ClassInitNotInitialized == (ramClass->initializeStatus & J9ClassInitStatusMask))
+	) {
+		// find entry
+		UDATA numberOfFlattenedFields = ramClass->flattenedClassCache->numberOfEntries;
+		//J9FlattenedClassCacheEntry *entry = NULL;
+		for (UDATA i = 0; i < numberOfFlattenedFields; i++) {
+			// rename or make a function?
+			J9FlattenedClassCacheEntry *tempEntry = J9_VM_FCC_ENTRY_FROM_CLASS(ramClass, i);
+			if (tempEntry->offset == (UDATA)valueAddress) {
+				entry = tempEntry;
+				printf("cached class is %p\n", J9_VM_FCC_CLASS_FROM_ENTRY(entry));
+				break;
+			}
+		}
+		Assert_VM_true(NULL != entry);
+		Assert_VM_true(J9_VM_FCC_ENTRY_IS_STATIC_FIELD(entry));
+		/* if not set mark as written*/
+		if (J9_VM_FCC_ENTRY_IS_STRICT_STATIC_UNSET(entry)) {
+			Assert_VM_true(ramClass->flattenedClassCache->strictStaticFieldCounter > 0);
+			ramClass->flattenedClassCache->strictStaticFieldCounter -= 1;
+			// this isn't right for primitives
+			entry->clazz = (J9Class *)(J9_VM_FCC_CLASS_FLAGS_STATIC_FIELD | J9_VM_FCC_CLASS_FLAGS_STRICT_STATIC_FIELD_WRITTEN);
+		} else if (J9_VM_FCC_ENTRY_IS_STRICT_STATIC_READ(entry)
+			&& J9_ARE_ANY_BITS_SET(classAndFlags, J9StaticFieldRefFinal)
+		) {
+			/* If the strict final field was read, fail. */
+			rc = THROW_PUT_STRICT_STATIC_FINAL_AFTER_READ;
+			goto done;
+		}
+	}
 #endif /* defined(J9VM_OPT_VALHALLA_STRICT_FIELDS) */
 
 #if defined(DO_HOOKS)
@@ -7919,7 +7924,13 @@ done:
 				}
 			}
 #endif /* defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES) */
-			J9Class *fieldClass = (J9Class*)(classAndFlags & ~(UDATA)J9StaticFieldRefFlagBits);
+			// this is a hack - not sure why fieldClass isn't set right
+J9Class *fieldClass = NULL;
+			if (entry != NULL) {
+				fieldClass = J9_VM_FCC_CLASS_FROM_ENTRY(entry);
+			} else {
+			 fieldClass = (J9Class*)(classAndFlags & ~(UDATA)J9StaticFieldRefFlagBits);
+			}
 			bool isVolatile = (0 != (classAndFlags & J9StaticFieldRefVolatile));
 			switch(classAndFlags & J9StaticFieldRefTypeMask) {
 			case J9StaticFieldRefTypeObject:
