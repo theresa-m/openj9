@@ -82,7 +82,14 @@
 #define J9AccMethodHasParameterAnnotations 0x40000000 /* method */
 #define J9AccMethodHasDefaultAnnotation    0x80000000 /* method */
 /* Masks and helpers */
+#if defined(J9VM_OPT_VALHALLA_VALUE_TYPES)
+/* J9AccClassHasIdentity needs to be compared specially because the 
+ * flag has different meanings depending on the class version.
+ */
+#define J9AccClassCompatibilityMask 0x7FDF
+#else /* defined(J9VM_OPT_VALHALLA_VALUE_TYPES) */
 #define J9AccClassCompatibilityMask 0x7FFF
+#endif /* defined(J9VM_OPT_VALHALLA_VALUE_TYPES) */
 #define J9AccMethodReturnMask 0x1C0000
 #define J9AccMethodReturnShift 0x12
 /* Used in HookedByTheJit.cpp */
