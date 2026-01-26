@@ -81,7 +81,7 @@ getBooleanField(JNIEnv *env, jobject obj, jfieldID fieldID)
 
 	j9object_t object = J9_JNI_UNWRAP_REFERENCE(obj);
 	valueOffset += J9VMTHREAD_OBJECT_HEADER_SIZE(currentThread);
-	jboolean value = (jboolean)J9OBJECT_U32_LOAD(currentThread, object, valueOffset);
+	jboolean value = (jboolean)J9OBJECT_U8_LOAD(currentThread, object, valueOffset);
 
 	if (j9FieldID->field->modifiers & J9AccVolatile) {
 		VM_AtomicSupport::readBarrier();
@@ -113,7 +113,7 @@ getByteField(JNIEnv *env, jobject obj, jfieldID fieldID)
 
 	j9object_t object = J9_JNI_UNWRAP_REFERENCE(obj);
 	valueOffset += J9VMTHREAD_OBJECT_HEADER_SIZE(currentThread);
-	jbyte value = (jbyte)J9OBJECT_U32_LOAD(currentThread, object, valueOffset);
+	jbyte value = (jbyte)J9OBJECT_I8_LOAD(currentThread, object, valueOffset);
 
 	if (j9FieldID->field->modifiers & J9AccVolatile) {
 		VM_AtomicSupport::readBarrier();
@@ -145,7 +145,7 @@ getCharField(JNIEnv *env, jobject obj, jfieldID fieldID)
 
 	j9object_t object = J9_JNI_UNWRAP_REFERENCE(obj);
 	valueOffset += J9VMTHREAD_OBJECT_HEADER_SIZE(currentThread);
-	jchar value = (jchar)J9OBJECT_U32_LOAD(currentThread, object, valueOffset);
+	jchar value = (jchar)J9OBJECT_U16_LOAD(currentThread, object, valueOffset);
 
 	if (j9FieldID->field->modifiers & J9AccVolatile) {
 		VM_AtomicSupport::readBarrier();
@@ -177,7 +177,7 @@ getShortField(JNIEnv *env, jobject obj, jfieldID fieldID)
 
 	j9object_t object = J9_JNI_UNWRAP_REFERENCE(obj);
 	valueOffset += J9VMTHREAD_OBJECT_HEADER_SIZE(currentThread);
-	jshort value = (jshort)J9OBJECT_U32_LOAD(currentThread, object, valueOffset);
+	jshort value = (jshort)J9OBJECT_I16_LOAD(currentThread, object, valueOffset);
 
 	if (j9FieldID->field->modifiers & J9AccVolatile) {
 		VM_AtomicSupport::readBarrier();
@@ -333,7 +333,7 @@ setByteField(JNIEnv *env, jobject obj, jfieldID fieldID, jbyte value)
 			J9Method *method = findFieldContext(currentThread, &location);
 			if (NULL != method) {
 				U_64 newValue = 0;
-				*(I_32*)&newValue = (I_32)value;
+				*(I_8*)&newValue = (I_8)value;
 				ALWAYS_TRIGGER_J9HOOK_VM_PUT_FIELD(vm->hookInterface, currentThread, method, location, object, j9FieldID->offset, newValue);
 			}
 		}
@@ -346,7 +346,7 @@ setByteField(JNIEnv *env, jobject obj, jfieldID fieldID, jbyte value)
 
 	j9object_t object = J9_JNI_UNWRAP_REFERENCE(obj);
 	valueOffset += J9VMTHREAD_OBJECT_HEADER_SIZE(currentThread);
-	J9OBJECT_U32_STORE(currentThread, object, valueOffset, (U_32)value);
+	J9OBJECT_I8_STORE(currentThread, object, valueOffset, value);
 
 	if (isVolatile) {
 		VM_AtomicSupport::readWriteBarrier();
@@ -373,7 +373,7 @@ setBooleanField(JNIEnv *env, jobject obj, jfieldID fieldID, jboolean value)
 			J9Method *method = findFieldContext(currentThread, &location);
 			if (NULL != method) {
 				U_64 newValue = 0;
-				*(I_32*)&newValue = (I_32)value;
+				*(U_8*)&newValue = (U_8)value;
 				ALWAYS_TRIGGER_J9HOOK_VM_PUT_FIELD(vm->hookInterface, currentThread, method, location, object, j9FieldID->offset, newValue);
 			}
 		}
@@ -386,7 +386,7 @@ setBooleanField(JNIEnv *env, jobject obj, jfieldID fieldID, jboolean value)
 
 	j9object_t object = J9_JNI_UNWRAP_REFERENCE(obj);
 	valueOffset += J9VMTHREAD_OBJECT_HEADER_SIZE(currentThread);
-	J9OBJECT_U32_STORE(currentThread, object, valueOffset, (U_32)value);
+	J9OBJECT_U8_STORE(currentThread, object, valueOffset, value);
 
 	if (isVolatile) {
 		VM_AtomicSupport::readWriteBarrier();
@@ -411,7 +411,7 @@ setCharField(JNIEnv *env, jobject obj, jfieldID fieldID, jchar value)
 			J9Method *method = findFieldContext(currentThread, &location);
 			if (NULL != method) {
 				U_64 newValue = 0;
-				*(I_32*)&newValue = (I_32)value;
+				*(U_16*)&newValue = (U_16)value;
 				ALWAYS_TRIGGER_J9HOOK_VM_PUT_FIELD(vm->hookInterface, currentThread, method, location, object, j9FieldID->offset, newValue);
 			}
 		}
@@ -424,7 +424,7 @@ setCharField(JNIEnv *env, jobject obj, jfieldID fieldID, jchar value)
 
 	j9object_t object = J9_JNI_UNWRAP_REFERENCE(obj);
 	valueOffset += J9VMTHREAD_OBJECT_HEADER_SIZE(currentThread);
-	J9OBJECT_U32_STORE(currentThread, object, valueOffset, (U_32)value);
+	J9OBJECT_U16_STORE(currentThread, object, valueOffset, value);
 
 	if (isVolatile) {
 		VM_AtomicSupport::readWriteBarrier();
@@ -449,7 +449,7 @@ setShortField(JNIEnv *env, jobject obj, jfieldID fieldID, jshort value)
 			J9Method *method = findFieldContext(currentThread, &location);
 			if (NULL != method) {
 				U_64 newValue = 0;
-				*(I_32*)&newValue = (I_32)value;
+				*(I_16*)&newValue = (I_16)value;
 				ALWAYS_TRIGGER_J9HOOK_VM_PUT_FIELD(vm->hookInterface, currentThread, method, location, object, j9FieldID->offset, newValue);
 			}
 		}
@@ -462,7 +462,7 @@ setShortField(JNIEnv *env, jobject obj, jfieldID fieldID, jshort value)
 
 	j9object_t object = J9_JNI_UNWRAP_REFERENCE(obj);
 	valueOffset += J9VMTHREAD_OBJECT_HEADER_SIZE(currentThread);
-	J9OBJECT_U32_STORE(currentThread, object, valueOffset, (U_32)value);
+	J9OBJECT_I16_STORE(currentThread, object, valueOffset, value);
 
 	if (isVolatile) {
 		VM_AtomicSupport::readWriteBarrier();
