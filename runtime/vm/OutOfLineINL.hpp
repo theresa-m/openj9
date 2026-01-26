@@ -34,6 +34,12 @@ extern "C" {
 typedef VM_BytecodeAction J9OutOfLineINLMethod(J9VMThread *, J9Method *);
 
 J9OutOfLineINLMethod OutOfLineINL_jdk_internal_misc_Unsafe_fullFence;
+#if defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS)
+J9OutOfLineINLMethod OutOfLineINL_jdk_internal_misc_Unsafe_compareAndExchangeBoolean;
+J9OutOfLineINLMethod OutOfLineINL_jdk_internal_misc_Unsafe_compareAndExchangeByte;
+J9OutOfLineINLMethod OutOfLineINL_jdk_internal_misc_Unsafe_compareAndExchangeChar;
+J9OutOfLineINLMethod OutOfLineINL_jdk_internal_misc_Unsafe_compareAndExchangeShort;
+#endif /* defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS) */
 J9OutOfLineINLMethod OutOfLineINL_jdk_internal_misc_Unsafe_compareAndExchangeInt;
 J9OutOfLineINLMethod OutOfLineINL_jdk_internal_misc_Unsafe_compareAndExchangeLong;
 J9OutOfLineINLMethod OutOfLineINL_jdk_internal_misc_Unsafe_compareAndExchangeObject;
@@ -62,6 +68,24 @@ public:
 		currentThread->pc += 3;
 		currentThread->sp += slotCount;
 	}
+
+#if defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS)
+	static VMINLINE void
+	returnSingle8bits(J9VMThread *currentThread, I_8 value, UDATA slotCount)
+	{
+		currentThread->pc += 3;
+		currentThread->sp += (slotCount - 1);
+		*(I_8 *)currentThread->sp = value;
+	}
+
+	static VMINLINE void
+	returnSingle16bits(J9VMThread *currentThread, I_16 value, UDATA slotCount)
+	{
+		currentThread->pc += 3;
+		currentThread->sp += (slotCount - 1);
+		*(I_16 *)currentThread->sp = value;
+	}
+#endif /* defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS) */
 
 	static VMINLINE void
 	returnSingle(J9VMThread *currentThread, I_32 value, UDATA slotCount)

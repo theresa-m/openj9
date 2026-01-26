@@ -3815,7 +3815,7 @@ done:
 
 	/* sun.misc.Unsafe: public native byte getByte(Object obj, long offset); */
 	/* sun.misc.Unsafe: public native byte getByteVolatile(Object obj, long offset); */
-	VMINLINE VM_BytecodeAction
+	VMINLINE VM_BytecodeAction // TODO these instance get fields also need t be updated
 	inlUnsafeGetByte(REGISTER_ARGS_LIST, bool isVolatile)
 	{
 		UDATA offset = (UDATA)*(I_64*)_sp;

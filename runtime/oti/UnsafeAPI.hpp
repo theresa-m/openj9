@@ -630,6 +630,58 @@ done:
 		return result;
 	}
 
+#if defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS)
+	static VMINLINE U_8
+	compareAndExchangeBoolean(J9VMThread *currentThread, MM_ObjectAccessBarrierAPI *objectAccessBarrier, j9object_t object, UDATA offset, U_8 compareValue, U_8 swapValue)
+	{
+		// TODO
+	}
+
+	static VMINLINE I_8
+	compareAndExchangeByte(J9VMThread *currentThread, MM_ObjectAccessBarrierAPI *objectAccessBarrier, j9object_t object, UDATA offset, I_8 compareValue, I_8 swapValue)
+	{
+		// TODO
+	}
+
+	static VMINLINE U_16
+	compareAndExchangeChar(J9VMThread *currentThread, MM_ObjectAccessBarrierAPI *objectAccessBarrier, j9object_t object, UDATA offset, U_16 compareValue, U_16 swapValue)
+	{
+		// TODO
+	}
+
+	static VMINLINE I_16
+	compareAndExchangeShort(J9VMThread *currentThread, MM_ObjectAccessBarrierAPI *objectAccessBarrier, j9object_t object, UDATA offset, I_16 compareValue, I_16 swapValue)
+	{
+		UDATA logElementSize = 2;
+		U_32 result = 0;
+
+		if (NULL == object) {
+			// TODO I'm not sure when this would happen - could it be for statics? instance?
+			result = VM_AtomicSupport::lockCompareExchangeU32((U_32*)offset, compareValue, swapValue);
+		} else {
+			if (VM_VMHelpers::objectIsArray(currentThread, object)) {
+				/* Aligned array access */
+				UDATA index = convertOffsetToIndex(currentThread, offset, logElementSize);
+				result = objectAccessBarrier->inlineIndexableObjectCompareAndExchangeU16(currentThread, object, index, compareValue, swapValue, true);
+			} else if (offset & J9_SUN_STATIC_FIELD_OFFSET_TAG) {
+				/* Compact layouts are not available for static fields. Access as 32 bits instead. */
+				J9Class *fieldClass = J9VM_J9CLASS_FROM_HEAPCLASS(currentThread, object);
+
+				if (J9_ARE_ANY_BITS_SET(offset, J9_SUN_FINAL_FIELD_OFFSET_TAG)) {
+					VM_VMHelpers::reportFinalFieldModified(currentThread, fieldClass);
+				}
+
+				void *valueAddress = (void*)((UDATA)fieldClass->ramStatics + (offset & ~(UDATA)J9_SUN_FIELD_OFFSET_MASK));
+				result = objectAccessBarrier->inlineStaticCompareAndExchangeU32(currentThread, fieldClass, (U_32*)valueAddress, compareValue, swapValue, true);
+			} else {
+				/* Instance field */
+				result = objectAccessBarrier->inlineMixedObjectCompareAndExchangeU16(currentThread, object, offset, compareValue, swapValue, true);
+			}
+		}
+		return result;
+	}
+#endif /* defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS) */
+
 	static VMINLINE U_32
 	compareAndExchangeInt(J9VMThread *currentThread, MM_ObjectAccessBarrierAPI *objectAccessBarrier, j9object_t object, UDATA offset, U_32 compareValue, U_32 swapValue)
 	{
