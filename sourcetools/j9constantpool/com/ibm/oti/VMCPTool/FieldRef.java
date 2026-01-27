@@ -104,14 +104,37 @@ public class FieldRef extends PrimaryItem implements Constants {
 		return ((Alias) primary).classRef.cMacroName() + "_SET_" + ((Alias) primary).nas.name.data.toUpperCase();
 	}
 
+/*[IF COMPACT_LAYOUT]*/
+	/**
+	 * Compact layouts are supported for instance fields.
+	 * This method should be overwritten for static fields.
+	 * @return true if compact layout is supported
+	 */
+	protected boolean supportsCompactLayout() {
+		return true;
+	}
+/*[ENDIF] COMPACT_LAYOUT */
+
 	protected String fieldType() {
 		// helpers are:
+/*[IF COMPACT_LAYOUT]*/
+		//	j9gc_objaccess_mixedObjectReadI8
+		//	j9gc_objaccess_mixedObjectReadU8
+		//	j9gc_objaccess_mixedObjectReadI16
+		//	j9gc_objaccess_mixedObjectReadU16
+/*[ENDIF] COMPACT_LAYOUT */
 		//	j9gc_objaccess_mixedObjectReadI32
 		//	j9gc_objaccess_mixedObjectReadU32
 		//	j9gc_objaccess_mixedObjectReadI64
 		//	j9gc_objaccess_mixedObjectReadU64
 		//	j9gc_objaccess_mixedObjectReadObject
 		//	j9gc_objaccess_mixedObjectReadAddress
+/*[IF COMPACT_LAYOUT]*/
+		//	j9gc_objaccess_mixedObjectStoreI8
+		//	j9gc_objaccess_mixedObjectStoreU8
+		//	j9gc_objaccess_mixedObjectStoreI16
+		//	j9gc_objaccess_mixedObjectStoreU16
+/*[ENDIF] COMPACT_LAYOUT */
 		//	j9gc_objaccess_mixedObjectStoreI32
 		//	j9gc_objaccess_mixedObjectStoreU32
 		//	j9gc_objaccess_mixedObjectStoreI64
@@ -138,10 +161,22 @@ public class FieldRef extends PrimaryItem implements Constants {
 				return "I64";
 			} else if ("I_32".equals(cast)) {
 				return "I32";
+/*[IF COMPACT_LAYOUT]*/
+			} else if (supportsCompactLayout() && "I_16".equals(cast)) {
+				return "I16";
+			} else if (supportsCompactLayout() && "I_8".equals(cast)) {
+				return "I8";
+/*[ENDIF] COMPACT_LAYOUT */
 			} else if ("U_64".equals(cast)) {
 				return "U64";
 			} else if ("U_32".equals(cast)) {
 				return "U32";
+/*[IF COMPACT_LAYOUT]*/
+			} else if (supportsCompactLayout() && "U_16".equals(cast)) {
+				return "U16";
+			} else if (supportsCompactLayout() && "U_8".equals(cast)) {
+				return "U8";
+/*[ENDIF] COMPACT_LAYOUT */
 			} else if ("UDATA".equals(cast)) {
 				return "UDATA";
 			} else {
@@ -156,10 +191,22 @@ public class FieldRef extends PrimaryItem implements Constants {
 			return "OBJECT";
 		case 'J':
 			return "I64";
+		case 'I':
+			return "I32";
 		case 'D':
 			throw new UnsupportedOperationException("Double fields not supported by memory manager functions");
 		case 'F':
 			throw new UnsupportedOperationException("Float fields not supported by memory manager functions");
+/*[IF COMPACT_LAYOUT]*/
+		case 'S':
+			return supportsCompactLayout() ? "I16" : "U32";
+		case 'C':
+			return supportsCompactLayout() ? "U16" : "U32";
+		case 'B':
+			return supportsCompactLayout() ? "I8" : "U32";
+		case 'Z':
+			return supportsCompactLayout() ? "U8" : "U32";
+/*[ENDIF] COMPACT_LAYOUT */
 		default:
 			return "U32";
 		}
