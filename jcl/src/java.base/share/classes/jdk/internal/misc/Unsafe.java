@@ -1757,9 +1757,13 @@ public final class Unsafe {
 	 * @param exchangeValue value that will be set in obj at offset if the comparison is successful
 	 * @return value in obj at offset before this operation. This will be compareValue if the exchange was successful
 	 */
+/*[IF COMPACT_LAYOUT]*/
+	public final native byte compareAndExchangeByte(Object obj, long offset, byte compareValue, byte exchangeValue);
+/*[ELSE] COMPACT_LAYOUT */
 	public final byte compareAndExchangeByte(Object obj, long offset, byte compareValue, byte exchangeValue) {
 		return compareAndExchange8bits(obj, offset, compareValue, exchangeValue);
 	}
+/*[ENDIF] COMPACT_LAYOUT */
 
 	/**
 	 * Atomically sets the parameter value at offset in obj if the compare value
@@ -2360,13 +2364,19 @@ public final class Unsafe {
 	 * @param compareValue value that is expected to be in obj at offset
 	 * @param exchangeValue value that will be set in obj at offset if the comparison is successful
 	 * @return value in obj at offset before this operation. This will be compareValue if the exchange was successful
+/*[IF !COMPACT_LAYOUT]
 	 *
 	 * @throws IllegalArgumentException if value at offset spans over multiple aligned words (4 bytes) in memory
+/*[ENDIF] !COMPACT_LAYOUT
 	 */
+/*[IF COMPACT_LAYOUT]*/
+	public final native short compareAndExchangeShort(Object obj, long offset, short compareValue, short exchangeValue);
+/*[ELSE] COMPACT_LAYOUT */
 	public final short compareAndExchangeShort(Object obj, long offset, short compareValue, short exchangeValue) {
 		compareAndExchange16BitsOffsetChecks(offset);
 		return compareAndExchange16bits(obj, offset, compareValue, exchangeValue);
 	}
+/*[ENDIF] COMPACT_LAYOUT */
 
 	/**
 	 * Atomically sets the parameter value at offset in obj if the compare value
@@ -2527,14 +2537,20 @@ public final class Unsafe {
 	 * @param compareValue value that is expected to be in obj at offset
 	 * @param exchangeValue value that will be set in obj at offset if the comparison is successful
 	 * @return value in obj at offset before this operation. This will be compareValue if the exchange was successful
+/*[IF !COMPACT_LAYOUT]
 	 *
 	 * @throws IllegalArgumentException if value at offset spans over multiple aligned words (4 bytes) in memory
+/*[ENDIF] !COMPACT_LAYOUT
 	 */
+/*[IF COMPACT_LAYOUT]*/
+	public final native char compareAndExchangeChar(Object obj, long offset, char compareValue, char exchangeValue);
+/*[ELSE] COMPACT_LAYOUT */
 	public final char compareAndExchangeChar(Object obj, long offset, char compareValue, char exchangeValue) {
 		compareAndExchange16BitsOffsetChecks(offset);
 		short result = compareAndExchange16bits(obj, offset, compareValue, exchangeValue);
 		return s2c(result);
 	}
+/*[ENDIF] COMPACT_LAYOUT */
 
 	/**
 	 * Atomically sets the parameter value at offset in obj if the compare value
@@ -2672,11 +2688,16 @@ public final class Unsafe {
 	 * @param exchangeValue value that will be set in obj at offset if the comparison is successful
 	 * @return value in obj at offset before this operation. This will be compareValue if the exchange was successful
 	 */
+/*[IF COMPACT_LAYOUT]*/
+	public final native boolean compareAndExchangeBoolean(Object obj, long offset, boolean compareValue,
+			boolean exchangeValue);
+/*[ELSE] COMPACT_LAYOUT */
 	public final boolean compareAndExchangeBoolean(Object obj, long offset, boolean compareValue,
 			boolean exchangeValue) {
 		byte result = compareAndExchange8bits(obj, offset, bool2byte(compareValue), bool2byte(exchangeValue));
 		return byte2bool(result);
 	}
+/*[ENDIF] COMPACT_LAYOUT */
 
 	/**
 	 * Atomically sets the parameter value at offset in obj if the compare value
@@ -6040,6 +6061,7 @@ public final class Unsafe {
 		return new IllegalArgumentException();
 	}
 
+/*[IF !COMPACT_LAYOUT]*/
 	/*
 	 * Generic compareAndExchange for 8 bit primitives (byte and boolean).
 	 *
@@ -6192,6 +6214,7 @@ public final class Unsafe {
 			}
 		}
 	}
+/*[ENDIF] !COMPACT_LAYOUT */
 
 	/*
 	 * Verify that no bits are set in long past the least
