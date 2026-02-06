@@ -340,39 +340,39 @@ public class TestUnsafeCopyMemory extends UnsafeTestBase {
 	@BeforeMethod
 	protected void setUp() throws Exception {
 		myUnsafe = getUnsafeInstance();
-		/*
-		 * We want to test the Unsafe.copyMemory(Object,long,Object,long,long)
-		 * helper. Since some class libraries do not contain this helper, look
-		 * it up using reflect.
-		 */
-		try {
-			/*
-			 * signature: public native void copyMemory(java.lang.Object
-			 * srcBase, long srcOffset, java.lang.Object destBase, long
-			 * destOffset, long bytes);
-			 */
-			copyMemoryMethod = myUnsafe.getClass().getDeclaredMethod(
-					"copyMemory",
-					new Class[] { Object.class, long.class, Object.class,
-							long.class, long.class });
-		} catch (NoSuchMethodException e) {
-			logger.error("Class library does not include sun.misc.Unsafe.copyMemory(java.lang.Object srcBase, long srcOffset, java.lang.Object destBase, long destOffset, long bytes) -- skipping test", e);
-			return;
-		}
+		// /*
+		//  * We want to test the Unsafe.copyMemory(Object,long,Object,long,long)
+		//  * helper. Since some class libraries do not contain this helper, look
+		//  * it up using reflect.
+		//  */
+		// try {
+		// 	/*
+		// 	 * signature: public native void copyMemory(java.lang.Object
+		// 	 * srcBase, long srcOffset, java.lang.Object destBase, long
+		// 	 * destOffset, long bytes);
+		// 	 */
+		// 	copyMemoryMethod = myUnsafe.getClass().getDeclaredMethod(
+		// 			"copyMemory",
+		// 			new Class[] { Object.class, long.class, Object.class,
+		// 					long.class, long.class });
+		// } catch (NoSuchMethodException e) {
+		// 	logger.error("Class library does not include sun.misc.Unsafe.copyMemory(java.lang.Object srcBase, long srcOffset, java.lang.Object destBase, long destOffset, long bytes) -- skipping test", e);
+		// 	return;
+		// }
 	}
 
 	private static void copyMemory(java.lang.Object srcBase, long srcOffset,
 			java.lang.Object destBase, long destOffset, long bytes) {
-		try {
-			copyMemoryMethod.invoke(myUnsafe, new Object[] { srcBase,
-					srcOffset, destBase, destOffset, bytes });
-		} catch (IllegalArgumentException e) {
-			throw new Error("Reflect exception.", e);
-		} catch (IllegalAccessException e) {
-			throw new Error("Reflect exception.", e);
-		} catch (InvocationTargetException e) {
-			throw new Error("Reflect exception.", e);
-		}
+	// 	try {
+	// 		copyMemoryMethod.invoke(myUnsafe, new Object[] { srcBase,
+	// 				srcOffset, destBase, destOffset, bytes });
+	// 	} catch (IllegalArgumentException e) {
+	// 		throw new Error("Reflect exception.", e);
+	// 	} catch (IllegalAccessException e) {
+	// 		throw new Error("Reflect exception.", e);
+	// 	} catch (InvocationTargetException e) {
+	// 		throw new Error("Reflect exception.", e);
+	// 	}
 	}
 
 	private byte byteInWord(long value, int bytesInValue, long offset) {

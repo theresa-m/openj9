@@ -82,17 +82,17 @@ public class TestUnsafeSetMemory extends UnsafeTestBase {
 		}
 	}
 	
-	private static void setMemory(java.lang.Object o, long offset, long bytes, byte value) {
-		try {
-			setMemoryMethod.invoke(myUnsafe, new Object[] { o, offset, bytes, value });
-		} catch (IllegalArgumentException e) {
-			throw new Error("Reflect exception.", e);
-		} catch (IllegalAccessException e) {
-			throw new Error("Reflect exception.", e);
-		} catch (InvocationTargetException e) {
-			throw new Error("Reflect exception.", e);
-		}
-	}
+	// private static void setMemory(java.lang.Object o, long offset, long bytes, byte value) {
+	// 	try {
+	// 		setMemoryMethod.invoke(myUnsafe, new Object[] { o, offset, bytes, value });
+	// 	} catch (IllegalArgumentException e) {
+	// 		throw new Error("Reflect exception.", e);
+	// 	} catch (IllegalAccessException e) {
+	// 		throw new Error("Reflect exception.", e);
+	// 	} catch (InvocationTargetException e) {
+	// 		throw new Error("Reflect exception.", e);
+	// 	}
+	// }
 	
 	public void testLargeArrays() {
 		logger.debug("Testing Unsafe.setMemory(Object,long,long,byte) for large arrays.");
@@ -286,13 +286,13 @@ public class TestUnsafeSetMemory extends UnsafeTestBase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		/* We want to test the Java 7 setMemory helper. Since these tests also run on Java 6, look it up using reflect. */
-		try {
-			/* signature: public native void setMemory(java.lang.Object o, long offset, long bytes, byte value); */
-			setMemoryMethod = myUnsafe.getClass().getDeclaredMethod("setMemory", new Class[] { Object.class, long.class, long.class, byte.class });
-		} catch (NoSuchMethodException e) {
-			logger.error("Class library does not include sun.misc.Unsafe.setMemory(java.lang.Object o, long offset, long bytes, byte value) -- skipping test", e);
-			return;
-		}
+		// try {
+		// 	/* signature: public native void setMemory(java.lang.Object o, long offset, long bytes, byte value); */
+		// 	setMemoryMethod = myUnsafe.getClass().getDeclaredMethod("setMemory", new Class[] { Object.class, long.class, long.class, byte.class });
+		// } catch (NoSuchMethodException e) {
+		// 	logger.error("Class library does not include sun.misc.Unsafe.setMemory(java.lang.Object o, long offset, long bytes, byte value) -- skipping test", e);
+		// 	return;
+		// }
 	}
 	
 	

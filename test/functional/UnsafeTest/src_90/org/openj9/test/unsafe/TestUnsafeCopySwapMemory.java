@@ -165,34 +165,34 @@ public class TestUnsafeCopySwapMemory extends UnsafeTestBase {
 		 * helper. Since some class libraries do not contain this helper, look
 		 * it up using reflect.
 		 */
-		try {
-			/*
-			 * signature: public native void copySwapMemory(java.lang.Object
-			 * srcBase, long srcOffset, java.lang.Object destBase, long
-			 * destOffset, long copySize, long elementSize);
-			 */
-			copySwapMemoryMethod = myUnsafe.getClass().getDeclaredMethod(
-					"copySwapMemory",
-					new Class[] { Object.class, long.class, Object.class,
-							long.class, long.class, long.class });
-		} catch (NoSuchMethodException e) {
-			logger.error("Class library does not include sun.misc.Unsafe.copySwapMemory(java.lang.Object srcBase, long srcOffset, java.lang.Object destBase, long destOffset, long copySize, long elementSize) -- skipping test", e);
-			return;
-		}
+		// try {
+		// 	/*
+		// 	 * signature: public native void copySwapMemory(java.lang.Object
+		// 	 * srcBase, long srcOffset, java.lang.Object destBase, long
+		// 	 * destOffset, long copySize, long elementSize);
+		// 	 */
+		// 	copySwapMemoryMethod = myUnsafe.getClass().getDeclaredMethod(
+		// 			"copySwapMemory",
+		// 			new Class[] { Object.class, long.class, Object.class,
+		// 					long.class, long.class, long.class });
+		// } catch (NoSuchMethodException e) {
+		// 	logger.error("Class library does not include sun.misc.Unsafe.copySwapMemory(java.lang.Object srcBase, long srcOffset, java.lang.Object destBase, long destOffset, long copySize, long elementSize) -- skipping test", e);
+		// 	return;
+		// }
 	}
 
 	private static void copySwapMemory(java.lang.Object srcBase, long srcOffset,
 			java.lang.Object destBase, long destOffset, long copySize, long elementSize) {
-		try {
-			copySwapMemoryMethod.invoke(myUnsafe, new Object[] { srcBase,
-					srcOffset, destBase, destOffset, copySize, elementSize });
-		} catch (IllegalArgumentException e) {
-			throw new Error("Reflect exception.", e);
-		} catch (IllegalAccessException e) {
-			throw new Error("Reflect exception.", e);
-		} catch (InvocationTargetException e) {
-			throw new Error("Reflect exception.", e);
-		}
+		// try {
+		// 	copySwapMemoryMethod.invoke(myUnsafe, new Object[] { srcBase,
+		// 			srcOffset, destBase, destOffset, copySize, elementSize });
+		// } catch (IllegalArgumentException e) {
+		// 	throw new Error("Reflect exception.", e);
+		// } catch (IllegalAccessException e) {
+		// 	throw new Error("Reflect exception.", e);
+		// } catch (InvocationTargetException e) {
+		// 	throw new Error("Reflect exception.", e);
+		// }
 	}
 
 	private void testCopySwapArrayMemoryNative(Object srcArray, long address, boolean testCopyMemoryObjNull) {

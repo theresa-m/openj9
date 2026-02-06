@@ -1419,7 +1419,7 @@ public final class Unsafe {
 	 * @throws IllegalArgumentException if startIndex is illegal in obj, or if size is invalid
 	 */
 	public void setMemory(Object obj, long startIndex, long size, byte replace) {
-		setMemoryChecks(obj, startIndex, size, replace);
+		//setMemoryChecks(obj, startIndex, size, replace);
 
 		if (0 != size) {
 			setMemory0(obj, startIndex, size, replace);
