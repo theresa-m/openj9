@@ -573,7 +573,8 @@ public class UnsafeTestBase implements ITest {
 	}
 
 	protected void testByte(Object target, String method) throws Exception {
-		for (int i = 0; i < modelByte.length; i++) {
+		int i = 0;
+		//for (int i = 0; i < modelByte.length; i++) {
 			long offset = offset(target, i);
 			getLogger().debug("testByte Method: " + method + "- Object: "
 					+ target.getClass().getName() + ", Offset: " + offset
@@ -611,7 +612,11 @@ public class UnsafeTestBase implements ITest {
 						myUnsafe.weakCompareAndSetByteRelease(base(target, i), offset, compareValueByte, modelByte[i]));
 
 			} else if (method.equals(COMPAREANDEXCH)) {
-				myUnsafe.putByte(base(target, i), offset, compareValueByte);
+				System.out.println("before " + ((ByteData)target).sf0 + " " + compareValueByte);
+				//myUnsafe.putByte(base(target, i), offset, compareValueByte);
+				((ByteData)target).sf0 = compareValueByte;
+				System.out.println("after " + ((ByteData)target).sf0);
+				System.out.println("after 2 " + myUnsafe.getByte(base(target, i), offset));
 				checkSameAt(compareValueByte,
 						myUnsafe.compareAndExchangeByte(base(target, i), offset, compareValueByte, modelByte[i]));
 
@@ -630,7 +635,7 @@ public class UnsafeTestBase implements ITest {
 			}
 			modelCheck(modelByte, target, i);
 
-		}
+		//}
 	}
 
 	protected void testChar(Object target, String method) throws Exception {

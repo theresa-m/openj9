@@ -1758,7 +1758,11 @@ public final class Unsafe {
 	 * @return value in obj at offset before this operation. This will be compareValue if the exchange was successful
 	 */
 /*[IF COMPACT_LAYOUT]*/
-	public final native byte compareAndExchangeByte(Object obj, long offset, byte compareValue, byte exchangeValue);
+	//public final native byte compareAndExchangeByte(Object obj, long offset, byte compareValue, byte exchangeValue);
+	public final byte compareAndExchangeByte(Object obj, long offset, byte compareValue, byte exchangeValue) {
+		// return compareAndExchangeBoolean(obj, offset, compareValue, exchangeValue);
+		return compareAndExchange8bits(obj, offset, compareValue, exchangeValue);
+	}
 /*[ELSE] COMPACT_LAYOUT */
 	public final byte compareAndExchangeByte(Object obj, long offset, byte compareValue, byte exchangeValue) {
 		return compareAndExchange8bits(obj, offset, compareValue, exchangeValue);
@@ -6061,7 +6065,6 @@ public final class Unsafe {
 		return new IllegalArgumentException();
 	}
 
-/*[IF !COMPACT_LAYOUT]*/
 	/*
 	 * Generic compareAndExchange for 8 bit primitives (byte and boolean).
 	 *
@@ -6214,7 +6217,6 @@ public final class Unsafe {
 			}
 		}
 	}
-/*[ENDIF] !COMPACT_LAYOUT */
 
 	/*
 	 * Verify that no bits are set in long past the least

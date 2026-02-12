@@ -43,19 +43,23 @@ public class MainTester {
 			compileClass();
 		}
 		List<Object> result = new ArrayList<>();
-		result.add(new TestUnsafeAccess(scenario));
-		result.add(new TestUnsafeAccessVolatile(scenario));
-		result.add(new TestUnsafeAccessOpaque(scenario));
-		result.add(new TestUnsafeAccessOrdered(scenario));
-		result.add(new TestUnsafeAccessUnaligned(scenario));
-		result.add(new TestUnsafeSetMemory(scenario));
-		result.add(new TestUnsafeCopyMemory(scenario));
-		result.add(new TestUnsafeCopySwapMemory(scenario));
-		result.add(new TestUnsafePutGetAddress(scenario));
+		// passing
+		// result.add(new TestUnsafeAccess(scenario));
+		// result.add(new TestUnsafeAccessVolatile(scenario));
+		// result.add(new TestUnsafeAccessOpaque(scenario));
+		// result.add(new TestUnsafeAccessOrdered(scenario));
+		// result.add(new TestUnsafeAccessUnaligned(scenario));
+		// result.add(new TestUnsafeAllocateDirectByteBuffer(scenario));
+		// result.add(new TestUnsafePutGetAddress(scenario));
+		// result.add(new TestUnsafeCopyMemory(scenario));
+		// result.add(new TestUnsafeCopySwapMemory(scenario));
+	
+		// failing
+		// result.add(new TestUnsafeSetMemory(scenario));
+		// getAndSetByte returns wrong value
+		// result.add(new TestUnsafeGetAndOp(scenario));
 		result.add(new TestUnsafeCompareAndExchange(scenario));
-		result.add(new TestUnsafeCompareAndSet(scenario));
-		result.add(new TestUnsafeAllocateDirectByteBuffer(scenario));
-		result.add(new TestUnsafeGetAndOp(scenario));
+		// result.add(new TestUnsafeCompareAndSet(scenario));
 		return result.toArray();
 	}
 

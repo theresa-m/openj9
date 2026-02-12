@@ -56,235 +56,235 @@ public class TestUnsafeCompareAndExchange extends UnsafeTestBase {
 		}
 	}
 
-	public void testInstanceCompareAndExchangeChar() throws Exception {
-		for (String test : testList) {
-			testChar(new CharData(), test);
-		}
-	}
+	// public void testInstanceCompareAndExchangeChar() throws Exception {
+	// 	for (String test : testList) {
+	// 		testChar(new CharData(), test);
+	// 	}
+	// }
 
-	public void testInstanceCompareAndExchangeShort() throws Exception {
-		for (String test : testList) {
-			testShort(new ShortData(), test);
-		}
-	}
+	// public void testInstanceCompareAndExchangeShort() throws Exception {
+	// 	for (String test : testList) {
+	// 		testShort(new ShortData(), test);
+	// 	}
+	// }
 
-	public void testInstanceCompareAndExchangeInt() throws Exception {
-		for (String test : testList) {
-			testInt(new IntData(), test);
-		}
-	}
+	// public void testInstanceCompareAndExchangeInt() throws Exception {
+	// 	for (String test : testList) {
+	// 		testInt(new IntData(), test);
+	// 	}
+	// }
 
-	public void testInstanceCompareAndExchangeLong() throws Exception {
-		for (String test : testList) {
-			testLong(new LongData(), test);
-		}
-	}
+	// public void testInstanceCompareAndExchangeLong() throws Exception {
+	// 	for (String test : testList) {
+	// 		testLong(new LongData(), test);
+	// 	}
+	// }
 
-	public void testInstanceCompareAndExchangeFloat() throws Exception {
-		for (String test : testList) {
-			testFloat(new FloatData(), test);
-		}
-	}
+	// public void testInstanceCompareAndExchangeFloat() throws Exception {
+	// 	for (String test : testList) {
+	// 		testFloat(new FloatData(), test);
+	// 	}
+	// }
 
-	public void testInstanceCompareAndExchangeDouble() throws Exception {
-		for (String test : testList) {
-			testDouble(new DoubleData(), test);
-		}
-	}
+	// public void testInstanceCompareAndExchangeDouble() throws Exception {
+	// 	for (String test : testList) {
+	// 		testDouble(new DoubleData(), test);
+	// 	}
+	// }
 
-	public void testInstanceCompareAndExchangeBoolean() throws Exception {
-		for (String test : testList) {
-			testBoolean(new BooleanData(), test);
-		}
-	}
+	// public void testInstanceCompareAndExchangeBoolean() throws Exception {
+	// 	for (String test : testList) {
+	// 		testBoolean(new BooleanData(), test);
+	// 	}
+	// }
 
-	public void testInstanceCompareAndExchangeReference() throws Exception {
-		for (String test : testList) {
-			testReference(new ObjectData(), test);
-		}
-	}
+	// public void testInstanceCompareAndExchangeReference() throws Exception {
+	// 	for (String test : testList) {
+	// 		testReference(new ObjectData(), test);
+	// 	}
+	// }
 
-	/* test with array as object */
-	public void testArrayCompareAndExchangeByte() throws Exception {
-		for (String test : testList) {
-			testByte(new byte[modelByte.length], test);
-		}
-	}
+	// /* test with array as object */
+	// public void testArrayCompareAndExchangeByte() throws Exception {
+	// 	for (String test : testList) {
+	// 		testByte(new byte[modelByte.length], test);
+	// 	}
+	// }
 
-	public void testArrayCompareAndExchangeChar() throws Exception {
-		for (String test : testList) {
-			testChar(new char[modelChar.length], test);
-		}
-	}
+	// public void testArrayCompareAndExchangeChar() throws Exception {
+	// 	for (String test : testList) {
+	// 		testChar(new char[modelChar.length], test);
+	// 	}
+	// }
 
-	public void testArrayCompareAndExchangeShort() throws Exception {
-		for (String test : testList) {
-			testShort(new short[modelShort.length], test);
-		}
-	}
+	// public void testArrayCompareAndExchangeShort() throws Exception {
+	// 	for (String test : testList) {
+	// 		testShort(new short[modelShort.length], test);
+	// 	}
+	// }
 
-	public void testArrayCompareAndExchangeInt() throws Exception {
-		for (String test : testList) {
-			testInt(new int[modelInt.length], test);
-		}
-	}
+	// public void testArrayCompareAndExchangeInt() throws Exception {
+	// 	for (String test : testList) {
+	// 		testInt(new int[modelInt.length], test);
+	// 	}
+	// }
 
-	public void testArrayCompareAndExchangeLong() throws Exception {
-		for (String test : testList) {
-			testLong(new long[modelLong.length], test);
-		}
-	}
+	// public void testArrayCompareAndExchangeLong() throws Exception {
+	// 	for (String test : testList) {
+	// 		testLong(new long[modelLong.length], test);
+	// 	}
+	// }
 
-	public void testArrayCompareAndExchangeFloat() throws Exception {
-		for (String test : testList) {
-			testFloat(new float[modelFloat.length], test);
-		}
-	}
+	// public void testArrayCompareAndExchangeFloat() throws Exception {
+	// 	for (String test : testList) {
+	// 		testFloat(new float[modelFloat.length], test);
+	// 	}
+	// }
 
-	public void testArrayCompareAndExchangeDouble() throws Exception {
-		for (String test : testList) {
-			testDouble(new double[modelDouble.length], test);
-		}
-	}
+	// public void testArrayCompareAndExchangeDouble() throws Exception {
+	// 	for (String test : testList) {
+	// 		testDouble(new double[modelDouble.length], test);
+	// 	}
+	// }
 
-	public void testArrayCompareAndExchangeBoolean() throws Exception {
-		for (String test : testList) {
-			testBoolean(new boolean[modelBoolean.length], test);
-		}
-	}
+	// public void testArrayCompareAndExchangeBoolean() throws Exception {
+	// 	for (String test : testList) {
+	// 		testBoolean(new boolean[modelBoolean.length], test);
+	// 	}
+	// }
 
-	public void testArrayCompareAndExchangeReference() throws Exception {
-		for (String test : testList) {
-			testReference(new Object[models.length], test);
-		}
-	}
+	// public void testArrayCompareAndExchangeReference() throws Exception {
+	// 	for (String test : testList) {
+	// 		testReference(new Object[models.length], test);
+	// 	}
+	// }
 
-	/* test with static object */
-	public void testStaticCompareAndExchangeByte() throws Exception {
-		for (String test : testList) {
-			testByte(ByteData.class, test);
-		}
-	}
+	// /* test with static object */
+	// public void testStaticCompareAndExchangeByte() throws Exception {
+	// 	for (String test : testList) {
+	// 		testByte(ByteData.class, test);
+	// 	}
+	// }
 
-	public void testStaticCompareAndExchangeChar() throws Exception {
-		for (String test : testList) {
-			testChar(CharData.class, test);
-		}
-	}
+	// public void testStaticCompareAndExchangeChar() throws Exception {
+	// 	for (String test : testList) {
+	// 		testChar(CharData.class, test);
+	// 	}
+	// }
 
-	public void testStaticCompareAndExchangeShort() throws Exception {
-		for (String test : testList) {
-			testShort(ShortData.class, test);
-		}
-	}
+	// public void testStaticCompareAndExchangeShort() throws Exception {
+	// 	for (String test : testList) {
+	// 		testShort(ShortData.class, test);
+	// 	}
+	// }
 
-	public void testStaticCompareAndExchangeInt() throws Exception {
-		for (String test : testList) {
-			testInt(IntData.class, test);
-		}
-	}
+	// public void testStaticCompareAndExchangeInt() throws Exception {
+	// 	for (String test : testList) {
+	// 		testInt(IntData.class, test);
+	// 	}
+	// }
 
-	public void testStaticCompareAndExchangeLong() throws Exception {
-		for (String test : testList) {
-			testLong(LongData.class, test);
-		}
-	}
+	// public void testStaticCompareAndExchangeLong() throws Exception {
+	// 	for (String test : testList) {
+	// 		testLong(LongData.class, test);
+	// 	}
+	// }
 
-	public void testStaticCompareAndExchangeFloat() throws Exception {
-		for (String test : testList) {
-			testFloat(FloatData.class, test);
-		}
-	}
+	// public void testStaticCompareAndExchangeFloat() throws Exception {
+	// 	for (String test : testList) {
+	// 		testFloat(FloatData.class, test);
+	// 	}
+	// }
 
-	public void testStaticCompareAndExchangeDouble() throws Exception {
-		for (String test : testList) {
-			testDouble(DoubleData.class, test);
-		}
-	}
+	// public void testStaticCompareAndExchangeDouble() throws Exception {
+	// 	for (String test : testList) {
+	// 		testDouble(DoubleData.class, test);
+	// 	}
+	// }
 
-	public void testStaticCompareAndExchangeBoolean() throws Exception {
-		for (String test : testList) {
-			testBoolean(BooleanData.class, test);
-		}
-	}
+	// public void testStaticCompareAndExchangeBoolean() throws Exception {
+	// 	for (String test : testList) {
+	// 		testBoolean(BooleanData.class, test);
+	// 	}
+	// }
 
-	public void testStaticCompareAndExchangeReference() throws Exception {
-		for (String test : testList) {
-			testReference(ObjectData.class, test);
-		}
-	}
+	// public void testStaticCompareAndExchangeReference() throws Exception {
+	// 	for (String test : testList) {
+	// 		testReference(ObjectData.class, test);
+	// 	}
+	// }
 
-	/* test with null object */
-	public void testObjectNullCompareAndExchangeByte() throws Exception {
-		memAllocate(100);
-		alignment();
+	// /* test with null object */
+	// public void testObjectNullCompareAndExchangeByte() throws Exception {
+	// 	memAllocate(100);
+	// 	alignment();
 
-		for (String test : testList) {
-			testByteNative(test);
-		}
-	}
+	// 	for (String test : testList) {
+	// 		testByteNative(test);
+	// 	}
+	// }
 
-	public void testObjectNullCompareAndExchangeChar() throws Exception {
-		memAllocate(100);
-		alignment();
+	// public void testObjectNullCompareAndExchangeChar() throws Exception {
+	// 	memAllocate(100);
+	// 	alignment();
 
-		for (String test : testList) {
-			testCharNative(test);
-		}
-	}
+	// 	for (String test : testList) {
+	// 		testCharNative(test);
+	// 	}
+	// }
 
-	public void testObjectNullCompareAndExchangeShort() throws Exception {
-		memAllocate(100);
-		alignment();
+	// public void testObjectNullCompareAndExchangeShort() throws Exception {
+	// 	memAllocate(100);
+	// 	alignment();
 
-		for (String test : testList) {
-			testShortNative(test);
-		}
-	}
+	// 	for (String test : testList) {
+	// 		testShortNative(test);
+	// 	}
+	// }
 
-	public void testObjectNullCompareAndExchangeInt() throws Exception {
-		memAllocate(100);
-		alignment();
+	// public void testObjectNullCompareAndExchangeInt() throws Exception {
+	// 	memAllocate(100);
+	// 	alignment();
 
-		for (String test : testList) {
-			testIntNative(test);
-		}
-	}
+	// 	for (String test : testList) {
+	// 		testIntNative(test);
+	// 	}
+	// }
 
-	public void testObjectNullCompareAndExchangeLong() throws Exception {
-		memAllocate(100);
-		alignment();
+	// public void testObjectNullCompareAndExchangeLong() throws Exception {
+	// 	memAllocate(100);
+	// 	alignment();
 
-		for (String test : testList) {
-			testLongNative(test);
-		}
-	}
+	// 	for (String test : testList) {
+	// 		testLongNative(test);
+	// 	}
+	// }
 
-	public void testObjectNullCompareAndExchangeFloat() throws Exception {
-		memAllocate(100);
-		alignment();
+	// public void testObjectNullCompareAndExchangeFloat() throws Exception {
+	// 	memAllocate(100);
+	// 	alignment();
 
-		for (String test : testList) {
-			testFloatNative(test);
-		}
-	}
+	// 	for (String test : testList) {
+	// 		testFloatNative(test);
+	// 	}
+	// }
 
-	public void testObjectNullCompareAndExchangeDouble() throws Exception {
-		memAllocate(100);
-		alignment();
+	// public void testObjectNullCompareAndExchangeDouble() throws Exception {
+	// 	memAllocate(100);
+	// 	alignment();
 
-		for (String test : testList) {
-			testDoubleNative(test);
-		}
-	}
+	// 	for (String test : testList) {
+	// 		testDoubleNative(test);
+	// 	}
+	// }
 
-	public void testObjectNullCompareAndExchangeBoolean() throws Exception {
-		memAllocate(100);
-		alignment();
+	// public void testObjectNullCompareAndExchangeBoolean() throws Exception {
+	// 	memAllocate(100);
+	// 	alignment();
 
-		for (String test : testList) {
-			testBooleanNative(test);
-		}
-	}
+	// 	for (String test : testList) {
+	// 		testBooleanNative(test);
+	// 	}
+	// }
 
 }

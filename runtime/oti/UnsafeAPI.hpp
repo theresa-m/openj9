@@ -714,7 +714,7 @@ done:
 				void *valueAddress = (void*)((UDATA)fieldClass->ramStatics + (offset & ~(UDATA)J9_SUN_FIELD_OFFSET_MASK));
 				result = (I_8)objectAccessBarrier->inlineStaticCompareAndExchangeU32(currentThread, fieldClass, (U_32*)valueAddress, (I_32)compareValue, (I_32)swapValue, true);
 			} else {
-				/* Instance field */
+				/* Instance field */ // here
 				result = objectAccessBarrier->inlineMixedObjectCompareAndExchangeU8(currentThread, object, offset, compareValue, swapValue, true);
 			}
 		}
