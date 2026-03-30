@@ -422,9 +422,9 @@ getStaticFields(J9VMThread *currentThread, J9ROMClass *romClass, J9ROMFieldShape
 #if defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES)
 	J9FlattenedClassCache *flattenedClassCache = NULL; /* needed only for instance fields */
 	cursor = fieldOffsetsStartDo(vm, romClass, superclass, &walkState, walkFlags, flattenedClassCache);
-#else
+#else /* defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES) */
 	cursor = fieldOffsetsStartDo(vm, romClass, superclass, &walkState, walkFlags);
-#endif
+#endif /* defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES) */
 
 	while (NULL != cursor->field) {
 		if (NULL != outFields) {
@@ -845,9 +845,9 @@ releaseMutex:
 J9ROMFieldOffsetWalkResult *
 #if defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES)
 fieldOffsetsStartDo(J9JavaVM *vm, J9ROMClass *romClass, J9Class *superClazz, J9ROMFieldOffsetWalkState *state, U_32 flags, J9FlattenedClassCache *flattenedClassCache)
-#else /* J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES */
+#else /* defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES) */
 fieldOffsetsStartDo(J9JavaVM *vm, J9ROMClass *romClass, J9Class *superClazz, J9ROMFieldOffsetWalkState *state, U_32 flags)
-#endif /* J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES */
+#endif /* defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES) */
 {
 
 	Trc_VM_romFieldOffsetsStartDo_Entry( NULL, romClass, superClazz, flags );
@@ -866,9 +866,9 @@ fieldOffsetsStartDo(J9JavaVM *vm, J9ROMClass *romClass, J9Class *superClazz, J9R
 	state->flattenedClassCache = flattenedClassCache;
 
 	ObjectFieldInfo fieldInfo(vm, romClass, flattenedClassCache);
-#else /* J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES */
+#else /* defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES) */
 	ObjectFieldInfo fieldInfo(vm, romClass);
-#endif /* J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES */
+#endif /* defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES) */
 
 	/* Calculate instance size. Skip the following if we  care about only about statics */
 	if (J9_ARE_ANY_BITS_SET(state->walkFlags, (J9VM_FIELD_OFFSET_WALK_INCLUDE_INSTANCE | J9VM_FIELD_OFFSET_WALK_INCLUDE_HIDDEN | J9VM_FIELD_OFFSET_WALK_CALCULATE_INSTANCE_SIZE))) {
@@ -890,13 +890,13 @@ fieldOffsetsStartDo(J9JavaVM *vm, J9ROMClass *romClass, J9Class *superClazz, J9R
 			fieldInfo.setSuperclassFieldsSize(0);
 		}
 
-		UDATA lockwordNeeded = (UDATA)checkLockwordNeeded( vm, romClass, superClazz, state->walkFlags );
+		UDATA lockwordNeeded = (UDATA)checkLockwordNeeded(vm, romClass, superClazz, state->walkFlags);
 		/*
 		 * remove the lockword from Object (if there is one) only if we don't need a lockword or we do need one
 		 * and we are not re-using the one from Object which we can tell because lockwordNeeded is LOCKWORD_NEEDED as
 		 * opposed to the value of the existing offset.
 		 */
-		if ((LOCKWORD_NEEDED == lockwordNeeded)||(NO_LOCKWORD_NEEDED == lockwordNeeded)) {
+		if ((LOCKWORD_NEEDED == lockwordNeeded) || (NO_LOCKWORD_NEEDED == lockwordNeeded)) {
 			if ((NULL != superClazz) && ((UDATA)-1 != superClazz->lockOffset) && (0 == J9CLASS_DEPTH(superClazz))) {
 				U_32 newSuperSize = fieldInfo.getSuperclassFieldsSize() - referenceSize;
 				/*
@@ -934,7 +934,7 @@ fieldOffsetsStartDo(J9JavaVM *vm, J9ROMClass *romClass, J9Class *superClazz, J9R
 					(J9ROMCLASS_FINALIZE_NEEDED(romClass)) ||
 					(J9ROMCLASS_HAS_EMPTY_FINALIZE(romClass) && (NULL != J9ROMCLASS_SUPERCLASSNAME(romClass)))
 			) {
-				extraHiddenFields = initJ9HiddenField(	&state->hiddenFinalizeLinkField, NULL,
+				extraHiddenFields = initJ9HiddenField(&state->hiddenFinalizeLinkField, NULL,
 						vm->hiddenFinalizeLinkFieldShape,
 						&state->finalizeLinkOffset, extraHiddenFields);
 			}
@@ -969,11 +969,19 @@ fieldOffsetsStartDo(J9JavaVM *vm, J9ROMClass *romClass, J9Class *superClazz, J9R
 		state->firstObjectOffset = fieldInfo.addFlatObjectsArea(state->firstFlatObjectOffset);
 		state->firstFlatSingleOffset = fieldInfo.addObjectsArea(state->firstObjectOffset);
 		state->firstSingleOffset = fieldInfo.addFlatSinglesArea(state->firstFlatSingleOffset);
-#else /* J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES */
+#if defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS)
+		state->firstShortOffset = fieldInfo.addSinglesArea(state->firstSingleOffset);
+		state->firstByteOffset = fieldInfo.addShortsArea(state->firstShortOffset);
+#endif /* defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS) */
+#else /* defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES) */
 		state->firstDoubleOffset = fieldInfo.calculateFieldDataStart();
 		state->firstObjectOffset = fieldInfo.addDoublesArea(state->firstDoubleOffset);
 		state->firstSingleOffset = fieldInfo.addObjectsArea(state->firstObjectOffset);
-#endif /* J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES */
+#if defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS)
+		state->firstShortOffset = fieldInfo.addSinglesArea(state->firstSingleOffset);
+		state->firstByteOffset = fieldInfo.addShortsArea(state->firstShortOffset);
+#endif /* defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS) */
+#endif /* defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES) */
 
 
 		if (fieldInfo.isMyBackfillSlotAvailable() && fieldInfo.isBackfillSuitableFieldAvailable() ) {
@@ -992,13 +1000,13 @@ fieldOffsetsStartDo(J9JavaVM *vm, J9ROMClass *romClass, J9Class *superClazz, J9R
 			} else if (objectBackfillAvailable && (0 != fieldInfo.getFlatUnAlignedObjectInstanceBackfillSize())) {
 				state->walkFlags |= J9VM_FIELD_OFFSET_WALK_BACKFILL_FLAT_OBJECT_FIELD;
 			}
-#else /* J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES */
+#else /* defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES) */
 			if (fieldInfo.isBackfillSuitableInstanceSingleAvailable()) {
 				state->walkFlags |= J9VM_FIELD_OFFSET_WALK_BACKFILL_SINGLE_FIELD;
 			} else if (fieldInfo.isBackfillSuitableInstanceObjectAvailable()) {
 				state->walkFlags |= J9VM_FIELD_OFFSET_WALK_BACKFILL_OBJECT_FIELD;
 			}
-#endif /* J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES */
+#endif /* defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES) */
 		}
 
 		/*
@@ -1010,14 +1018,26 @@ fieldOffsetsStartDo(J9JavaVM *vm, J9ROMClass *romClass, J9Class *superClazz, J9R
 			UDATA hiddenSingleOffset = objectHeaderSize;
 			UDATA hiddenDoubleOffset = objectHeaderSize;
 			UDATA hiddenObjectOffset = objectHeaderSize;
+#if defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS)
+			UDATA hiddenShortOffset = objectHeaderSize;
+			UDATA hiddenByteOffset = objectHeaderSize;
+#endif /* defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS) */
 			if (fieldInfo.isContendedClassLayout()) { /* hidden fields go immediately after the superclass fields and the instance fields which are placed on the following cache line */
 				/* hidden doubles go right at the start.  No adjustment required */
 				hiddenObjectOffset = hiddenDoubleOffset + (fieldInfo.getTotalDoubleCount() * sizeof(U_64));
 				hiddenSingleOffset = hiddenObjectOffset + (fieldInfo.getTotalObjectCount() * referenceSize);
+#if defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS)
+				hiddenShortOffset = hiddenSingleOffset + (fieldInfo.getTotalSingleCount() * sizeof(U_32));
+				hiddenByteOffset = hiddenShortOffset + (fieldInfo.getTotalShortCount() * sizeof(U_16));
+#endif /* defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS) */
 			} else {
 				hiddenSingleOffset += state->firstSingleOffset + (fieldInfo.getNonBackfilledInstanceSingleCount() * sizeof(U_32));
 				hiddenDoubleOffset += state->firstDoubleOffset + (fieldInfo.getInstanceDoubleCount() * sizeof(U_64));
 				hiddenObjectOffset += state->firstObjectOffset + (fieldInfo.getNonBackfilledInstanceObjectCount() * referenceSize);
+#if defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS)
+				hiddenShortOffset += state->firstShortOffset + (fieldInfo.getInstanceShortCount() * sizeof(U_16));
+				hiddenByteOffset += state->firstByteOffset + (fieldInfo.getInstanceByteCount() * sizeof(U_8));
+#endif /* defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS) */
 			}
 			bool useBackfillForObject = false;
 			bool useBackfillForSingle = false;
@@ -1046,6 +1066,14 @@ fieldOffsetsStartDo(J9JavaVM *vm, J9ROMClass *romClass, J9Class *superClazz, J9R
 				} else if (J9_ARE_ALL_BITS_SET(modifiers, J9FieldSizeDouble)) {
 					hiddenField->fieldOffset = hiddenDoubleOffset;
 					hiddenDoubleOffset += sizeof(U_64);
+#if defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS)
+				} else if (((modifiers & J9FieldTypeMask) == J9FieldTypeChar) || ((modifiers & J9FieldTypeMask) == J9FieldTypeShort)) {
+					hiddenField->fieldOffset = hiddenShortOffset;
+					hiddenShortOffset += sizeof(U_16);
+				} else if (((modifiers & J9FieldTypeMask) == J9FieldTypeBoolean) || ((modifiers & J9FieldTypeMask) == J9FieldTypeByte)) {
+					hiddenField->fieldOffset = hiddenByteOffset;
+					hiddenByteOffset += sizeof(U_8);
+#endif /* defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS) */
 				} else {
 					if (useBackfillForSingle) {
 						hiddenField->fieldOffset = fieldInfo.getMyBackfillOffsetForHiddenField();
@@ -1097,7 +1125,7 @@ fieldOffsetsNextDo(J9ROMFieldOffsetWalkState *state)
 	state->result.field = NULL;
 #if defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES)
 	state->result.flattenedClass = NULL;
-#endif /* J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES */
+#endif /* defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES) */
 
 	/*
 	 * Walk regular ROM fields until we run out of them. Then switch
@@ -1148,10 +1176,6 @@ fieldOffsetsNextDo(J9ROMFieldOffsetWalkState *state)
 	Trc_VM_romFieldOffsetsNextDo_result(NULL, state->result.field, state->result.offset, state->result.index);
 	return &state->result;
 }
-
-
-
-
 
 /*
  * Find the next appropriate field, starting with the field passed in, storing
@@ -1270,7 +1294,7 @@ fieldOffsetsFindNext(J9ROMFieldOffsetWalkState *state, J9ROMFieldShape *field)
 								state->objectsSeen++;
 							}
 						}
-#else /* J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES */
+#else /* defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES) */
 						if (state->walkFlags & J9VM_FIELD_OFFSET_WALK_BACKFILL_OBJECT_FIELD) {
 							Assert_VM_true(state->backfillOffsetToUse >= 0);
 							state->result.offset = state->backfillOffsetToUse;
@@ -1279,12 +1303,20 @@ fieldOffsetsFindNext(J9ROMFieldOffsetWalkState *state, J9ROMFieldShape *field)
 							state->result.offset = state->firstObjectOffset + state->objectsSeen * referenceSize;
 							state->objectsSeen++;
 						}
-#endif /* J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES */
+#endif /* defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES) */
 						break;
-					} else if ( 0 == (state->walkFlags & J9VM_FIELD_OFFSET_WALK_ONLY_OBJECT_SLOTS) ) {
-						if( modifiers & J9FieldSizeDouble ) {
+					} else if (0 == (state->walkFlags & J9VM_FIELD_OFFSET_WALK_ONLY_OBJECT_SLOTS)) {
+						if (modifiers & J9FieldSizeDouble) {
 							state->result.offset = state->firstDoubleOffset + state->doublesSeen * sizeof( U_64 );
 							state->doublesSeen++;
+#if defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS)
+						} else if (((modifiers & J9FieldTypeMask) == J9FieldTypeChar) || ((modifiers & J9FieldTypeMask) == J9FieldTypeShort)) {
+							state->result.offset = state->firstShortOffset + state->shortsSeen * sizeof(U_16);
+							state->shortsSeen++;
+						} else if (((modifiers & J9FieldTypeMask) == J9FieldTypeBoolean) || ((modifiers & J9FieldTypeMask) == J9FieldTypeByte)) {
+							state->result.offset = state->firstByteOffset + state->bytesSeen * sizeof(U_8);
+							state->bytesSeen++;
+#endif /* defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS) */
 						} else {
 							if (state->walkFlags & J9VM_FIELD_OFFSET_WALK_BACKFILL_SINGLE_FIELD) {
 								Assert_VM_true(state->backfillOffsetToUse >= 0);
@@ -1332,7 +1364,6 @@ fullTraversalFieldOffsetsStartDo(J9JavaVM *vm, J9Class *clazz, J9ROMFullTraversa
 		state->clazz = NULL;
 	}
 
-
 	if (state->walkFlags & J9VM_FIELD_OFFSET_WALK_PREINDEX_INTERFACE_FIELDS) {
 		iTable = (J9ITable *) clazz->iTable;
 		while (iTable) {
@@ -1349,9 +1380,7 @@ fullTraversalFieldOffsetsStartDo(J9JavaVM *vm, J9Class *clazz, J9ROMFullTraversa
 		}
 	}
 
-
-	while(state->currentClass) {
-
+	while (NULL != state->currentClass) {
 		if ((state->walkFlags & J9VM_FIELD_OFFSET_WALK_PREINDEX_INTERFACE_FIELDS) == 0) {
 			/* add the slots for the interfaces to the index */
 			iTable = (J9ITable *) state->currentClass->iTable;
