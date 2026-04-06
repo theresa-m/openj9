@@ -67,6 +67,17 @@ public class StaticFieldRef extends FieldRef implements Constants {
 		super(e, FIELDALIAS, new Factory(classes));
 	}
 
+/*[IF COMPACT_LAYOUT]*/
+	/**
+	 * Static fields do not support compact layouts.
+	 * @return true if compact layout is supported
+	 */
+	@Override
+	protected boolean supportsCompactLayout() {
+		return false;
+	}
+/*[ENDIF] COMPACT_LAYOUT */
+
 	public void writeMacros(ConstantPool pool, PrintWriter out) {
 		superWriteMacros(pool, out);
 		String type = fieldType();
