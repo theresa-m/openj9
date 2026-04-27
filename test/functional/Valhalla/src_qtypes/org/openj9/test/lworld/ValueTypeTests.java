@@ -160,6 +160,20 @@ public class ValueTypeTests {
 	static MethodHandle makeObjectBackfillClass = null;
 	static MethodHandle getObjectO = null;
 	static MethodHandle getObjectL = null;
+	/* LayoutsWithPrimitivesAndSmallTypes classes */
+	static Class<?> compactSingleBackfillClass = null;
+	static MethodHandle makeCompactSingleBackfill = null;
+	static MethodHandle getCompactSingleI = null;
+	static MethodHandle getCompactSingleO = null;
+	static MethodHandle getCompactSingleL = null;
+	static MethodHandle getCompactSingleB = null;
+	static MethodHandle getCompactSingleS = null;
+	static Class<?> compactObjectBackfillClass = null;
+	static MethodHandle makeCompactObjectBackfill = null;
+	static MethodHandle getCompactObjectO = null;
+	static MethodHandle getCompactObjectL = null;
+	static MethodHandle getCompactObjectC = null;
+	static MethodHandle getCompactObjectZ = null;
 	/* LayoutsWithValueTypes classes */
 	static Class<?> flatSingleBackfillClass = null;
 	static MethodHandle makeFlatSingleBackfillClass = null;
@@ -255,6 +269,10 @@ public class ValueTypeTests {
 	static double defaultDoubleNew = -123412341.21341234d;
 	static float defaultFloatNew = -123423.12341234f;
 	static Object defaultObjectNew = (Object)0xFFEEFFEE;
+	static byte defaultByte = (byte)0x7F;
+	static short defaultShort = (short)0x7FFF;
+	static char defaultChar = 'Z';
+	static boolean defaultBoolean = true;
 	/* miscellaneous constants */
 	static final int genericArraySize = 10;
 	static final int objectGCScanningIterationCount = 1000;
@@ -1433,6 +1451,45 @@ public class ValueTypeTests {
 		Object objectBackfillInstance = makeObjectBackfillClass.invoke(defaultLong, defaultObject);
 		assertEquals(getObjectO.invoke(objectBackfillInstance), defaultObject);
 		assertEquals(getObjectL.invoke(objectBackfillInstance), defaultLong);
+	}
+
+	@Test(priority=2)
+	static public void testCreateLayoutsWithPrimitivesAndSmallTypes() throws Throwable {
+		/* 8-bit and 16-bit fields are not eligible for backfill. */
+		String[] compactSingleBackfill = {"l:J", "o:Ljava/lang/Object;", "i:I", "b:B", "s:S"};
+		compactSingleBackfillClass = ValueTypeGenerator.generateValueClass("CompactSingleBackfill", compactSingleBackfill);
+		makeCompactSingleBackfill = lookup.findStatic(compactSingleBackfillClass, "makeObjectGeneric",
+			MethodType.methodType(Object.class, Object.class, Object.class, Object.class, Object.class, Object.class));
+		getCompactSingleI = generateGenericGetter(compactSingleBackfillClass, "i");
+		getCompactSingleO = generateGenericGetter(compactSingleBackfillClass, "o");
+		getCompactSingleL = generateGenericGetter(compactSingleBackfillClass, "l");
+		getCompactSingleB = generateGenericGetter(compactSingleBackfillClass, "b");
+		getCompactSingleS = generateGenericGetter(compactSingleBackfillClass, "s");
+
+		String[] compactObjectBackfill = {"l:J", "o:Ljava/lang/Object;", "c:C", "z:Z"};
+		compactObjectBackfillClass = ValueTypeGenerator.generateValueClass("CompactObjectBackfill", compactObjectBackfill);
+		makeCompactObjectBackfill = lookup.findStatic(compactObjectBackfillClass, "makeObjectGeneric",
+			MethodType.methodType(Object.class, Object.class, Object.class, Object.class, Object.class));
+		getCompactObjectO = generateGenericGetter(compactObjectBackfillClass, "o");
+		getCompactObjectL = generateGenericGetter(compactObjectBackfillClass, "l");
+		getCompactObjectC = generateGenericGetter(compactObjectBackfillClass, "c");
+		getCompactObjectZ = generateGenericGetter(compactObjectBackfillClass, "z");
+	}
+
+	@Test(priority=3, invocationCount=2)
+	static public void testLayoutsWithPrimitivesAndSmallTypes() throws Throwable {
+		Object compactSingleBackfillInstance = makeCompactSingleBackfill.invoke(defaultLong, defaultObject, defaultInt, defaultByte, defaultShort);
+		assertEquals(getCompactSingleI.invoke(compactSingleBackfillInstance), defaultInt);
+		assertEquals(getCompactSingleO.invoke(compactSingleBackfillInstance), defaultObject);
+		assertEquals(getCompactSingleL.invoke(compactSingleBackfillInstance), defaultLong);
+		assertEquals(getCompactSingleB.invoke(compactSingleBackfillInstance), defaultByte);
+		assertEquals(getCompactSingleS.invoke(compactSingleBackfillInstance), defaultShort);
+
+		Object compactObjectBackfillInstance = makeCompactObjectBackfill.invoke(defaultLong, defaultObject, defaultChar, defaultBoolean);
+		assertEquals(getCompactObjectO.invoke(compactObjectBackfillInstance), defaultObject);
+		assertEquals(getCompactObjectL.invoke(compactObjectBackfillInstance), defaultLong);
+		assertEquals(getCompactObjectC.invoke(compactObjectBackfillInstance), defaultChar);
+		assertEquals(getCompactObjectZ.invoke(compactObjectBackfillInstance), defaultBoolean);
 	}
 	
 	@Test(priority=4)
