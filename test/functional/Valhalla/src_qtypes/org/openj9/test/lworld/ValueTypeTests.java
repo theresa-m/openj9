@@ -1384,6 +1384,10 @@ public class ValueTypeTests {
 	 *	flattened ValueLong l;
 	 *	flattened ValueDouble d;
 	 *	flattened ValueInt i;
+	 *	flattened ValueByte b;
+	 *	flattened ValueShort s;
+	 *	flattened ValueChar c;
+	 *	flattened ValueBoolean z;
 	 *	flattened Triangle2D tri;
 	 * }
 	 */
@@ -1393,7 +1397,8 @@ public class ValueTypeTests {
 
 		makeAssortedValueWithLongAlignment = lookup.findStatic(assortedValueWithLongAlignmentClass,
 				"makeObjectGeneric", MethodType.methodType(Object.class, Object.class,
-						Object.class, Object.class, Object.class, Object.class, Object.class, Object.class));
+						Object.class, Object.class, Object.class, Object.class, Object.class, Object.class,
+						Object.class, Object.class, Object.class, Object.class));
 		/*
 		 * Getters are created in array getterList[i][0] according to the order of fields i
 		 */
