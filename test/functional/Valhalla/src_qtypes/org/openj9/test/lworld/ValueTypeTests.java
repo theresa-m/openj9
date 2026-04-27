@@ -97,6 +97,22 @@ public class ValueTypeTests {
 	static Class<?> valueObjectClass = null;
 	static MethodHandle makeValueObject = null;
 	static MethodHandle getObject = null;
+	/* valueByte */
+	static Class<?> valueByteClass = null;
+	static MethodHandle makeValueByte = null;
+	static MethodHandle getByte = null;
+	/* valueShort */
+	static Class<?> valueShortClass = null;
+	static MethodHandle makeValueShort = null;
+	static MethodHandle getShort = null;
+	/* valueChar */
+	static Class<?> valueCharClass = null;
+	static MethodHandle makeValueChar = null;
+	static MethodHandle getChar = null;
+	/* valueBoolean */
+	static Class<?> valueBooleanClass = null;
+	static MethodHandle makeValueBoolean = null;
+	static MethodHandle getBoolean = null;
 	/* largeObject */
 	static Class<?> largeObjectValueClass = null;
 	static MethodHandle makeLargeObjectValue = null;
@@ -1204,6 +1220,98 @@ public class ValueTypeTests {
 		Object valueObject = makeValueObject.invoke(val);
 
 		assertEquals(getObject.invoke(valueObject), val);
+	}
+
+	/*
+	 * Create a value type with a byte primitive member
+	 *
+	 * value ValueByte {
+	 * 	byte b;
+	 * }
+	 */
+	@Test(priority=1)
+	static public void testCreateValueByte() throws Throwable {
+		String[] fields = {"b:B"};
+		valueByteClass = ValueTypeGenerator.generateValueClass("ValueByte", fields);
+
+		makeValueByte = lookup.findStatic(valueByteClass, "makeObjectGeneric",
+				MethodType.methodType(Object.class, Object.class));
+
+		getByte = generateGenericGetter(valueByteClass, "b");
+
+		byte b = Byte.MAX_VALUE;
+		Object valueByte = makeValueByte.invoke(b);
+
+		assertEquals(getByte.invoke(valueByte), b);
+	}
+
+	/*
+	 * Create a value type with a short primitive member
+	 *
+	 * value ValueShort {
+	 * 	short s;
+	 * }
+	 */
+	@Test(priority=1)
+	static public void testCreateValueShort() throws Throwable {
+		String[] fields = {"s:S"};
+		valueShortClass = ValueTypeGenerator.generateValueClass("ValueShort", fields);
+
+		makeValueShort = lookup.findStatic(valueShortClass, "makeObjectGeneric",
+				MethodType.methodType(Object.class, Object.class));
+
+		getShort = generateGenericGetter(valueShortClass, "s");
+
+		short s = Short.MAX_VALUE;
+		Object valueShort = makeValueShort.invoke(s);
+
+		assertEquals(getShort.invoke(valueShort), s);
+	}
+
+	/*
+	 * Create a value type with a char primitive member
+	 *
+	 * value ValueChar {
+	 * 	char c;
+	 * }
+	 */
+	@Test(priority=1)
+	static public void testCreateValueChar() throws Throwable {
+		String[] fields = {"c:C"};
+		valueCharClass = ValueTypeGenerator.generateValueClass("ValueChar", fields);
+
+		makeValueChar = lookup.findStatic(valueCharClass, "makeObjectGeneric",
+				MethodType.methodType(Object.class, Object.class));
+
+		getChar = generateGenericGetter(valueCharClass, "c");
+
+		char c = Character.MAX_VALUE;
+		Object valueChar = makeValueChar.invoke(c);
+
+		assertEquals(getChar.invoke(valueChar), c);
+	}
+
+	/*
+	 * Create a value type with a boolean primitive member
+	 *
+	 * value ValueBoolean {
+	 * 	boolean z;
+	 * }
+	 */
+	@Test(priority=1)
+	static public void testCreateValueBoolean() throws Throwable {
+		String[] fields = {"z:Z"};
+		valueBooleanClass = ValueTypeGenerator.generateValueClass("ValueBoolean", fields);
+
+		makeValueBoolean = lookup.findStatic(valueBooleanClass, "makeObjectGeneric",
+				MethodType.methodType(Object.class, Object.class));
+
+		getBoolean = generateGenericGetter(valueBooleanClass, "z");
+
+		boolean z = true;
+		Object valueBoolean = makeValueBoolean.invoke(z);
+
+		assertEquals(getBoolean.invoke(valueBoolean), z);
 	}
 	
 	/*	
