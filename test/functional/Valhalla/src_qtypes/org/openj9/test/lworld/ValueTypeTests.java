@@ -1409,13 +1409,17 @@ public class ValueTypeTests {
 	/*
 	 * Create an assorted refType with long alignment
 	 *
-	 * class AssortedReftWithLongAlignment {
+	 * class AssortedRefWithLongAlignment {
 	 *	flattened Point2D point;
 	 *	flattened Line2D line;
 	 *	flattened ValueObject o;
 	 *	flattened ValueLong l;
 	 *	flattened ValueDouble d;
 	 *	flattened ValueInt i;
+	 *	flattened ValueByte b;
+	 *	flattened ValueShort s;
+	 *	flattened ValueChar c;
+	 *	flattened ValueBoolean z;
 	 *	flattened Triangle2D tri;
 	 * }
 	 */
@@ -1424,9 +1428,9 @@ public class ValueTypeTests {
 		assortedRefWithLongAlignmentClass = ValueTypeGenerator.generateRefClass("AssortedRefWithLongAlignment", typeWithLongAlignmentFields);
 
 		makeAssortedRefWithLongAlignment = lookup.findStatic(assortedRefWithLongAlignmentClass,
-				"makeObjectGeneric", MethodType.methodType(Object.class, Object.class, Object.class,
-						Object.class, Object.class, Object.class, Object.class, Object.class));
-
+				"makeObjectGeneric", MethodType.methodType(Object.class, Object.class,
+						Object.class, Object.class, Object.class, Object.class, Object.class, Object.class,
+						Object.class, Object.class, Object.class, Object.class));
 		/*
 		 * Getters are created in array getterAndSetter[i][0] according to the order of fields i
 		 * Setters are created in array getterAndSetter[i][1] according to the order of fields i
