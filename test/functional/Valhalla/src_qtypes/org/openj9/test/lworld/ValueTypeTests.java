@@ -220,6 +220,10 @@ public class ValueTypeTests {
 		"line:LFlattenedLine2D;:NR",
 		"i:LValueInt;:NR",
 		"f:LValueFloat;:NR",
+		"b:LValueByte;:NR",
+		"s:LValueShort;:NR",
+		"c:LValueChar;:NR",
+		"z:LValueBoolean;:NR",
 		"tri2:LTriangle2D;:NR"
 	};
 	static String[] typeWithObjectAlignmentFields = {
@@ -229,6 +233,10 @@ public class ValueTypeTests {
 		"o:LValueObject;:NR",
 		"i:LValueInt;:NR",
 		"f:LValueFloat;:NR",
+		"b:LValueByte;:NR",
+		"s:LValueShort;:NR",
+		"c:LValueChar;:NR",
+		"z:LValueBoolean;:NR",
 		"tri2:LTriangle2D;:NR"
 	};
 	static String[] typeWithLongAlignmentFields = {
@@ -238,6 +246,10 @@ public class ValueTypeTests {
 		"l:LValueLong;:NR",
 		"d:LValueDouble;:NR",
 		"i:LValueInt;:NR",
+		"b:LValueByte;:NR",
+		"s:LValueShort;:NR",
+		"c:LValueChar;:NR",
+		"z:LValueBoolean;:NR",
 		"tri:LTriangle2D;:NR"
 	};
 	
@@ -269,10 +281,15 @@ public class ValueTypeTests {
 	static double defaultDoubleNew = -123412341.21341234d;
 	static float defaultFloatNew = -123423.12341234f;
 	static Object defaultObjectNew = (Object)0xFFEEFFEE;
+	/* compact layout default values */
 	static byte defaultByte = (byte)0x7F;
 	static short defaultShort = (short)0x7FFF;
 	static char defaultChar = 'Z';
 	static boolean defaultBoolean = true;
+	static byte defaultByteNew = (byte)0x42;
+	static short defaultShortNew = (short)0x1234;
+	static char defaultCharNew = 'A';
+	static boolean defaultBooleanNew = false;
 	/* miscellaneous constants */
 	static final int genericArraySize = 10;
 	static final int objectGCScanningIterationCount = 1000;
@@ -1620,6 +1637,10 @@ public class ValueTypeTests {
 	 * 	flattened ValueObject o;
 	 * 	flattened ValueInt i;
 	 * 	flattened ValueFloat f;
+	 * 	flattened ValueByte b;
+	 * 	flattened ValueShort s;
+	 * 	flattened ValueChar c;
+	 * 	flattened ValueBoolean z;
 	 * 	flattened Triangle2D tri2;
 	 * }
 	 */
@@ -1630,7 +1651,8 @@ public class ValueTypeTests {
 
 		makeAssortedValueWithObjectAlignment = lookup.findStatic(assortedValueWithObjectAlignmentClass,
 			"makeObjectGeneric", MethodType.methodType(Object.class, Object.class,
-					Object.class, Object.class, Object.class, Object.class, Object.class, Object.class));
+					Object.class, Object.class, Object.class, Object.class, Object.class, Object.class,
+					Object.class, Object.class, Object.class, Object.class));
 		/*
 		 * Getters are created in array getterAndSetter[i][0] according to the order of fields i
 		 * Setters are created in array getterAndSetter[i][1] according to the order of fields i
@@ -1654,6 +1676,10 @@ public class ValueTypeTests {
 	 * 	flattened ValueObject o;
 	 * 	flattened ValueInt i;
 	 * 	flattened ValueFloat f;
+	 * 	flattened ValueByte b;
+	 * 	flattened ValueShort s;
+	 * 	flattened ValueChar c;
+	 * 	flattened ValueBoolean z;
 	 * 	flattened Triangle2D tri2;
 	 * }
 	 */
@@ -1663,7 +1689,8 @@ public class ValueTypeTests {
 
 		makeAssortedRefWithObjectAlignment = lookup.findStatic(assortedRefWithObjectAlignmentClass,
 				"makeObjectGeneric", MethodType.methodType(Object.class, Object.class, Object.class,
-						Object.class, Object.class, Object.class, Object.class, Object.class));
+						Object.class, Object.class, Object.class, Object.class, Object.class,
+						Object.class, Object.class, Object.class, Object.class));
 		/*
 		 * Getters are created in array getterAndSetter[i][0] according to the order of fields i
 		 * Setters are created in array getterAndSetter[i][1] according to the order of fields i
@@ -1686,6 +1713,10 @@ public class ValueTypeTests {
 	 * 	flattened Line2D line;
 	 * 	flattened ValueInt i;
 	 * 	flattened ValueFloat f;
+	 * 	flattened ValueByte b;
+	 * 	flattened ValueShort s;
+	 * 	flattened ValueChar c;
+	 * 	flattened ValueBoolean z;
 	 * 	flattened Triangle2D tri2;
 	 * }
 	 */
@@ -1695,7 +1726,8 @@ public class ValueTypeTests {
 
 		makeAssortedValueWithSingleAlignment = lookup.findStatic(assortedValueWithSingleAlignmentClass,
 			"makeObjectGeneric", MethodType.methodType(Object.class, Object.class,
-					Object.class, Object.class, Object.class, Object.class, Object.class));
+					Object.class, Object.class, Object.class, Object.class, Object.class,
+					Object.class, Object.class, Object.class, Object.class));
 		/*
 		 * Getters are created in array getterAndSetter[i][0] according to the order of fields i
 		 * Setters are created in array getterAndSetter[i][1] according to the order of fields i
@@ -1718,6 +1750,10 @@ public class ValueTypeTests {
 	 * 	flattened Line2D line;
 	 * 	flattened ValueInt i;
 	 * 	flattened ValueFloat f;
+	 * 	flattened ValueByte b;
+	 * 	flattened ValueShort s;
+	 * 	flattened ValueChar c;
+	 * 	flattened ValueBoolean z;
 	 * 	flattened Triangle2D tri2;
 	 * }
 	 */
@@ -1727,7 +1763,8 @@ public class ValueTypeTests {
 
 		makeAssortedRefWithSingleAlignment = lookup.findStatic(assortedRefWithSingleAlignmentClass,
 				"makeObjectGeneric", MethodType.methodType(Object.class, Object.class, Object.class,
-						Object.class, Object.class, Object.class, Object.class));
+						Object.class, Object.class, Object.class, Object.class, Object.class,
+						Object.class, Object.class, Object.class));
 		/*
 		 * Getters are created in array getterAndSetter[i][0] according to the order of fields i
 		 * Setters are created in array getterAndSetter[i][1] according to the order of fields i
@@ -2972,6 +3009,18 @@ public class ValueTypeTests {
 			case "LValueLong;":
 				args[i] = makeValueLong.invoke(useInitFields ? (long)initFields[i] : defaultLong);
 				break;
+			case "LValueByte;":
+				args[i] = makeValueByte.invoke(useInitFields ? (byte)initFields[i] : defaultByte);
+				break;
+			case "LValueShort;":
+				args[i] = makeValueShort.invoke(useInitFields ? (short)initFields[i] : defaultShort);
+				break;
+			case "LValueChar;":
+				args[i] = makeValueChar.invoke(useInitFields ? (char)initFields[i] : defaultChar);
+				break;
+			case "LValueBoolean;":
+				args[i] = makeValueBoolean.invoke(useInitFields ? (boolean)initFields[i] : defaultBoolean);
+				break;
 			case "LLargeObject;":
 				args[i] = createLargeObject(useInitFields ? (Object)initFields[i] : defaultObject);
 				break;
@@ -3098,6 +3147,38 @@ public class ValueTypeTests {
 				if (!isValue) {
 					fieldAccessMHs[i][1].invoke(instance, lNew);
 					assertEquals(getLong.invoke(fieldAccessMHs[i][0].invoke(instance)), defaultLongNew);
+				}
+				break;
+			case "LValueByte;":
+				assertEquals(getByte.invoke(fieldAccessMHs[i][0].invoke(instance)), defaultByte);
+				Object bNew = makeValueByte.invoke(defaultByteNew);
+				if (!isValue) {
+					fieldAccessMHs[i][1].invoke(instance, bNew);
+					assertEquals(getByte.invoke(fieldAccessMHs[i][0].invoke(instance)), defaultByteNew);
+				}
+				break;
+			case "LValueShort;":
+				assertEquals(getShort.invoke(fieldAccessMHs[i][0].invoke(instance)), defaultShort);
+				Object sNew = makeValueShort.invoke(defaultShortNew);
+				if (!isValue) {
+					fieldAccessMHs[i][1].invoke(instance, sNew);
+					assertEquals(getShort.invoke(fieldAccessMHs[i][0].invoke(instance)), defaultShortNew);
+				}
+				break;
+			case "LValueChar;":
+				assertEquals(getChar.invoke(fieldAccessMHs[i][0].invoke(instance)), defaultChar);
+				Object cNew = makeValueChar.invoke(defaultCharNew);
+				if (!isValue) {
+					fieldAccessMHs[i][1].invoke(instance, cNew);
+					assertEquals(getChar.invoke(fieldAccessMHs[i][0].invoke(instance)), defaultCharNew);
+				}
+				break;
+			case "LValueBoolean;":
+				assertEquals(getBoolean.invoke(fieldAccessMHs[i][0].invoke(instance)), defaultBoolean);
+				Object zNew = makeValueBoolean.invoke(defaultBooleanNew);
+				if (!isValue) {
+					fieldAccessMHs[i][1].invoke(instance, zNew);
+					assertEquals(getBoolean.invoke(fieldAccessMHs[i][0].invoke(instance)), defaultBooleanNew);
 				}
 				break;
 			case "LLargeObject;":
