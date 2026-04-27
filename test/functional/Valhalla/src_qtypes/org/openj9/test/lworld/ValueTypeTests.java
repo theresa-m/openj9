@@ -893,6 +893,10 @@ public class ValueTypeTests {
 			defaultLongNew,
 			defaultDoubleNew,
 			defaultIntNew,
+			defaultByteNew,
+			defaultShortNew,
+			defaultCharNew,
+			defaultBooleanNew,
 			defaultTrianglePositionsNew
 		};
 		Object[] newObjectFields = {
@@ -902,6 +906,10 @@ public class ValueTypeTests {
 			defaultObjectNew,
 			defaultIntNew,
 			defaultFloatNew,
+			defaultByteNew,
+			defaultShortNew,
+			defaultCharNew,
+			defaultBooleanNew,
 			defaultTrianglePositionsNew
 		};
 
