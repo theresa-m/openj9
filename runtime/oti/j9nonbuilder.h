@@ -2015,6 +2015,10 @@ typedef struct J9ROMFieldOffsetWalkState {
 	UDATA currentFlatSingleOffset;
 	UDATA currentFlatObjectOffset;
 	UDATA currentFlatDoubleOffset;
+#if defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS)
+	UDATA currentFlatShortOffset;
+	UDATA currentFlatByteOffset;
+#endif /* defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS) */
 	BOOLEAN classRequiresPrePadding;
 	UDATA flatBackFillSize;
 #endif /* defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES) */

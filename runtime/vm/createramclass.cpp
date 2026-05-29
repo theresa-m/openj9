@@ -2452,7 +2452,7 @@ nativeOOM:
 			}
 #if defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES)
 #if defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS)
-			if ((state->ramClass->flatFieldSize != (U_8)-1) && (state->ramClass->flatFieldSize <= javaVM->valueFlatteningThreshold)) {
+			if ((state->ramClass->flatFieldSize != (U_8)-1) && (state->ramClass->flatFieldSize <= javaVM->valueFlatteningThreshold)
 #else /* defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS) */
 			if ((state->ramClass->totalInstanceSize <= javaVM->valueFlatteningThreshold)
 #endif /* defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS) */
