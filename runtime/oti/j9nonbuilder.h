@@ -3843,6 +3843,9 @@ typedef struct J9ArrayClass {
 	 * A null-restricted J9ArrayClass points to its nullable companion, if one exists.
 	 */
 	struct J9Class *companionArray;
+#if defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS)
+	U_8 flatFieldSize;
+#endif /* defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS) */
 #endif /* defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES) */
 } J9ArrayClass;
 
