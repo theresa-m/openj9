@@ -83,6 +83,7 @@
 #define J9ClassLargestAlignmentConstraintReference 0x800
 #define J9ClassLargestAlignmentConstraintDouble 0x1000
 #define J9ClassIsExemptFromValidation 0x2000
+#define J9ClassLargestAlignmentConstraintInteger 0x4000
 #define J9ClassCanSupportFastSubstitutability 0x8000
 #define J9ClassHasReferences 0x10000
 #define J9ClassRequiresPrePadding 0x20000
@@ -91,6 +92,7 @@
 #define J9ClassEnsureHashed 0x100000
 #define J9ClassHasOffloadAllowSubtasksNatives 0x200000
 #define J9ClassIsPrimitiveValueType 0x400000
+#define J9ClassLargestAlignmentConstraintShort 0x800000
 #define J9ClassNeedToPruneMemberNames 0x1000000
 #define J9ClassArrayIsNullRestricted 0x2000000
 #define J9ClassIsLoadedFromSnapshot 0x4000000
@@ -1954,6 +1956,9 @@ typedef struct J9ROMFieldOffsetWalkResult {
 	IDATA backfillOffset;
 #if defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES)
 	struct J9Class* flattenedClass;
+#if defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS)
+	U_8 flatFieldSize;
+#endif /* defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS) */
 #endif /* defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES) */
 } J9ROMFieldOffsetWalkResult;
 
@@ -2003,6 +2008,10 @@ typedef struct J9ROMFieldOffsetWalkState {
 	UDATA firstFlatSingleOffset;
 	UDATA firstFlatObjectOffset;
 	UDATA firstFlatDoubleOffset;
+#if defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS)
+	UDATA firstFlatShortOffset;
+	UDATA firstFlatByteOffset;
+#endif /* defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS) */
 	UDATA currentFlatSingleOffset;
 	UDATA currentFlatObjectOffset;
 	UDATA currentFlatDoubleOffset;
@@ -3722,6 +3731,9 @@ typedef struct J9Class {
 #endif /* defined(J9VM_OPT_OPENJDK_METHODHANDLE) */
 #if defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES)
 	struct J9Class *nullRestrictedArrayClass;
+#if defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS)
+	U_8 flatFieldSize;
+#endif /* defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS) */
 #endif /* defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES) */
 } J9Class;
 
@@ -5568,7 +5580,6 @@ typedef struct J9InternalVMFunctions {
 	UDATA ( *getFlattenableFieldOffset)(struct J9Class *fieldOwner, J9ROMFieldShape *field);
 	BOOLEAN ( *isFlattenableFieldFlattened)(J9Class *fieldOwner, J9ROMFieldShape *field);
 	struct J9Class* ( *getFlattenableFieldType)(J9Class *fieldOwner, J9ROMFieldShape *field);
-	UDATA ( *getFlattenableFieldSize)(struct J9VMThread* currentThread, J9Class *fieldOwner, J9ROMFieldShape *field);
 	UDATA ( *arrayElementSize)(J9ArrayClass* arrayClass);
 	j9object_t ( *getFlattenableField)(struct J9VMThread *currentThread, J9RAMFieldRef *cpEntry, j9object_t receiver, BOOLEAN fastPath);
 	j9object_t ( *cloneValueType)(struct J9VMThread *currentThread, struct J9Class *receiverClass, j9object_t original, BOOLEAN fastPath);

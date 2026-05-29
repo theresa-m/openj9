@@ -50,11 +50,15 @@ ObjectFieldInfo::countInstanceFields(void)
 					J9UTF8 *fieldSig = J9ROMFIELDSHAPE_SIGNATURE(field);
 					U_8 *fieldSigBytes = J9UTF8_DATA(J9ROMFIELDSHAPE_SIGNATURE(field));
 					J9Class *fieldClass = findJ9ClassInFlattenedClassCache(_flattenedClassCache, fieldSigBytes + 1, J9UTF8_LENGTH(fieldSig) - 2);
-					U_32 size = (U_32)fieldClass->totalInstanceSize;
 					if (!J9_IS_FIELD_FLATTENED(fieldClass, field)) {
 						_instanceObjectCount += 1;
 						_totalObjectCount += 1;
 					} else {
+#if defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS)
+						U_32 size = (U_32)fieldClass->flatFieldSize;
+#else /* defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS) */
+						U_32 size = (U_32)fieldClass->totalInstanceSize;
+#endif /* defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS) */
 						bool forceDoubleAlignment = false;
 						if (sizeof(U_32) == _referenceSize) {
 							/* Flattened volatile valueType that is 8 bytes should be put at 8-byte aligned address. Currently flattening is disabled
@@ -76,10 +80,23 @@ ObjectFieldInfo::countInstanceFields(void)
 							size = (U_32) ROUND_UP_TO_POWEROF2(size, (UDATA)_referenceSize);
 							_totalFlatFieldRefBytes += size;
 							setPotentialFlatObjectInstanceBackfill(size);
-						} else {
+#if defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS)
+						} else if (J9_ARE_ALL_BITS_SET(fieldClass->classFlags, J9ClassLargestAlignmentConstraintInteger)) {
+							size = (U_32) ROUND_UP_TO_POWEROF2(size, sizeof(U_32));
 							_totalFlatFieldSingleBytes += size;
 							setPotentialFlatSingleInstanceBackfill(size);
+						} else if (J9_ARE_ALL_BITS_SET(fieldClass->classFlags, J9ClassLargestAlignmentConstraintShort)) {
+							size = (U_32) ROUND_UP_TO_POWEROF2(size, sizeof(U_16));
+							_totalFlatFieldShortBytes += size;
+						} else {
+							_totalFlatFieldByteBytes += size;
 						}
+#else /* defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS) */
+						} else {
+							_totalFlatFieldSingleBytes += size;
+							setPotentialFlatSingleInstanceBackfill(size);						
+						}
+#endif /* defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS) */
 					}
 				} else
 #endif /* defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES) */
@@ -176,7 +193,11 @@ ObjectFieldInfo::calculateTotalFieldsSizeAndBackfill()
 	} else {
 		accumulator = _superclassFieldsSize + (_totalObjectCount * _referenceSize) + (_totalSingleCount * sizeof(U_32)) + (_totalDoubleCount * sizeof(U_64));
 #if defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS)
-		U_32 smallTypeSize = (_totalShortCount * sizeof(U_16)) + (_totalByteCount * sizeof(U_8));
+		U_32 smallTypeSize = (_totalShortCount * sizeof(U_16)) + (_totalByteCount * sizeof(U_8))
+#if defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES)
+			+ _totalFlatFieldShortBytes + _totalFlatFieldByteBytes;
+#endif /* defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES) */	
+		;
 		/* 16 and 8-bit fields must be aligned to 32 bits. */
 		U_32 smallTypeSizeRounded = ROUND_UP_TO_POWEROF2((UDATA)smallTypeSize, sizeof(U_32));
 		accumulator += smallTypeSizeRounded;
@@ -241,3 +262,24 @@ ObjectFieldInfo::calculateTotalFieldsSizeAndBackfill()
 	}
 	return accumulator;
 }
+
+#if defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS) && defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES)
+U_8
+ObjectFieldInfo::calculateFlatFieldSize()
+{
+	U_8 totalSize = (U_8)-1;
+	if (isValue()) {
+		U_32 accumulator = _superclassFlatFieldsSize;
+		accumulator += (_totalObjectCount * _referenceSize) + (_totalSingleCount * sizeof(U_32)) + (_totalDoubleCount * sizeof(U_64))
+			+ (_totalShortCount * sizeof(U_16)) + (_totalByteCount * sizeof(U_8));
+		accumulator += _totalFlatFieldDoubleBytes + _totalFlatFieldRefBytes + _totalFlatFieldSingleBytes
+			+ _totalFlatFieldShortBytes + _totalFlatFieldByteBytes;
+		
+		/* Only record the flat value size if there's a possibility of this object being small enough to flatten.*/
+		if (accumulator <= sizeof(U_64)) {
+			totalSize = accumulator;
+		}
+	}
+	return totalSize;
+}
+#endif /* defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS) && defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES) */

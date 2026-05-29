@@ -93,6 +93,9 @@ calculateInstanceDescription( J9VMThread *vmThread, J9Class *ramClass, J9Class *
 		 */
 		ramClass->totalInstanceSize = walkResult->totalInstanceSize;
 		ramClass->backfillOffset = objectHeaderSize + ((walkResult->backfillOffset == -1) ?	walkResult->totalInstanceSize : walkResult->backfillOffset);
+#if defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES) && defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS)
+		ramClass->flatFieldSize = walkResult->flatFieldSize;
+#endif /* defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES) && defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS) */
 
 		/* write lockword offset into ramClass */
 		ramClass->lockOffset =	walkState->lockOffset;

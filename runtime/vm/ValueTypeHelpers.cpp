@@ -173,19 +173,6 @@ getFlattenableFieldType(J9Class *fieldOwner, J9ROMFieldShape *field)
 }
 
 UDATA
-getFlattenableFieldSize(J9VMThread *currentThread, J9Class *fieldOwner, J9ROMFieldShape *field)
-{
-        Assert_VM_notNull(fieldOwner);
-        Assert_VM_notNull(field);
-
-        UDATA instanceSize = J9VMTHREAD_REFERENCE_SIZE(currentThread);
-        if (isFlattenableFieldFlattened(fieldOwner, field)) {
-                instanceSize = J9_VALUETYPE_FLATTENED_SIZE(getFlattenableFieldType(fieldOwner, field));
-        }
-        return instanceSize;
-}
-
-UDATA
 arrayElementSize(J9ArrayClass* arrayClass)
 {
         Assert_VM_notNull(arrayClass);

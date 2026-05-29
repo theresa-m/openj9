@@ -42,6 +42,9 @@ private:
 	bool _useContendedClassLayout; /* check this in constructor. Forced to false if we can't get the line size */
 	J9ROMClass *_romClass;
 	U_32 _superclassFieldsSize;
+#if defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS) && defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES)
+	U_8 _superclassFlatFieldsSize;
+#endif /* defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS) && defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES) */
 	bool _objectCanUseBackfill; /* true if an object reference is the same size as a backfill slot */
 
 	/* These count uncontended instance and hidden fields */
@@ -75,6 +78,10 @@ private:
 	U_32 _totalFlatFieldDoubleBytes;
 	U_32 _totalFlatFieldRefBytes;
 	U_32 _totalFlatFieldSingleBytes;
+#if defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS)
+	U_32 _totalFlatFieldShortBytes;
+	U_32 _totalFlatFieldByteBytes;
+#endif /* defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS) */
 	U_32 _flatAlignedObjectInstanceBackfill;
 	U_32 _flatAlignedSingleInstanceBackfill;
 	U_32 _flatUnAlignedObjectInstanceBackfill;
@@ -127,6 +134,9 @@ public:
 		_useContendedClassLayout(false),
 		_romClass(romClass),
 		_superclassFieldsSize((U_32) -1),
+#if defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS) && defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES)
+		_superclassFlatFieldsSize((U_8) -1),
+#endif /* defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS) && defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES) */
 		_objectCanUseBackfill(J9JAVAVM_REFERENCE_SIZE(vm) == BACKFILL_SIZE),
 		_instanceObjectCount(0),
 		_instanceSingleCount(0),
@@ -155,6 +165,10 @@ public:
 		_totalFlatFieldDoubleBytes(0),
 		_totalFlatFieldRefBytes(0),
 		_totalFlatFieldSingleBytes(0),
+#if defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS)
+		_totalFlatFieldShortBytes(0),
+		_totalFlatFieldByteBytes(0),
+#endif /* defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS) */
 		_flatAlignedObjectInstanceBackfill(0),
 		_flatAlignedSingleInstanceBackfill(0),
 		_flatUnAlignedObjectInstanceBackfill(0),
@@ -455,6 +469,14 @@ public:
 		this->_superclassFieldsSize = superTotalSize;
 	}
 
+#if defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS) && defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES)
+	VMINLINE void
+	setSuperclassFlatFieldsSize(U_8 superFlatFieldsSize)
+	{
+		this->_superclassFlatFieldsSize = superFlatFieldsSize;
+	}
+#endif /* defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS) && defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES) */
+
 	VMINLINE bool
 	const isMyBackfillSlotAvailable(void) const
 	{
@@ -474,6 +496,18 @@ public:
 	 */
 	U_32
 	calculateTotalFieldsSizeAndBackfill(void);
+
+#if defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS) && defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES)
+	/**
+	 * Calculate the flat field size.
+	 * 
+	 * @return return the flat field size if the class
+	 * might be eligible for flattening. Otherwise return
+	 * 255.
+	 */
+	U_8
+	calculateFlatFieldSize(void);
+#endif /* defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS) && defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES) */
 
 	/**
 	 * Fields can start on the first 8-byte boundary after the end of the superclass.
@@ -585,7 +619,7 @@ public:
 
 	/**
 	 * @param start end of previous field area, which should be after doubles
-	 * @return offset to end of the flat doubles area
+	 * @return offset to end of the flat objects area
 	 */
 	VMINLINE UDATA
 	addFlatObjectsArea(UDATA start) const
@@ -595,13 +629,35 @@ public:
 
 	/**
 	 * @param start end of previous field area, which should be after objects
-	 * @return offset to end of the flat doubles area
+	 * @return offset to end of the flat singles area
 	 */
 	VMINLINE UDATA
 	addFlatSinglesArea(UDATA start) const
 	{
 		return start + getNonBackfilledFlatInstanceSingleSize();
 	}
+
+#if defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS)
+	/**
+	 * @param start end of previous field area
+	 * @return offset to end of the flat shorts area
+	 */
+	VMINLINE UDATA
+	addFlatShortsArea(UDATA start) const
+	{
+		return start + _totalFlatFieldShortBytes;
+	}
+
+	/**
+	 * @param start end of previous field area
+	 * @return offset to end of the flat bytes area
+	 */
+	VMINLINE UDATA
+	addFlatBytesArea(UDATA start) const
+	{
+		return start + _totalFlatFieldByteBytes;
+	}
+#endif /* defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS) */
 
 	/**
 	 * Determines if a double field can be placed contiguously after the
