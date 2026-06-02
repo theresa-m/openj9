@@ -5560,7 +5560,6 @@ typedef struct J9InternalVMFunctions {
 	UDATA ( *getFlattenableFieldOffset)(struct J9Class *fieldOwner, J9ROMFieldShape *field);
 	BOOLEAN ( *isFlattenableFieldFlattened)(J9Class *fieldOwner, J9ROMFieldShape *field);
 	struct J9Class* ( *getFlattenableFieldType)(J9Class *fieldOwner, J9ROMFieldShape *field);
-	UDATA ( *getFlattenableFieldSize)(struct J9VMThread* currentThread, J9Class *fieldOwner, J9ROMFieldShape *field);
 	UDATA ( *arrayElementSize)(J9ArrayClass* arrayClass);
 	j9object_t ( *getFlattenableField)(struct J9VMThread *currentThread, J9RAMFieldRef *cpEntry, j9object_t receiver, BOOLEAN fastPath);
 	j9object_t ( *cloneValueType)(struct J9VMThread *currentThread, struct J9Class *receiverClass, j9object_t original, BOOLEAN fastPath);

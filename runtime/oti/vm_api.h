@@ -2934,19 +2934,6 @@ J9Class *
 getFlattenableFieldType(J9Class *fieldOwner, J9ROMFieldShape *field);
 
 /**
- * Returns the size of an instance field. `J9_VALUETYPE_FLATTENED_SIZE` will be deprecated.
- * This helper assumes field is null-restricted.
- *
- * @param[in] currentThread thread token
- * @param[in] fieldOwner the J9class that defines the field
- * @param[in] fieldref cp ref of the field
- *
- * @return TRUE if field is flattened, false otherwise
- */
-UDATA
-getFlattenableFieldSize(J9VMThread *currentThread, J9Class *fieldOwner, J9ROMFieldShape *field);
-
-/**
  * Returns the size of an array element field. `J9_VALUETYPE_FLATTENED_SIZE`
  * will be deprecated.
  *
