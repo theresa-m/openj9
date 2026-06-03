@@ -176,10 +176,7 @@ ObjectFieldInfo::calculateTotalFieldsSizeAndBackfill()
 	} else {
 		accumulator = _superclassFieldsSize + (_totalObjectCount * _referenceSize) + (_totalSingleCount * sizeof(U_32)) + (_totalDoubleCount * sizeof(U_64));
 #if defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS)
-		U_32 smallTypeSize = (_totalShortCount * sizeof(U_16)) + (_totalByteCount * sizeof(U_8));
-		/* 16 and 8-bit fields must be aligned to 32 bits. */
-		U_32 smallTypeSizeRounded = ROUND_UP_TO_POWEROF2((UDATA)smallTypeSize, sizeof(U_32));
-		accumulator += smallTypeSizeRounded;
+		accumulator += (_totalShortCount * sizeof(U_16)) + (_totalByteCount * sizeof(U_8));
 #endif /* defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS) */
 #if defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES)
 		accumulator += _totalFlatFieldDoubleBytes + _totalFlatFieldRefBytes + _totalFlatFieldSingleBytes;

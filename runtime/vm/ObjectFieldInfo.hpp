@@ -99,10 +99,7 @@ private:
 		U_32 accumulator = _superclassFieldsSize +  _objectHeaderSize; /* get the true size with header */
 		accumulator += (_totalObjectCount * _objectHeaderSize) + (_totalSingleCount * sizeof(U_32)) + (_totalDoubleCount * sizeof(U_64)); /* add the non-contended and hidden fields */
 #if defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS)
-		U_32 smallTypeSize = (_totalShortCount * sizeof(U_16)) + (_totalByteCount * sizeof(U_8));
-		/* 16 and 8-bit fields must be aligned to 32 bits. */
-		U_32 smallTypeSizeRounded = ROUND_UP_TO_POWEROF2((UDATA)smallTypeSize, sizeof(U_32));
-		accumulator += smallTypeSizeRounded;
+		accumulator += (_totalShortCount * sizeof(U_16)) + (_totalByteCount * sizeof(U_8));
 #endif /* defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS) */
 		accumulator = ROUND_DOWN_TO_POWEROF2(accumulator, OBJECT_SIZE_INCREMENT_IN_BYTES) + _cacheLineSize; /* get the worst-case cache line boundary and add a cache size */
 		return accumulator;
@@ -452,7 +449,12 @@ public:
 	VMINLINE void
 	setSuperclassFieldsSize(U_32 superTotalSize)
 	{
+#if defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS)
+		/* Align superclass to 32-bits for now to maintain existing backfill policy. */
+		this->_superclassFieldsSize = ROUND_UP_TO_POWEROF2(superTotalSize, sizeof(U_32));
+#else /* defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS) */
 		this->_superclassFieldsSize = superTotalSize;
+#endif /* defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS) */
 	}
 
 	VMINLINE bool
