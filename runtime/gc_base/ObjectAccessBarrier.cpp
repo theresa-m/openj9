@@ -1651,7 +1651,11 @@ MM_ObjectAccessBarrier::structuralCompareFlattenedObjects(J9VMThread *vmThread, 
 	UDATA const referenceSize = J9VMTHREAD_REFERENCE_SIZE(vmThread);
 	bool hasReferences = J9CLASS_HAS_REFERENCES(valueClass);
 	/* for non value-types this is just the instance size */
+#if defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS)
 	UDATA limit = J9CLASS_UNPADDED_INSTANCE_SIZE(valueClass);
+#else /* defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS) */
+	UDATA limit = J9_VALUETYPE_FLATTENED_SIZE(valueClass);
+#endif /* defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS) */
 	UDATA offset = 0;
 
 	Assert_MM_true(J9_IS_J9CLASS_VALUETYPE(valueClass));
@@ -1750,6 +1754,11 @@ MM_ObjectAccessBarrier::copyObjectFields(J9VMThread *vmThread, J9Class *objectCl
 	UDATA offset = 0;
 	/* for non value-types this is just the instance size */
 	UDATA limit = J9CLASS_UNPADDED_INSTANCE_SIZE(objectClass);
+#if defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS)
+	if (isValueType) {
+		limit = J9_VALUETYPE_FLATTENED_SIZE(objectClass);
+	}
+#endif /* defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS) */
 	UDATA const referenceSize = J9VMTHREAD_REFERENCE_SIZE(vmThread);
 	bool hasReferences = J9CLASS_HAS_REFERENCES(objectClass);
 

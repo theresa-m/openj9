@@ -369,6 +369,11 @@ public:
 	VMINLINE UDATA
 	mixedObjectGetDataSize(J9Class *objectClass)
 	{
+#if defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS) && defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES)
+		if (J9_IS_J9CLASS_VALUETYPE(objectClass)) {
+			return objectClass->flatFieldSize;
+		}
+#endif /* defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS) && defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES) */
 		return J9CLASS_UNPADDED_INSTANCE_SIZE(objectClass);
 	}
 
@@ -440,10 +445,24 @@ public:
 			UDATA limit = mixedObjectGetDataSize(objectClass);
 
 			if (J9VMTHREAD_COMPRESS_OBJECT_REFERENCES(vmThread)) {
+#if defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS)
+				/* With compact layouts, we may have fields smaller than 4 bytes. */
+				UDATA limit4 = ROUND_DOWN_TO_POWEROF2(limit, sizeof(uint32_t));
+				while (offset < limit4) {
+					*(uint32_t*)((UDATA)destObject + offset + destOffset) = *(uint32_t*)((UDATA)srcObject + offset + srcOffset);
+					offset += sizeof(uint32_t);
+				}
+				/* Copy remaining bytes (0-3 bytes) */
+				while (offset < limit) {
+					*(uint8_t*)((UDATA)destObject + offset + destOffset) = *(uint8_t*)((UDATA)srcObject + offset + srcOffset);
+					offset += sizeof(uint8_t);
+				}
+#else /* defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS) */
 				while (offset < limit) {
 					*(uint32_t*)((UDATA)destObject + offset + destOffset) = *(uint32_t*)((UDATA)srcObject + offset + srcOffset);
 					offset += sizeof(uint32_t);
 				}
+#endif /* defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS) */
 			} else {
 				while (offset < limit) {
 					*(uintptr_t*)((UDATA)destObject + offset + destOffset) = *(uintptr_t*)((UDATA)srcObject + offset + srcOffset);

@@ -75,6 +75,10 @@ private:
 	U_32 _totalFlatFieldDoubleBytes;
 	U_32 _totalFlatFieldRefBytes;
 	U_32 _totalFlatFieldSingleBytes;
+#if defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS)
+	U_32 _totalFlatFieldShortBytes;
+	U_32 _totalFlatFieldByteBytes;
+#endif /* defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS) */
 	U_32 _flatAlignedObjectInstanceBackfill;
 	U_32 _flatAlignedSingleInstanceBackfill;
 	U_32 _flatUnAlignedObjectInstanceBackfill;
@@ -155,6 +159,10 @@ public:
 		_totalFlatFieldDoubleBytes(0),
 		_totalFlatFieldRefBytes(0),
 		_totalFlatFieldSingleBytes(0),
+#if defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS)
+		_totalFlatFieldShortBytes(0),
+		_totalFlatFieldByteBytes(0),
+#endif /* defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS) */
 		_flatAlignedObjectInstanceBackfill(0),
 		_flatAlignedSingleInstanceBackfill(0),
 		_flatUnAlignedObjectInstanceBackfill(0),
@@ -475,6 +483,22 @@ public:
 	U_32
 	calculateTotalFieldsSizeAndBackfill(void);
 
+#if defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS) && defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES)
+	/**
+	 * Calculate the flat field size.
+	 *
+	 * @return return the flat field size for value classes.
+	 * For identity classes return 0, this value will
+	 * not be used.
+	 *
+	 * The flat field size is the size if this class were flattened
+	 * as a field. It does not include alignment padding which
+	 * should be calculated depending on the largest field size in the class.
+	 */
+	U_32
+	calculateFlatFieldSize(void);
+#endif /* defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS) && defined(J9VM_OPT_VALHALLA_FLATTENABLE_VALUE_TYPES) */
+
 	/**
 	 * Fields can start on the first 8-byte boundary after the end of the superclass.
 	 * If the superclass is not end-aligned, the padding bytes become the new backfill.
@@ -585,7 +609,7 @@ public:
 
 	/**
 	 * @param start end of previous field area, which should be after doubles
-	 * @return offset to end of the flat doubles area
+	 * @return offset to end of the flat objects area
 	 */
 	VMINLINE UDATA
 	addFlatObjectsArea(UDATA start) const
@@ -595,13 +619,35 @@ public:
 
 	/**
 	 * @param start end of previous field area, which should be after objects
-	 * @return offset to end of the flat doubles area
+	 * @return offset to end of the flat singles area
 	 */
 	VMINLINE UDATA
 	addFlatSinglesArea(UDATA start) const
 	{
 		return start + getNonBackfilledFlatInstanceSingleSize();
 	}
+
+#if defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS)
+	/**
+	 * @param start end of previous field area
+	 * @return offset to end of the flat shorts area
+	 */
+	VMINLINE UDATA
+	addFlatShortsArea(UDATA start) const
+	{
+		return start + _totalFlatFieldShortBytes;
+	}
+
+	/**
+	 * @param start end of previous field area
+	 * @return offset to end of the flat bytes area
+	 */
+	VMINLINE UDATA
+	addFlatBytesArea(UDATA start) const
+	{
+		return start + _totalFlatFieldByteBytes;
+	}
+#endif /* defined(J9VM_OPT_VALHALLA_COMPACT_LAYOUTS) */
 
 	/**
 	 * Determines if a double field can be placed contiguously after the

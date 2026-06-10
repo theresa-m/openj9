@@ -205,6 +205,11 @@ public abstract class Scalar extends DataType {
 		return roundTo(value, U64.SIZEOF);
 	}
 
+	public static UDATA roundToSizeofU16(UDATA value)
+	{
+		return roundTo(value, U16.SIZEOF);
+	}
+
 	public static UDATA roundToSizeToFJ9object(UDATA value)
 	{
 		int fj9object_t_SizeOf = (J9ObjectHelper.compressObjectReferences ? U32.SIZEOF : UDATA.SIZEOF);
