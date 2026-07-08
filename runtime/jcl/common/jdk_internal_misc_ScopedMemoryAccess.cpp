@@ -76,11 +76,11 @@ Java_jdk_internal_misc_ScopedMemoryAccess_closeScope0(JNIEnv *env, jobject insta
 		bool setNativeOOM = false;
 		omrthread_monitor_t closeScopeMonitor = NULL;
 		PORT_ACCESS_FROM_JAVAVM(vm);
-		struct J9CloseScopeInterruptNode {
-			J9VMThread *thread;
-			J9CloseScopeInterruptNode *next;
-		};
-		J9CloseScopeInterruptNode *threadsToInterrupt = NULL;
+		// struct J9CloseScopeInterruptNode {
+		// 	J9VMThread *thread;
+		// 	J9CloseScopeInterruptNode *next;
+		// };
+		// J9CloseScopeInterruptNode *threadsToInterrupt = NULL;
 #endif /* JAVA_SPEC_VERSION >= 22 */
 
 		while (NULL != walkThread) {
@@ -125,18 +125,18 @@ Java_jdk_internal_misc_ScopedMemoryAccess_closeScope0(JNIEnv *env, jobject insta
 					 * notification. Wait to call interrupt until we're sure no OOM will be
 					 * thrown.
 					 */
-					if ((NULL != walkThread->threadObject)
-					&& !IS_JAVA_LANG_VIRTUALTHREAD(currentThread, walkThread->threadObject)
-					) {
-						J9CloseScopeInterruptNode *interruptNode = (J9CloseScopeInterruptNode *)j9mem_allocate_memory(sizeof(J9CloseScopeInterruptNode), J9MEM_CATEGORY_VM);
-						if (NULL == interruptNode) {
-							setNativeOOM = true;
-							break;
-						}
-						interruptNode->thread = walkThread;
-						interruptNode->next = threadsToInterrupt;
-						threadsToInterrupt = interruptNode;
-					}
+					// if ((NULL != walkThread->threadObject)
+					// && !IS_JAVA_LANG_VIRTUALTHREAD(currentThread, walkThread->threadObject)
+					// ) {
+					// 	J9CloseScopeInterruptNode *interruptNode = (J9CloseScopeInterruptNode *)j9mem_allocate_memory(sizeof(J9CloseScopeInterruptNode), J9MEM_CATEGORY_VM);
+					// 	if (NULL == interruptNode) {
+					// 		setNativeOOM = true;
+					// 		break;
+					// 	}
+					// 	interruptNode->thread = walkThread;
+					// 	interruptNode->next = threadsToInterrupt;
+					// 	threadsToInterrupt = interruptNode;
+					// }
 
 					closeScopeCount += 1;
 #else /* JAVA_SPEC_VERSION >= 22 */
@@ -156,30 +156,30 @@ Java_jdk_internal_misc_ScopedMemoryAccess_closeScope0(JNIEnv *env, jobject insta
 				J9OBJECT_U64_STORE(currentThread, closeScopeObj, vm->closeScopeMonitorOffset, (U_64)closeScopeMonitor);
 				J9OBJECT_I64_STORE(currentThread, closeScopeObj, vm->closeScopeCountOffset, closeScopeCount);
 
-				void (*sidecarInterruptFunction)(J9VMThread *) = vm->sidecarInterruptFunction;
-				J9CloseScopeInterruptNode *node = threadsToInterrupt;
-				while (NULL != node) {
-					J9CloseScopeInterruptNode *next = node->next;
-					if (NULL != sidecarInterruptFunction) {
-						sidecarInterruptFunction(node->thread);
-					}
-					omrthread_interrupt(node->thread->osThread);
-					j9mem_free_memory(node);
-					node = next;
-				}
-				threadsToInterrupt = NULL;
+				// void (*sidecarInterruptFunction)(J9VMThread *) = vm->sidecarInterruptFunction;
+				// J9CloseScopeInterruptNode *node = threadsToInterrupt;
+				// while (NULL != node) {
+				// 	J9CloseScopeInterruptNode *next = node->next;
+				// 	if (NULL != sidecarInterruptFunction) {
+				// 		sidecarInterruptFunction(node->thread);
+				// 	}
+				// 	omrthread_interrupt(node->thread->osThread);
+				// 	j9mem_free_memory(node);
+				// 	node = next;
+				// }
+				// threadsToInterrupt = NULL;
 			}
 		}
 
 		if (setNativeOOM) {
 			/* Error: rollback all queued nodes and release shared global refs. */
-			J9CloseScopeInterruptNode *node = threadsToInterrupt;
-			while (NULL != node) {
-				J9CloseScopeInterruptNode *next = node->next;
-				j9mem_free_memory(node);
-				node = next;
-			}
-			threadsToInterrupt = NULL;
+			// J9CloseScopeInterruptNode *node = threadsToInterrupt;
+			// while (NULL != node) {
+			// 	J9CloseScopeInterruptNode *next = node->next;
+			// 	j9mem_free_memory(node);
+			// 	node = next;
+			// }
+			// threadsToInterrupt = NULL;
 			if (closeScopeCount > 0) {
 				walkThread = J9_LINKED_LIST_START_DO(vm->mainThread);
 				while (NULL != walkThread) {
