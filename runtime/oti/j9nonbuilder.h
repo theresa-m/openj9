@@ -5884,6 +5884,24 @@ typedef uintptr_t ContinuationState;
 #define J9VM_CONTINUATION_RUNTIMEFLAG_JVMTI_CONTENDED_MONITOR_ENTER_RECORDED 0x1
 #endif /* JAVA_SPEC_VERSION >= 24 */
 
+#if defined(J9VM_OPT_VTHREAD_LOCK_OWNERSHIP)
+/* Abstract prefix shared by J9VMThread and J9VMContinuation.
+ * Both structs are rearranged so their leading fields match this layout exactly,
+ * enabling safe casting between the two types via J9VMAbstractThread *.
+ * The privateFlags field carries J9_PRIVATE_FLAGS_IS_CONTINUATION_STRUCT to
+ * identify the concrete type. lockingID holds a stable ownership identity
+ * (the struct's own address) that is swapped on vthread mount/unmount so the
+ * value stored in a lockword remains valid across carrier thread migrations.
+ */
+typedef struct J9VMAbstractThread {
+	struct JNINativeInterface_ *functions;
+	struct J9JavaVM *javaVM;
+	j9object_t threadObject;
+	UDATA privateFlags;
+	UDATA lockingID;
+} J9VMAbstractThread;
+#endif /* defined(J9VM_OPT_VTHREAD_LOCK_OWNERSHIP) */
+
 typedef struct J9VMContinuation {
 	UDATA* arg0EA;
 	UDATA* bytecodes;
