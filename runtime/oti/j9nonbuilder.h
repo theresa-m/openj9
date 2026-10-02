@@ -6741,6 +6741,7 @@ typedef struct J9JavaVM {
 #endif /* JAVA_SPEC_VERSION >= 19 */
 #if JAVA_SPEC_VERSION >= 22
 	UDATA closeScopeCountOffset;
+	UDATA closeScopeMonitorOffset;
 #endif /* JAVA_SPEC_VERSION >= 22 */
 #if defined(J9VM_OPT_CRIU_SUPPORT)
 	omrthread_monitor_t delayedLockingOperationsMutex;

@@ -622,6 +622,9 @@ initializeRequiredClasses(J9VMThread *vmThread, char* dllName)
 	if (0 != vmFuncs->addHiddenInstanceField(vm, "jdk/internal/foreign/MemorySessionImpl", "closeScopeCount", "J", &vm->closeScopeCountOffset)) {
 		return 1;
 	}
+	if (0 != vmFuncs->addHiddenInstanceField(vm, "jdk/internal/foreign/MemorySessionImpl", "closeScopeMonitor", "J", &vm->closeScopeMonitorOffset)) {
+		return 1;
+	}
 #endif /* JAVA_SPEC_VERSION >= 22 */
 
 #if defined(J9VM_OPT_JFR)

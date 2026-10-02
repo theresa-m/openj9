@@ -185,8 +185,14 @@ javaCheckAsyncMessages(J9VMThread *currentThread, UDATA throwExceptions)
 
 				Assert_VM_true(closeScopeCount >= 0);
 
-				/* Last thread to process this close deletes the shared global refs. */
+				/* Last thread to process this close notifies the closer and deletes the
+				 * shared global refs.
+				 */
 				if (0 == closeScopeCount) {
+					omrthread_monitor_t closeScopeMonitor = (omrthread_monitor_t)(UDATA)J9OBJECT_U64_LOAD(currentThread, closeScopeObj, vm->closeScopeMonitorOffset);
+					omrthread_monitor_enter(closeScopeMonitor);
+					omrthread_monitor_notify_all(closeScopeMonitor);
+					omrthread_monitor_exit(closeScopeMonitor);
 					j9jni_deleteGlobalRef((JNIEnv *)currentThread, head->closeScope, JNI_FALSE);
 					j9jni_deleteGlobalRef((JNIEnv *)currentThread, head->scopeError, JNI_FALSE);
 				}

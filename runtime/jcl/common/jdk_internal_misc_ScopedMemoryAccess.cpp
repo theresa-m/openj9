@@ -74,7 +74,12 @@ Java_jdk_internal_misc_ScopedMemoryAccess_closeScope0(JNIEnv *env, jobject insta
 		jobject errorGlobalRef = NULL;
 		I_64 closeScopeCount = 0;
 		bool setNativeOOM = false;
-
+		omrthread_monitor_t closeScopeMonitor = NULL;
+		struct J9CloseScopeInterruptNode {
+			J9VMThread *thread;
+			J9CloseScopeInterruptNode *next;
+		};
+		J9CloseScopeInterruptNode *threadsToInterrupt = NULL;
 		PORT_ACCESS_FROM_JAVAVM(vm);
 #endif /* JAVA_SPEC_VERSION >= 22 */
 
@@ -107,13 +112,34 @@ Java_jdk_internal_misc_ScopedMemoryAccess_closeScope0(JNIEnv *env, jobject insta
 						break;
 					}
 
-					/* Push close request onto the thread’s pending closeScope list. */
+					/* Push close request onto the thread's pending closeScope list. */
 					parentNode->closeScope = closeScopeGlobalRef;
 					parentNode->scopeError = errorGlobalRef;
 					parentNode->next = walkThread->closeScopeList;
 					walkThread->closeScopeList = parentNode;
 
 					VM_VMHelpers::indicateAsyncMessagePending(walkThread);
+
+					/* Build a list of platform threads to priority-interrupt after the setup
+					 * is complete. omrthread_priority_interrupt wakes a thread blocked in
+					 * park/wait/sleep so it can reach javaCheckAsyncMessages and process the
+					 * pending closeScope node, without setting Java's interrupt status or
+					 * causing InterruptedException. Virtual threads are excluded because they
+					 * are woken by the scheduler rather than a direct OS interrupt.
+					 * Defer the interrupt calls until we are sure no OOM will be thrown.
+					 */
+					if ((NULL != walkThread->threadObject)
+					&& !IS_JAVA_LANG_VIRTUALTHREAD(currentThread, walkThread->threadObject)
+					) {
+						J9CloseScopeInterruptNode *interruptNode = (J9CloseScopeInterruptNode *)j9mem_allocate_memory(sizeof(J9CloseScopeInterruptNode), J9MEM_CATEGORY_VM);
+						if (NULL == interruptNode) {
+							setNativeOOM = true;
+							break;
+						}
+						interruptNode->thread = walkThread;
+						interruptNode->next = threadsToInterrupt;
+						threadsToInterrupt = interruptNode;
+					}
 
 					closeScopeCount += 1;
 #else /* JAVA_SPEC_VERSION >= 22 */
@@ -126,8 +152,38 @@ Java_jdk_internal_misc_ScopedMemoryAccess_closeScope0(JNIEnv *env, jobject insta
 			walkThread = J9_LINKED_LIST_NEXT_DO(vm->mainThread, walkThread);
 		}
 #if JAVA_SPEC_VERSION >= 22
+		if (!setNativeOOM && (closeScopeCount > 0)) {
+			if (0 != omrthread_monitor_init_with_name(&closeScopeMonitor, 0, "closeScope monitor")) {
+				setNativeOOM = true;
+			} else {
+				J9OBJECT_U64_STORE(currentThread, closeScopeObj, vm->closeScopeMonitorOffset, (U_64)closeScopeMonitor);
+				J9OBJECT_I64_STORE(currentThread, closeScopeObj, vm->closeScopeCountOffset, closeScopeCount);
+
+				/* Priority-interrupt each blocked platform thread to wake it from
+				 * park/wait/sleep so it can process the queued closeScope notification.
+				 * This does not set Java's interrupt status and will not cause
+				 * InterruptedException (mirrors RI's _ParkEvent->unpark() behaviour).
+				 */
+				J9CloseScopeInterruptNode *node = threadsToInterrupt;
+				while (NULL != node) {
+					J9CloseScopeInterruptNode *next = node->next;
+					omrthread_priority_interrupt(node->thread->osThread);
+					j9mem_free_memory(node);
+					node = next;
+				}
+				threadsToInterrupt = NULL;
+			}
+		}
+
 		if (setNativeOOM) {
-			/* Error: rollback and cleanup created nodes. */
+			/* Error: rollback interrupt-node list, queued close nodes, and global refs. */
+			J9CloseScopeInterruptNode *node = threadsToInterrupt;
+			while (NULL != node) {
+				J9CloseScopeInterruptNode *next = node->next;
+				j9mem_free_memory(node);
+				node = next;
+			}
+			threadsToInterrupt = NULL;
 			if (closeScopeCount > 0) {
 				walkThread = J9_LINKED_LIST_START_DO(vm->mainThread);
 				while (NULL != walkThread) {
@@ -156,11 +212,6 @@ Java_jdk_internal_misc_ScopedMemoryAccess_closeScope0(JNIEnv *env, jobject insta
 			if (NULL != errorGlobalRef) {
 				vmFuncs->j9jni_deleteGlobalRef(env, errorGlobalRef, JNI_FALSE);
 			}
-		} else {
-			/* Success: store number of pending close notifications on the MemorySessionImpl object. */
-			if (closeScopeCount > 0) {
-				J9OBJECT_I64_STORE(currentThread, closeScopeObj, vm->closeScopeCountOffset, closeScopeCount);
-			}
 		}
 
 #endif /* JAVA_SPEC_VERSION >= 22 */
@@ -168,8 +219,20 @@ Java_jdk_internal_misc_ScopedMemoryAccess_closeScope0(JNIEnv *env, jobject insta
 
 #if JAVA_SPEC_VERSION >= 22
 		if (setNativeOOM) {
-			/*  Create exception after releasing exclusive VM access. */
+			/* Create exception after releasing exclusive VM access. */
 			vmFuncs->setNativeOutOfMemoryError(currentThread, 0, 0);
+		} else if (closeScopeCount > 0) {
+			/* Block until every thread has either left a @Scoped method or
+			 * is processing an error. This ensures segment memory can be
+			 * safely released.
+			 */
+			omrthread_monitor_enter(closeScopeMonitor);
+			while (J9OBJECT_I64_LOAD(currentThread, closeScopeObj, vm->closeScopeCountOffset) > 0) {
+				omrthread_monitor_wait(closeScopeMonitor);
+			}
+			omrthread_monitor_exit(closeScopeMonitor);
+			/* All target threads are done. Clear the monitor field and destroy. */
+			omrthread_monitor_destroy(closeScopeMonitor);
 		}
 #endif /* JAVA_SPEC_VERSION >= 22 */
 	}
