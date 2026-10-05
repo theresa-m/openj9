@@ -5894,7 +5894,7 @@ typedef uintptr_t ContinuationState;
  * value stored in a lockword remains valid across carrier thread migrations.
  */
 typedef struct J9VMAbstractThread {
-	struct JNINativeInterface_ *functions;
+	struct JNINativeInterface_ *functions; /* needed so J9VMThread can be cast to JNIEnv */
 	struct J9JavaVM *javaVM;
 	j9object_t threadObject;
 	UDATA privateFlags;
@@ -5903,6 +5903,14 @@ typedef struct J9VMAbstractThread {
 #endif /* defined(J9VM_OPT_VTHREAD_LOCK_OWNERSHIP) */
 
 typedef struct J9VMContinuation {
+#if defined(J9VM_OPT_VTHREAD_LOCK_OWNERSHIP)
+	/* J9VMAbstractThread prefix - functions and javaVM are always NULL for continuations */
+	struct JNINativeInterface_* functions;
+	struct J9JavaVM* javaVM;
+	j9object_t threadObject;
+	UDATA privateFlags;
+	UDATA lockingID;
+#endif /* defined(J9VM_OPT_VTHREAD_LOCK_OWNERSHIP) */
 	UDATA* arg0EA;
 	UDATA* bytecodes;
 	UDATA* sp;
@@ -5955,6 +5963,12 @@ typedef struct J9CloseScopeListNode {
 typedef struct J9VMThread {
 	struct JNINativeInterface_* functions;
 	struct J9JavaVM* javaVM;
+#if defined(J9VM_OPT_VTHREAD_LOCK_OWNERSHIP)
+	/* J9VMAbstractThread prefix fields at offsets 2, 3, 4 */
+	j9object_t threadObject;
+	UDATA privateFlags;
+	UDATA lockingID;
+#endif /* defined(J9VM_OPT_VTHREAD_LOCK_OWNERSHIP) */
 	UDATA* arg0EA;
 	UDATA* bytecodes;
 	UDATA* sp;
@@ -5978,7 +5992,9 @@ typedef struct J9VMThread {
 	UDATA compressObjectReferences;
 #endif /* defined(OMR_GC_COMPRESSED_POINTERS) && defined(OMR_GC_FULL_POINTERS) */
 #endif /* defined(J9VM_ENV_DATA64) */
+#if !defined(J9VM_OPT_VTHREAD_LOCK_OWNERSHIP)
 	j9object_t threadObject;
+#endif /* !defined(J9VM_OPT_VTHREAD_LOCK_OWNERSHIP) */
 	void* lowTenureAddress;
 	void* highTenureAddress;
 	void* heapBaseForActiveCardTable;
@@ -6050,7 +6066,9 @@ typedef struct J9VMThread {
 	UDATA* jniLimitReference;
 	struct J9VMThread* linkNext;
 	struct J9VMThread* linkPrevious;
+#if !defined(J9VM_OPT_VTHREAD_LOCK_OWNERSHIP)
 	UDATA privateFlags;
+#endif /* !defined(J9VM_OPT_VTHREAD_LOCK_OWNERSHIP) */
 	UDATA jitTOC;
 	UDATA ferReturnType;
 	/* U_64 fields should be 8-aligned */
