@@ -5903,6 +5903,7 @@ typedef struct J9VMAbstractThread {
 
 typedef struct J9VMContinuation {
 #if defined(J9VM_OPT_VTHREAD_LOCK_OWNERSHIP)
+	/* fix
 	 * which reads those two slots via a bare pointer works on both types;
 	 * they are always NULL for continuations. */
 	struct JNINativeInterface_* functions;
