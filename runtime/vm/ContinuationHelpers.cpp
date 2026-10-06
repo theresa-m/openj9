@@ -126,6 +126,10 @@ createContinuation(J9VMThread *currentThread, j9object_t continuationObject)
 	/* Reset all fields in the new or recycled continuation. */
 	memset(continuation, 0, sizeof(J9VMContinuation));
 
+#if defined(J9VM_OPT_VTHREAD_LOCK_OWNERSHIP)
+	continuation->privateFlags = J9_PRIVATE_FLAGS_IS_CONTINUATION_STRUCT;
+#endif /* defined(J9VM_OPT_VTHREAD_LOCK_OWNERSHIP) */
+
 #if JAVA_SPEC_VERSION >= 24
 		continuation->nextWaitingContinuation = NULL;
 		if (J9_ARE_ANY_BITS_SET(vm->extendedRuntimeFlags3, J9_EXTENDED_RUNTIME3_YIELD_PINNED_CONTINUATION)) {
