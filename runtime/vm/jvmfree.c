@@ -171,11 +171,7 @@ recycleVMThread(J9VMThread * vmThread)
 
 	/* Determine the region of the vmThread to preserve: from publicFlagsMutex to threadObject */
 	size_t startRegion = offsetof(J9VMThread, publicFlagsMutex);
-#if defined(J9VM_OPT_VTHREAD_LOCK_OWNERSHIP)
-	size_t endRegion = offsetof(J9VMThread, lowTenureAddress);
-#else /* defined(J9VM_OPT_VTHREAD_LOCK_OWNERSHIP) */
 	size_t endRegion = offsetof(J9VMThread, threadObject);
-#endif /* defined(J9VM_OPT_VTHREAD_LOCK_OWNERSHIP) */
 
 	/* Indicate that the vmThread is dying */
 	vmThread->threadObject = NULL;
