@@ -89,6 +89,14 @@ public:
 		SWAP_MEMBER(j2iFrame, UDATA*, vmThread, continuation);
 		SWAP_MEMBER(dropFlags, UDATA, vmThread, continuation);
 
+#if defined(J9VM_OPT_VTHREAD_LOCK_OWNERSHIP)
+		/* On mount the carrier thread adopts the continuation's locking identity so that
+		 * lockwords written during execution on the continuation's stack record the
+		 * continuation address.  On unmount the carrier thread reclaims its own identity.
+		 * continuation->lockingID always stays as (UDATA)continuation. */
+		vmThread->lockingID = continuation->lockingID;
+#endif /* defined(J9VM_OPT_VTHREAD_LOCK_OWNERSHIP) */
+
 		J9VMEntryLocalStorage *threadELS = vmThread->entryLocalStorage;
 		/* Swap the JIT GPR registers data referenced by ELS */
 		J9JITGPRSpillArea tempGPRs = continuation->jitGPRs;

@@ -208,6 +208,9 @@ allocateVMThread(J9JavaVM *vm, omrthread_t osThread, UDATA privateFlags, void *m
 #endif /* defined(J9VM_ENV_DATA64) */
 
 	newThread->privateFlags = privateFlags;
+#if defined(J9VM_OPT_VTHREAD_LOCK_OWNERSHIP)
+	newThread->lockingID = (UDATA)newThread;
+#endif /* defined(J9VM_OPT_VTHREAD_LOCK_OWNERSHIP) */
 	if (vm->extendedRuntimeFlags & J9_EXTENDED_RUNTIME_DEBUG_VM_ACCESS) {
 		setEventFlag(newThread, J9_PUBLIC_FLAGS_DEBUG_VM_ACCESS);
 	}

@@ -128,6 +128,7 @@ createContinuation(J9VMThread *currentThread, j9object_t continuationObject)
 
 #if defined(J9VM_OPT_VTHREAD_LOCK_OWNERSHIP)
 	continuation->privateFlags = J9_PRIVATE_FLAGS_IS_CONTINUATION_STRUCT;
+	continuation->lockingID = (UDATA)continuation;
 #endif /* defined(J9VM_OPT_VTHREAD_LOCK_OWNERSHIP) */
 
 #if JAVA_SPEC_VERSION >= 24
@@ -329,6 +330,10 @@ yieldContinuation(J9VMThread *currentThread, BOOLEAN isFinished, UDATA returnSta
 
 	currentThread->currentContinuation = NULL;
 	VM_ContinuationHelpers::swapFieldsWithContinuation(currentThread, continuation, continuationObject);
+#if defined(J9VM_OPT_VTHREAD_LOCK_OWNERSHIP)
+	/* Restore the carrier thread's own locking identity now that its stack is active again. */
+	currentThread->lockingID = (UDATA)currentThread;
+#endif /* defined(J9VM_OPT_VTHREAD_LOCK_OWNERSHIP) */
 #if JAVA_SPEC_VERSION >= 24
 	Trc_VM_yieldContinuation_Unmount(currentThread, continuation, returnState, continuation->ownedMonitorCount, continuation->enteredMonitors);
 #endif /* JAVA_SPEC_VERSION >= 24 */
