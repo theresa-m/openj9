@@ -5896,7 +5896,6 @@ typedef uintptr_t ContinuationState;
 typedef struct J9VMAbstractThread {
 	struct JNINativeInterface_ *functions; /* needed so J9VMThread can be cast to JNIEnv */
 	struct J9JavaVM *javaVM;
-	j9object_t threadObject;
 	UDATA privateFlags;
 	UDATA lockingID;
 } J9VMAbstractThread;
@@ -5904,10 +5903,11 @@ typedef struct J9VMAbstractThread {
 
 typedef struct J9VMContinuation {
 #if defined(J9VM_OPT_VTHREAD_LOCK_OWNERSHIP)
-	/* J9VMAbstractThread prefix - functions and javaVM are always NULL for continuations */
+	 * which reads those two slots via a bare pointer works on both types;
+	 * they are always NULL for continuations. */
 	struct JNINativeInterface_* functions;
 	struct J9JavaVM* javaVM;
-	j9object_t threadObject;
+	/* J9VMAbstractThread fields (see J9VMAbstractThread) */
 	UDATA privateFlags;
 	UDATA lockingID;
 #endif /* defined(J9VM_OPT_VTHREAD_LOCK_OWNERSHIP) */
@@ -5964,8 +5964,8 @@ typedef struct J9VMThread {
 	struct JNINativeInterface_* functions;
 	struct J9JavaVM* javaVM;
 #if defined(J9VM_OPT_VTHREAD_LOCK_OWNERSHIP)
-	/* J9VMAbstractThread prefix fields at offsets 2, 3, 4 */
-	j9object_t threadObject;
+	/* J9VMAbstractThread prefix fields - privateFlags discriminates the concrete type,
+	 * lockingID holds a stable locking identity updated on vthread mount/unmount. */
 	UDATA privateFlags;
 	UDATA lockingID;
 #endif /* defined(J9VM_OPT_VTHREAD_LOCK_OWNERSHIP) */
@@ -5992,9 +5992,7 @@ typedef struct J9VMThread {
 	UDATA compressObjectReferences;
 #endif /* defined(OMR_GC_COMPRESSED_POINTERS) && defined(OMR_GC_FULL_POINTERS) */
 #endif /* defined(J9VM_ENV_DATA64) */
-#if !defined(J9VM_OPT_VTHREAD_LOCK_OWNERSHIP)
 	j9object_t threadObject;
-#endif /* !defined(J9VM_OPT_VTHREAD_LOCK_OWNERSHIP) */
 	void* lowTenureAddress;
 	void* highTenureAddress;
 	void* heapBaseForActiveCardTable;
