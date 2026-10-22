@@ -249,28 +249,36 @@ findAndMatchStack (J9BytecodeVerificationData *verifyData, IDATA targetPC, IDATA
 			/* If there is no early larval frame for this pc the unset fields
 			 * are inferred from the previous frame.
 			 */
-			J9EarlyLarvalFrame *earlyLarvalFrame = verifyData->earlyLarvalFramePrevious;
+			J9EarlyLarvalFrame *earlyLarvalFrame = NULL;
 			if (hashTableGetCount(verifyData->earlyLarvalFrames) > 0) {
 				J9EarlyLarvalFrame query = {0};
 				query.baseFramePC = targetPC;
-				J9EarlyLarvalFrame *earlyLarvalFrameTemp = hashTableFind(verifyData->earlyLarvalFrames, &query);
-				if (NULL != earlyLarvalFrameTemp) {
-					earlyLarvalFrame = earlyLarvalFrameTemp;
-					verifyData->earlyLarvalFramePrevious = earlyLarvalFrame;
-				} else if (targetStack->uninitializedThis) {
+				earlyLarvalFrame = hashTableFind(verifyData->earlyLarvalFrames, &query);
+				if ((NULL == earlyLarvalFrame) && targetStack->uninitializedThis) {
 					/* When a restricted (uninitializedThis is true) frame has no
 					 * explicit early_larval wrapper the unset fields are inferred as:
 					 * - if the previous frame was restricted, the unset fields are
-					 * the same as the unset fields of the previous frame (earlyLarvalFramePrevious)
+					 * the same as the unset fields of the previous frame
 					 * - otherwise the list of unset fields is empty
 					 */
-					if ((stackIndex > 0) && !BCV_INDEX_STACK(stackIndex - 1)->uninitializedThis) {
-						/* Predecessor is not restricted: inferred unset fields = {}.
-						 * Use a zero-field sentinel so the check below treats every
-						 * strict field that is not already set as an error.
-						 */
-						static J9EarlyLarvalFrame emptyUnsetFields = {-1, 0, NULL};
-						earlyLarvalFrame = &emptyUnsetFields;
+					UDATA previousIndex = stackIndex;
+					while (previousIndex > 0) {
+						J9BranchTargetStack *previousStack = BCV_INDEX_STACK(previousIndex - 1);
+						J9EarlyLarvalFrame previousQuery = {0};
+						J9EarlyLarvalFrame *previousFrame = NULL;
+						if (!previousStack->uninitializedThis) {
+							/* Predecessor is not restricted: inferred unset field list as empty. */
+							static J9EarlyLarvalFrame emptyUnsetFields = {-1, 0, NULL};
+							earlyLarvalFrame = &emptyUnsetFields;
+							break;
+						}
+						previousQuery.baseFramePC = (IDATA)previousStack->pc;
+						previousFrame = hashTableFind(verifyData->earlyLarvalFrames, &previousQuery);
+						if (NULL != previousFrame) {
+							earlyLarvalFrame = previousFrame;
+							break;
+						}
+						previousIndex--;
 					}
 				}
 			}
