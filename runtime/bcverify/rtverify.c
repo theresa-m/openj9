@@ -264,21 +264,19 @@ findAndMatchStack (J9BytecodeVerificationData *verifyData, IDATA targetPC, IDATA
 					UDATA previousIndex = stackIndex;
 					while (previousIndex > 0) {
 						J9BranchTargetStack *previousStack = BCV_INDEX_STACK(previousIndex - 1);
-						J9EarlyLarvalFrame previousQuery = {0};
-						J9EarlyLarvalFrame *previousFrame = NULL;
 						if (!previousStack->uninitializedThis) {
 							/* Predecessor is not restricted: inferred unset field list as empty. */
 							static J9EarlyLarvalFrame emptyUnsetFields = {-1, 0, NULL};
 							earlyLarvalFrame = &emptyUnsetFields;
 							break;
 						}
-						previousQuery.baseFramePC = (IDATA)previousStack->pc;
-						previousFrame = hashTableFind(verifyData->earlyLarvalFrames, &previousQuery);
-						if (NULL != previousFrame) {
-							earlyLarvalFrame = previousFrame;
+						J9EarlyLarvalFrame previousQuery = {0};
+						previousQuery.baseFramePC = previousStack->pc;
+						earlyLarvalFrame = hashTableFind(verifyData->earlyLarvalFrames, &previousQuery);
+						if (NULL != earlyLarvalFrame) {
 							break;
 						}
-						previousIndex--;
+						previousIndex -= 1;
 					}
 				}
 			}
