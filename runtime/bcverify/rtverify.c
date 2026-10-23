@@ -264,7 +264,7 @@ findAndMatchStack (J9BytecodeVerificationData *verifyData, IDATA targetPC, IDATA
 					 */
 					UDATA previousIndex = stackIndex;
 
-					while (previousIndex > 0) {
+					for (; previousIndex > 0; previousIndex--) {
 						J9BranchTargetStack *previousStack = BCV_INDEX_STACK(previousIndex - 1);
 						if (!previousStack->uninitializedThis) {
 							/* Predecessor is not restricted: inferred unset field list is empty (all fields set). */
@@ -278,7 +278,6 @@ findAndMatchStack (J9BytecodeVerificationData *verifyData, IDATA targetPC, IDATA
 							allFieldsUnset = FALSE;
 							break;
 						}
-						previousIndex -= 1;
 					}
 				}
 			}
